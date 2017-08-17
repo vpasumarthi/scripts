@@ -1,19 +1,42 @@
 #!/bin/sh
+##
+##Frequently Modified Metadata
+##
+#SBATCH --job-name=SPE-Fe2O3-Exp
+#SBATCH --output=job.out
+#SBATCH --error=job.err
+##
+##Dupuis Cluster
+##
+#SBATCH --partition=mdupuis2
+#SBATCH --clusters=chemistry
 #SBATCH --time=20-00:00:00
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=20
-#SBATCH --constraint=IB
-##SBATCH --mem=128000
 #SBATCH --exclusive
-##SBATCH --account=mdupuis2
-#SBATCH --job-name=SPE-Fe2O3-Exp
-#SBATCH --output=job.out
+#SBATCH --exclude=cpn-p28-42
+##
+##General Compute
+##
+##SBATCH --partition=general-compute
+##SBATCH --time=72:00:00
+##SBATCH --nodes=2
+##SBATCH --tasks-per-node=12
+##SBATCH --mem=48000
+##
+##Debug
+##
+##SBATCH --partition=debug
+##SBATCH --time=01:00:00
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=12
+##SBATCH --mem=48000
+##
+##Infrequently Modified Metadata
+##
 #SBATCH --mail-user=pasumart@buffalo.edu
 #SBATCH --mail-type=END
-#SBATCH --partition=mdupuis2
-#SBATCH --clusters=chemistry
-#SBATCH --error=job.err
-#SBATCH --exclude=cpn-p28-42
+#SBATCH --constraint=IB
 
 # Job description:
 # run vasp job followed by bader analysis; also prints the job run time to the output file
