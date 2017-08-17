@@ -79,10 +79,10 @@ SECONDS=0
 
 srun --propagate=STACK vasp
 
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
-
 /projects/academic/mdupuis2/vish/bin/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
 /projects/academic/mdupuis2/vish/bin/bader CHGCAR_sum
+
+cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 duration=$SECONDS
 days=$((duration/60/60/24))
