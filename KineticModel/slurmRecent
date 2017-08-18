@@ -1,0 +1,64 @@
+#!/bin/sh
+##
+##Frequently Modified Metadata
+##
+#SBATCH --job-name="bvo994_1"
+#SBATCH --output=bvo994_1.out
+##
+##Dupuis Cluster
+##
+#SBATCH --partition=mdupuis2
+#SBATCH --clusters=chemistry
+#SBATCH --time=20-00:00:00
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=20
+#SBATCH --exclusive
+#SBATCH --exclude=cpn-p28-42
+##
+##General Compute
+##
+##SBATCH --partition=general-compute
+##SBATCH --time=72:00:00
+##SBATCH --nodes=2
+##SBATCH --tasks-per-node=12
+##SBATCH --mem=48000
+##
+##Debug
+##
+##SBATCH --partition=debug
+##SBATCH --time=01:00:00
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=12
+##SBATCH --mem=48000
+##
+##Infrequently Modified Metadata
+##
+#SBATCH --mail-user=pasumart@buffalo.edu
+#SBATCH --mail-type=END
+#SBATCH --constraint=IB
+
+# Job description:
+# run KMC simulation followed by performing MSD analysis of the output trajectories
+
+
+echo "SLURM_JOBID="$SLURM_JOBID
+echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
+echo "SLURM_NNODES"=$SLURM_NNODES
+echo "SLURMTMPDIR="$SLURMTMPDIR
+
+echo "working directory = "$SLURM_SUBMIT_DIR
+
+module load python/anaconda
+module list
+ulimit -s unlimited
+
+# The initial srun will trigger the SLURM prologue on the compute nodes.
+NPROCS=`srun --nodes=${SLURM_NNODES} bash -c 'hostname' |wc -l`
+echo NPROCS=$NPROCS
+echo "Launch mymodel with srun"
+#The PMI library is necessary for srun
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+srun ../RunFiles/Run1.py
+srun ../MSDFiles/MSD1.py
+
+echo "All Done!"
