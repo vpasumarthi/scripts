@@ -14,7 +14,6 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=20
 #SBATCH --exclusive
-#SBATCH --exclude=cpn-p28-42
 ##
 ##General Compute
 ##
