@@ -51,6 +51,11 @@ ax.set_xlabel('Number of electrons')
 ax.set_ylabel('Diffusivity (${{\mu}}m^2/s$)')
 figureTitle = 'Diffusion coefficient as a function of number of electrons'
 ax.set_title('\n'.join(wrap(figureTitle,60)))
-figureName = str(speciesType) + 'DiffusionProfile_' + str(nElectronsList[0]) + '-' + str(nElectronsList[-1]) + '.jpg'
+filename = str(speciesType) + 'DiffusionProfile_' + str(nElectronsList[0]) + '-' + str(nElectronsList[-1])
+figureName = filename + '.jpg'
 figurePath = cwd + directorySeparator + figureName
 plt.savefig(figurePath)
+
+dataFileName = filename + '.txt'
+dataFilePath = cwd + directorySeparator + dataFileName
+np.savetxt(dataFilePath, diffusivityProfileData)
