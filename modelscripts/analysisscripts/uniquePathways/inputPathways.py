@@ -11,7 +11,7 @@ avoidElementType = 'S' # 'O' for cutoffDistKey = 'O:O'; '' for V
 neighborCutoff = 6
 bridgeCutoff = 3.50 # 2.62 for Zr:Zr; 3.50 for S:S
 roundLattice = 0
-printStack = 1
+printPathwayList = 1
 printEquivalency = 1
 
 # Input Parameters:
@@ -26,4 +26,4 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 inputFileLocation = os.path.join(cwd, inputCoordinateFileName)
 
 generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, base, prec, cwd, 
-                       classList, avoidElementType, roundLattice, printStack, printEquivalency)
+                       classList, avoidElementType, roundLattice, printPathwayList, printEquivalency)

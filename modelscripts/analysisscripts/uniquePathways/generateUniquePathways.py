@@ -41,7 +41,7 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 	return quantumIndices
 
 def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, base, prec, outdir, 
-						classList=[], avoidElementType='', roundLattice=0, printStack=0, printEquivalency=0):
+						classList=[], avoidElementType='', roundLattice=0, printPathwayList=0, printEquivalency=0):
 	""" generate unique pathways for the given set of element types"""
 	neighborCutoffDistLimits = [0, neighborCutoff]
 	bridgeCutoffDistLimits = [0, bridgeCutoff]
@@ -207,13 +207,13 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 		if printEquivalency:
 			refIndex = np.argmax(centerSiteClassList == centerSiteClassList[iCenterElementIndex])
 			print np.array_equal(np.round(sortedDisplacementList[refIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4))
-		if printStack:
-			printingArray = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None]))
-			if classList:
-				printingArray = np.hstack((printingArray, sortedClassPairList[iCenterElementIndex][:, None]))
-			printingArray = np.hstack((printingArray, sortedBridgeList[iCenterElementIndex][:, None]))
-			pathwayList[iCenterElementIndex] = printingArray
-			print printingArray
+		if classList:
+			iPathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None], sortedClassPairList[iCenterElementIndex][:, None], sortedBridgeList[iCenterElementIndex][:, None]))
+		else:
+			iPathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None], sortedBridgeList[iCenterElementIndex][:, None]))
+		pathwayList[iCenterElementIndex] = iPathwayList
+		if printPathwayList:
+			print iPathwayList
 # 	import pdb; pdb.set_trace()
 	latticeDirectionListFileName = 'latticeDirectionList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
 	displacementListFileName = 'displacementList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
