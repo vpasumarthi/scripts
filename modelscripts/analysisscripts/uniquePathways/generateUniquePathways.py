@@ -43,9 +43,9 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir):
 	""" generate lattice directions and distances for neighboring atoms"""
 	roundLattice = 0
-	printStack = 1
-	printEquivalency = 0
-	avoidElementType = 'Zr' # 'O' for cutoffDistKey = 'O:O'
+	printStack = 0
+	printEquivalency = 1
+	avoidElementType = 'S' # 'O' for cutoffDistKey = 'O:O'
 	computePathway = 1
 	if computePathway:
 		bridgeCutoff = 2.62 # 2.62 for Zr:Zr; 3.50 for S:S
@@ -224,26 +224,10 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 					latticeDirectionList[iCenterElementIndex][index] = iCenterLDList[index] / gcd(gcd(nzAbsCenterLDList[0], nzAbsCenterLDList[1]), nzAbsCenterLDList[2])
 		sortedLatticeDirectionList[iCenterElementIndex] = latticeDirectionList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
 		np.set_printoptions(suppress=True)
-		# Check if hops from all sites are equivalent
-		if cutoffDistKey == 'O:O':
-			if centerSiteClassList[iCenterElementIndex] == 1:
-				refIndex = 0
-			else:
-				refIndex = 2
-		elif cutoffDistKey == 'V:V':
-			refIndex = 0
-		elif cutoffDistKey == 'Zr:Zr':
-			refIndex = 0
-		if cutoffDistKey == 'S:S':
-			if centerSiteClassList[iCenterElementIndex] == 1:
-				refIndex = 0
-			else:
-				refIndex = 2
-		# print equivalency of all O sites with their respective class reference site
+
+		# print equivalency of all center sites with their respective class reference site
 		if printEquivalency:
-#                 print np.array_equal(np.round(abs(sortedLatticeDirectionList[refIndex]), 4), np.round(abs(sortedLatticeDirectionList[iCenterElementIndex]), 4))
-#                 print np.array_equal(np.sort(np.round(abs(sortedLatticeDirectionList[refIndex]), 4)), np.sort(np.round(abs(sortedLatticeDirectionList[iCenterElementIndex]), 4)))
-# 			import pdb; pdb.set_trace()
+			refIndex = np.argmax(centerSiteClassList == centerSiteClassList[iCenterElementIndex])
 			print np.array_equal(np.round(sortedDisplacementList[refIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4))
 		if printStack:
 # 			import pdb; pdb.set_trace()
