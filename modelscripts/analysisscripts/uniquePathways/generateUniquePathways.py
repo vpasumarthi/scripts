@@ -40,7 +40,7 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 		nFilledUnitCells -= quantumIndices[index] * systemSize[index+1:].prod()
 	return quantumIndices
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir):
+def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir, classList=[]):
 	""" generate lattice directions and distances for neighboring atoms"""
 	roundLattice = 0
 	printStack = 0
@@ -122,13 +122,9 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 	for iCell in range(numCells):
 		neighborSiteFractCoords[(iCell * numCenterElements):((iCell + 1) * numCenterElements)] = centerSiteFractCoords + unitcellTranslationalCoords[iCell]
 		
-	if cutoffDistKey == 'O:O':
-		centerSiteClassList = np.array([1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1])
-		neighborSiteClassList = np.tile(centerSiteClassList, numCells)
-		classPairList = np.empty(numCenterElements, dtype=object)
-	if cutoffDistKey == 'S:S':
-		centerSiteClassList = np.array([1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1])
-		neighborSiteClassList = np.tile(centerSiteClassList, numCells)
+	if classList:
+		centerSiteClassList = classList[0]
+		neighborSiteClassList = np.tile(classList[1], numCells)
 		classPairList = np.empty(numCenterElements, dtype=object)
 
 	displacementVectorList = np.empty(numCenterElements, dtype=object)
@@ -141,7 +137,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 		iLatticeDirectionList = []
 		iDisplacements = []
 		iBridgeList = []
-		if cutoffDistKey == 'S:S':
+		if classList:
 			iClassPairList = []
 		for neighborSiteIndex, neighborSiteFractCoord in enumerate(neighborSiteFractCoords):
 			latticeDirection = neighborSiteFractCoord - centerSiteFractCoord
@@ -167,7 +163,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 						print 'center:', np.round(centerSiteFractCoord / 2, 3)
 						print 'neighbor:', np.round(neighborSiteFractCoord / 2, 3)
 				numNeighbors[centerSiteIndex] += 1
-				if cutoffDistKey == 'S:S':
+				if classList:
 					iClassPairList.append(str(centerSiteClassList[centerSiteIndex]) + ':' + str(neighborSiteClassList[neighborSiteIndex]))
 				if computePathway:
 					bridgeSiteExists = 0
@@ -195,17 +191,13 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 	from fractions import gcd
 	sortedLatticeDirectionList = np.empty(numCenterElements, dtype=object)
 	sortedDisplacementList = np.empty(numCenterElements, dtype=object)
-	if cutoffDistKey == 'O:O':
-		sortedClassPairList = np.empty(numCenterElements, dtype=object)
-	if cutoffDistKey == 'S:S':
+	if classList:
 		sortedClassPairList = np.empty(numCenterElements, dtype=object)
 	if computePathway:
 		sortedBridgeList = np.empty(numCenterElements, dtype=object)
 	for iCenterElementIndex in range(numCenterElements):
 		sortedDisplacementList[iCenterElementIndex] = displacementList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
-		if cutoffDistKey == 'O:O':
-			sortedClassPairList[iCenterElementIndex] = classPairList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
-		if cutoffDistKey == 'S:S':
+		if classList:
 			sortedClassPairList[iCenterElementIndex] = classPairList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
 		if computePathway:
 			sortedBridgeList[iCenterElementIndex] = bridgeList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
@@ -230,11 +222,8 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 			refIndex = np.argmax(centerSiteClassList == centerSiteClassList[iCenterElementIndex])
 			print np.array_equal(np.round(sortedDisplacementList[refIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4))
 		if printStack:
-# 			import pdb; pdb.set_trace()
 			printingArray = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None]))
-			if cutoffDistKey == 'O:O':
-				printingArray = np.hstack((printingArray, sortedClassPairList[iCenterElementIndex][:, None]))
-			if cutoffDistKey == 'S:S':
+			if classList:
 				printingArray = np.hstack((printingArray, sortedClassPairList[iCenterElementIndex][:, None]))
 			if computePathway:
 				printingArray = np.hstack((printingArray, sortedBridgeList[iCenterElementIndex][:, None]))
