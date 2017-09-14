@@ -40,8 +40,9 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 		nFilledUnitCells -= quantumIndices[index] * systemSize[index+1:].prod()
 	return quantumIndices
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, base, prec, outdir, 
-						classList=[], avoidElementType='', roundLattice=0, printPathwayList=0, printEquivalency=0):
+def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, outdir, 
+						classList=[], avoidElementType='', roundLatticeParameters={}, printPathwayList=0, 
+						printEquivalency=0):
 	""" generate unique pathways for the given set of element types"""
 	neighborCutoffDistLimits = [0, neighborCutoff]
 	bridgeCutoffDistLimits = [0, bridgeCutoff]
@@ -49,7 +50,10 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 	nElementTypes = len(elementTypes)
 	totalElementsPerUnitCell = nElementsPerUnitCell.sum()
 	elementTypeIndexList = np.repeat(np.arange(nElementTypes), nElementsPerUnitCell)
-
+	if roundLatticeParameters:
+		base = roundLatticeParameters['base']
+		prec = roundLatticeParameters['prec']
+	
 	startIndex = 0
 	for elementIndex in range(nElementTypes):
 	    endIndex = startIndex + nElementsPerUnitCell[elementIndex] 
@@ -130,7 +134,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 			iClassPairList = []
 		for neighborSiteIndex, neighborSiteFractCoord in enumerate(neighborSiteFractCoords):
 			latticeDirection = neighborSiteFractCoord - centerSiteFractCoord
-			if roundLattice:
+			if roundLatticeParameters:
 				roundedLatticeDirection = np.round(base * np.round((latticeDirection) / base), prec)
 			else:
 				roundedLatticeDirection = latticeDirection
@@ -187,7 +191,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 		if classList:
 			sortedClassPairList[iCenterElementIndex] = classPairList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
 		sortedBridgeList[iCenterElementIndex] = bridgeList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
-		if roundLattice:
+		if roundLatticeParameters:
 			latticeDirectionList[iCenterElementIndex] = (latticeDirectionList[iCenterElementIndex] / base).astype(int)
 			iCenterLDList = latticeDirectionList[iCenterElementIndex]
 			for index in range(numNeighbors[iCenterElementIndex]):
