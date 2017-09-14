@@ -40,12 +40,9 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 		nFilledUnitCells -= quantumIndices[index] * systemSize[index+1:].prod()
 	return quantumIndices
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir, classList=[]):
-	""" generate lattice directions and distances for neighboring atoms"""
-	roundLattice = 0
-	printStack = 0
-	printEquivalency = 1
-	avoidElementType = 'S' # 'O' for cutoffDistKey = 'O:O'
+def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir, classList=[], 
+						avoidElementType='', roundLattice=0, printStack=0, printEquivalency=0):
+	""" generate unique pathways for the given set of element types"""
 	computePathway = 1
 	if computePathway:
 		bridgeCutoff = 2.62 # 2.62 for Zr:Zr; 3.50 for S:S

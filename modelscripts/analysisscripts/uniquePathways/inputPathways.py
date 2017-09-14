@@ -5,12 +5,18 @@ import numpy as np
 import os
 
 # Frequently modified input parameters:
+inputCoordinateFileName = 'CONTCAR'
 cutoffDistKey = 'S:S'
+avoidElementType = 'S' # 'O' for cutoffDistKey = 'O:O'; '' for V
 cutoff = 6
+roundLattice = 0
+printStack = 0
+printEquivalency = 1
+
+# Input Parameters:
 base = 0.05
 prec = 2
-inputCoordinateFileName = 'CONTCAR'
-# class list definitions within 
+
 unitCellCenterSiteClassList = unitCellNeighborSiteClassList = np.array([1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1])
 # unitCellCenterSiteClassList = unitCellNeighborSiteClassList = np.array([1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1]) # 'O:O'
 classList = [unitCellCenterSiteClassList, unitCellNeighborSiteClassList]
@@ -18,4 +24,5 @@ classList = [unitCellCenterSiteClassList, unitCellNeighborSiteClassList]
 cwd = os.path.dirname(os.path.realpath(__file__))
 inputFileLocation = os.path.join(cwd, inputCoordinateFileName)
 
-generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, cwd, classList)
+generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, cwd, 
+                       classList, avoidElementType, roundLattice, printStack, printEquivalency)
