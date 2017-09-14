@@ -15,14 +15,14 @@ def readPOSCAR(inputPOSCAR):
 	    elif lineNumber == 6:
 	    	elementTypes = line.split()
 	    elif lineNumber == 7:
-	    	indexLength = map(int, line.split())
+	    	nElementsPerUnitCell = np.fromstring(line, dtype=int, sep=' ')
 	
-	indices = np.arange(len(indexLength))
+	indices = np.arange(len(nElementsPerUnitCell))
 	index_pos = np.zeros((len(inputData), 4))
-	index_pos[:, 0] = np.repeat(indices, indexLength)
+	index_pos[:, 0] = np.repeat(indices, nElementsPerUnitCell)
 	index_pos[:, 1:] = inputData
 	
-	output = np.array([latticeMatrix, elementTypes, index_pos], dtype=object)
+	output = np.array([latticeMatrix, elementTypes, nElementsPerUnitCell, index_pos], dtype=object)
 	return output
 		
 def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell):
@@ -51,10 +51,9 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 		bridgeCutoff = 2.62 # 2.62 for Zr:Zr; 3.50 for S:S
 		bridgeCutoffDistLimits = [0, bridgeCutoff]
 	
-	[latticeMatrix, elementTypes, index_pos] = readPOSCAR(inputFileLocation)
+	[latticeMatrix, elementTypes, nElementsPerUnitCell, index_pos] = readPOSCAR(inputFileLocation)
 	elementTypeIndexList = index_pos[:,0]
 	fractionalUnitCellCoords = index_pos[:, 1:]
-	dummy, nElementsPerUnitCell = np.unique(elementTypeIndexList, return_counts=True)
 	totalElementsPerUnitCell = nElementsPerUnitCell.sum()
 	nElementTypes = len(elementTypes)
 
