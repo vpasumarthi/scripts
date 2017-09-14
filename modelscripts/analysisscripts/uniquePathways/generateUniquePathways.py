@@ -40,14 +40,11 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 		nFilledUnitCells -= quantumIndices[index] * systemSize[index+1:].prod()
 	return quantumIndices
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec, outdir, classList=[], 
-						avoidElementType='', roundLattice=0, printStack=0, printEquivalency=0):
+def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, base, prec, outdir, 
+						classList=[], avoidElementType='', roundLattice=0, printStack=0, printEquivalency=0):
 	""" generate unique pathways for the given set of element types"""
-	computePathway = 1
-	if computePathway:
-		bridgeCutoff = 2.62 # 2.62 for Zr:Zr; 3.50 for S:S
-		bridgeCutoffDistLimits = [0, bridgeCutoff]
-	
+	neighborCutoffDistLimits = [0, neighborCutoff]
+	bridgeCutoffDistLimits = [0, bridgeCutoff]
 	[latticeMatrix, elementTypes, nElementsPerUnitCell, index_pos] = readPOSCAR(inputFileLocation)
 	elementTypeIndexList = index_pos[:,0]
 	fractionalUnitCellCoords = index_pos[:, 1:]
@@ -65,14 +62,12 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 	centerSiteElementTypeIndex = elementTypes.index(centerElementType) 
 	neighborSiteElementTypeIndex = elementTypes.index(neighborElementType)
 	
-	cutoffDistLimits = [0, cutoff]
-	convArray = np.linalg.inv(latticeMatrix.T)
-
 	pbc = np.ones(3, int)
 	numCells = 3**sum(pbc)
 	xRange = range(-1, 2) if pbc[0] == 1 else [0]
 	yRange = range(-1, 2) if pbc[1] == 1 else [0]
 	zRange = range(-1, 2) if pbc[2] == 1 else [0]
+	localSystemSize = np.array([len(xRange), len(yRange), len(zRange)])
 	unitcellTranslationalCoords = np.zeros((numCells, 3)) # Initialization
 	index = 0
 	for xOffset in xRange:
@@ -93,29 +88,27 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 	centerSiteIndices = nElementsPerUnitCell[:centerSiteElementTypeIndex].sum() + np.arange(numCenterElements)
 	centerSiteFractCoords = fractionalUnitCellCoords[centerSiteIndices]
 	neighborSiteFractCoords = np.zeros((numCenterElements * numCells, 3))
-	if computePathway:
-		localSystemSize = np.array([3, 3, 3])
-		supercellFractCoords = np.zeros((numCells * totalElementsPerUnitCell, 3))
-		for iCell in range(numCells):
-			supercellFractCoords[(iCell * totalElementsPerUnitCell):((iCell + 1) * totalElementsPerUnitCell)] = fractionalUnitCellCoords + unitcellTranslationalCoords[iCell]
-		neighborList = np.empty(numCenterElements, dtype=object)
-		for centerSiteIndex, centerSiteFractCoord in enumerate(centerSiteFractCoords):
-			iNeighborList = []
-			for neighborSiteIndex, neighborSiteFractCoord in enumerate(supercellFractCoords):
-				if avoidElementType:
-					if neighborSiteIndex not in avoidElementIndices:
-						latticeDirection = neighborSiteFractCoord - centerSiteFractCoord
-						neighborDisplacementVector = np.dot(latticeDirection[None, :], latticeMatrix)
-						displacement = np.linalg.norm(neighborDisplacementVector)
-						if bridgeCutoffDistLimits[0] < displacement <= bridgeCutoffDistLimits[1]:
-							debug = 0
-							if debug:
+	supercellFractCoords = np.zeros((numCells * totalElementsPerUnitCell, 3))
+	for iCell in range(numCells):
+		supercellFractCoords[(iCell * totalElementsPerUnitCell):((iCell + 1) * totalElementsPerUnitCell)] = fractionalUnitCellCoords + unitcellTranslationalCoords[iCell]
+	neighborList = np.empty(numCenterElements, dtype=object)
+	for centerSiteIndex, centerSiteFractCoord in enumerate(centerSiteFractCoords):
+		iNeighborList = []
+		for neighborSiteIndex, neighborSiteFractCoord in enumerate(supercellFractCoords):
+			if avoidElementType:
+				if neighborSiteIndex not in avoidElementIndices:
+					latticeDirection = neighborSiteFractCoord - centerSiteFractCoord
+					neighborDisplacementVector = np.dot(latticeDirection[None, :], latticeMatrix)
+					displacement = np.linalg.norm(neighborDisplacementVector)
+					if bridgeCutoffDistLimits[0] < displacement <= bridgeCutoffDistLimits[1]:
+						debug = 0
+						if debug:
 #                                     print np.round(centerSiteFractCoord, 3)
-								if np.array_equal(np.round(centerSiteFractCoord / 2, 3), np.array([0.376, 0.299, 0.272])):
-									print neighborSiteIndex
-									print displacement / ANG2BOHR
-							iNeighborList.append(neighborSiteIndex)
-			neighborList[centerSiteIndex] = np.asarray(iNeighborList)
+							if np.array_equal(np.round(centerSiteFractCoord / 2, 3), np.array([0.376, 0.299, 0.272])):
+								print neighborSiteIndex
+								print displacement / ANG2BOHR
+						iNeighborList.append(neighborSiteIndex)
+		neighborList[centerSiteIndex] = np.asarray(iNeighborList)
 	for iCell in range(numCells):
 		neighborSiteFractCoords[(iCell * numCenterElements):((iCell + 1) * numCenterElements)] = centerSiteFractCoords + unitcellTranslationalCoords[iCell]
 		
@@ -144,7 +137,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 				roundedLatticeDirection = latticeDirection
 			neighborDisplacementVector = np.dot(latticeDirection[None, :], latticeMatrix)
 			displacement = np.linalg.norm(neighborDisplacementVector)
-			if cutoffDistLimits[0] < displacement <= cutoffDistLimits[1]:
+			if neighborCutoffDistLimits[0] < displacement <= neighborCutoffDistLimits[1]:
 				iDisplacementVectors.append(neighborDisplacementVector)
 				iLatticeDirectionList.append(roundedLatticeDirection)
 				iDisplacements.append(displacement)
@@ -162,27 +155,26 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 				numNeighbors[centerSiteIndex] += 1
 				if classList:
 					iClassPairList.append(str(centerSiteClassList[centerSiteIndex]) + ':' + str(neighborSiteClassList[neighborSiteIndex]))
-				if computePathway:
-					bridgeSiteExists = 0
-					bridgeSiteType = ''
-					for iCenterNeighborSEIndex in neighborList[centerSiteIndex]:
-						iCenterNeighborFractCoord = supercellFractCoords[iCenterNeighborSEIndex]
-						bridgelatticeDirection = neighborSiteFractCoord - iCenterNeighborFractCoord
-						bridgeneighborDisplacementVector = np.dot(bridgelatticeDirection[None, :], latticeMatrix)
-						bridgedisplacement = np.linalg.norm(bridgeneighborDisplacementVector)
-						if bridgeCutoffDistLimits[0] < bridgedisplacement <= bridgeCutoffDistLimits[1]:
-							bridgeSiteExists = 1
-							bridgeSiteIndex = iCenterNeighborSEIndex
-							bridgeSiteQuantumIndices = generateQuantumIndices(localSystemSize, bridgeSiteIndex, nElementsPerUnitCell)
-							bridgeSiteType += elementTypes[bridgeSiteQuantumIndices[3]]
-					if not bridgeSiteExists:
-						bridgeSiteType = 'space'
-					iBridgeList.append(bridgeSiteType)
+				bridgeSiteExists = 0
+				bridgeSiteType = ''
+				for iCenterNeighborSEIndex in neighborList[centerSiteIndex]:
+					iCenterNeighborFractCoord = supercellFractCoords[iCenterNeighborSEIndex]
+					bridgelatticeDirection = neighborSiteFractCoord - iCenterNeighborFractCoord
+					bridgeneighborDisplacementVector = np.dot(bridgelatticeDirection[None, :], latticeMatrix)
+					bridgedisplacement = np.linalg.norm(bridgeneighborDisplacementVector)
+					if bridgeCutoffDistLimits[0] < bridgedisplacement <= bridgeCutoffDistLimits[1]:
+						bridgeSiteExists = 1
+						bridgeSiteIndex = iCenterNeighborSEIndex
+						bridgeSiteQuantumIndices = generateQuantumIndices(localSystemSize, bridgeSiteIndex, nElementsPerUnitCell)
+						bridgeSiteType += elementTypes[bridgeSiteQuantumIndices[3]]
+				if not bridgeSiteExists:
+					bridgeSiteType = 'space'
+				iBridgeList.append(bridgeSiteType)
 		bridgeList[centerSiteIndex] = np.asarray(iBridgeList)
 		displacementVectorList[centerSiteIndex] = np.asarray(iDisplacementVectors)
 		latticeDirectionList[centerSiteIndex] = np.asarray(iLatticeDirectionList)
 		displacementList[centerSiteIndex] = np.asarray(iDisplacements)
-		if cutoffDistKey == 'S:S':
+		if classList:
 			classPairList[centerSiteIndex] = np.asarray(iClassPairList)
 	
 	from fractions import gcd
@@ -190,14 +182,12 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 	sortedDisplacementList = np.empty(numCenterElements, dtype=object)
 	if classList:
 		sortedClassPairList = np.empty(numCenterElements, dtype=object)
-	if computePathway:
-		sortedBridgeList = np.empty(numCenterElements, dtype=object)
+	sortedBridgeList = np.empty(numCenterElements, dtype=object)
 	for iCenterElementIndex in range(numCenterElements):
 		sortedDisplacementList[iCenterElementIndex] = displacementList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
 		if classList:
 			sortedClassPairList[iCenterElementIndex] = classPairList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
-		if computePathway:
-			sortedBridgeList[iCenterElementIndex] = bridgeList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
+		sortedBridgeList[iCenterElementIndex] = bridgeList[iCenterElementIndex][displacementList[iCenterElementIndex].argsort()]
 		if roundLattice:
 			latticeDirectionList[iCenterElementIndex] = (latticeDirectionList[iCenterElementIndex] / base).astype(int)
 			iCenterLDList = latticeDirectionList[iCenterElementIndex]
@@ -222,14 +212,13 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, cutoff, base, prec,
 			printingArray = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None]))
 			if classList:
 				printingArray = np.hstack((printingArray, sortedClassPairList[iCenterElementIndex][:, None]))
-			if computePathway:
-				printingArray = np.hstack((printingArray, sortedBridgeList[iCenterElementIndex][:, None]))
+			printingArray = np.hstack((printingArray, sortedBridgeList[iCenterElementIndex][:, None]))
 			pathwayList[iCenterElementIndex] = printingArray
 # 			print printingArray
 # 	import pdb; pdb.set_trace()
-	latticeDirectionListFileName = 'latticeDirectionList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(cutoff)
-	displacementListFileName = 'displacementList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(cutoff)
-	pathwayFileName = 'pathwayList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(cutoff)
+	latticeDirectionListFileName = 'latticeDirectionList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
+	displacementListFileName = 'displacementList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
+	pathwayFileName = 'pathwayList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
 	latticeDirectionListFilePath = os.path.join(outdir, latticeDirectionListFileName) + '.npy'
 	displacementListFilePath = os.path.join(outdir, displacementListFileName) + '.npy'
 	pathwayFilePath = os.path.join(outdir, pathwayFileName) + '.npy'
