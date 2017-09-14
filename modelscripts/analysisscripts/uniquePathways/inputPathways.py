@@ -9,9 +9,9 @@ inputCoordinateFileName = 'CONTCAR'
 cutoffDistKey = 'S:S'
 avoidElementType = 'S' # 'O' for cutoffDistKey = 'O:O'; '' for V
 neighborCutoff = 6
-bridgeCutoff = 2.62 # 2.62 for Zr:Zr; 3.50 for S:S
+bridgeCutoff = 3.50 # 2.62 for Zr:Zr; 3.50 for S:S
 roundLattice = 0
-printStack = 0
+printStack = 1
 printEquivalency = 1
 
 # Input Parameters:

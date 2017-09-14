@@ -1,28 +1,28 @@
 import numpy as np
 import os
 
-def readPOSCAR(inputPOSCAR):
-	inputData = np.loadtxt(inputPOSCAR, skiprows=8)
-	srcFile = open(inputPOSCAR, 'r')
-	lineno_latticeParameters = range(3, 6)
+def readPOSCAR(inputFilePath):
 	latticeMatrix = np.zeros((3, 3))
-	index = 0
-	for lineIndex, line in enumerate(srcFile):
+	latticeParameterIndex = 0
+	latticeParametersLineRange = range(3, 6)
+	inputFile = open(inputFilePath, 'r')
+	for lineIndex, line in enumerate(inputFile):
 	    lineNumber = lineIndex + 1
-	    if lineNumber in lineno_latticeParameters:
-			latticeMatrix[index, :] = np.fromstring(line, sep=' ')
-			index += 1
+	    if lineNumber in latticeParametersLineRange:
+			latticeMatrix[latticeParameterIndex, :] = np.fromstring(line, sep=' ')
+			latticeParameterIndex += 1
 	    elif lineNumber == 6:
 	    	elementTypes = line.split()
 	    elif lineNumber == 7:
 	    	nElementsPerUnitCell = np.fromstring(line, dtype=int, sep=' ')
-	
-	indices = np.arange(len(nElementsPerUnitCell))
-	index_pos = np.zeros((len(inputData), 4))
-	index_pos[:, 0] = np.repeat(indices, nElementsPerUnitCell)
-	index_pos[:, 1:] = inputData
-	
-	output = np.array([latticeMatrix, elementTypes, nElementsPerUnitCell, index_pos], dtype=object)
+	    	totalElementsPerUnitCell = nElementsPerUnitCell.sum()
+	    	fractionalUnitCellCoords = np.zeros((totalElementsPerUnitCell, 3))
+	    	elementIndex = 0
+	    elif lineNumber > 8 and elementIndex < totalElementsPerUnitCell:
+	    	fractionalUnitCellCoords[elementIndex, :] = np.fromstring(line, sep=' ')
+	    	elementIndex += 1
+	inputFile.close()
+	output = np.array([latticeMatrix, elementTypes, nElementsPerUnitCell, fractionalUnitCellCoords], dtype=object)
 	return output
 		
 def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell):
@@ -45,11 +45,10 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 	""" generate unique pathways for the given set of element types"""
 	neighborCutoffDistLimits = [0, neighborCutoff]
 	bridgeCutoffDistLimits = [0, bridgeCutoff]
-	[latticeMatrix, elementTypes, nElementsPerUnitCell, index_pos] = readPOSCAR(inputFileLocation)
-	elementTypeIndexList = index_pos[:,0]
-	fractionalUnitCellCoords = index_pos[:, 1:]
-	totalElementsPerUnitCell = nElementsPerUnitCell.sum()
+	[latticeMatrix, elementTypes, nElementsPerUnitCell, fractionalUnitCellCoords] = readPOSCAR(inputFileLocation)
 	nElementTypes = len(elementTypes)
+	totalElementsPerUnitCell = nElementsPerUnitCell.sum()
+	elementTypeIndexList = np.repeat(np.arange(nElementTypes), nElementsPerUnitCell)
 
 	startIndex = 0
 	for elementIndex in range(nElementTypes):
@@ -166,7 +165,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 						bridgeSiteExists = 1
 						bridgeSiteIndex = iCenterNeighborSEIndex
 						bridgeSiteQuantumIndices = generateQuantumIndices(localSystemSize, bridgeSiteIndex, nElementsPerUnitCell)
-						bridgeSiteType += elementTypes[bridgeSiteQuantumIndices[3]]
+						bridgeSiteType += (', ' if bridgeSiteType != '' else '') + elementTypes[bridgeSiteQuantumIndices[3]]
 				if not bridgeSiteExists:
 					bridgeSiteType = 'space'
 				iBridgeList.append(bridgeSiteType)
@@ -214,7 +213,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 				printingArray = np.hstack((printingArray, sortedClassPairList[iCenterElementIndex][:, None]))
 			printingArray = np.hstack((printingArray, sortedBridgeList[iCenterElementIndex][:, None]))
 			pathwayList[iCenterElementIndex] = printingArray
-# 			print printingArray
+			print printingArray
 # 	import pdb; pdb.set_trace()
 	latticeDirectionListFileName = 'latticeDirectionList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
 	displacementListFileName = 'displacementList_' + centerElementType + '-' + neighborElementType + '_cutoff=' + str(neighborCutoff)
