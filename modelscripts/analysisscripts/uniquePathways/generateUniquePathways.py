@@ -40,9 +40,9 @@ def generateQuantumIndices(systemSize, systemElementIndex, nElementsPerUnitCell)
 		nFilledUnitCells -= quantumIndices[index] * systemSize[index+1:].prod()
 	return quantumIndices
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, outdir, 
-						classList=[], avoidElementType='', roundLatticeParameters={}, printPathwayList=0, 
-						printEquivalency=0, desiredCoordinateParameters={}):
+def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bridgeCutoff, outdir, pathwayPrec, 
+						equivalencyPrec, classList=[], avoidElementType='', roundLatticeParameters={}, 
+						printPathwayList=0, printEquivalency=0, desiredCoordinateParameters={}):
 	""" generate unique pathways for the given set of element types"""
 	# define input parameters
 	[latticeMatrix, elementTypes, nElementsPerUnitCell, fractionalUnitCellCoords] = readPOSCAR(inputFileLocation)
@@ -221,14 +221,15 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 				refIndex = np.argmax(centerSiteClassList == centerSiteClassList[iCenterElementIndex])
 			else:
 				refIndex = 0
-			print np.array_equal(np.round(sortedDisplacementList[refIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4))
+			print np.array_equal(np.round(sortedDisplacementList[refIndex], equivalencyPrec), np.round(sortedDisplacementList[iCenterElementIndex], equivalencyPrec))
 		
 		# generate center site pathway list
+		
 		if classList:
-			centerSitePathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None], 
+			centerSitePathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], pathwayPrec), np.round(sortedDisplacementList[iCenterElementIndex], pathwayPrec)[:, None], 
 											sortedClassPairList[iCenterElementIndex][:, None], sortedBridgeList[iCenterElementIndex][:, None]))
 		else:
-			centerSitePathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], 4), np.round(sortedDisplacementList[iCenterElementIndex], 4)[:, None], 
+			centerSitePathwayList = np.hstack((np.round(sortedLatticeDirectionList[iCenterElementIndex], pathwayPrec), np.round(sortedDisplacementList[iCenterElementIndex], pathwayPrec)[:, None], 
 											sortedBridgeList[iCenterElementIndex][:, None]))
 		pathwayList[iCenterElementIndex] = centerSitePathwayList
 		
