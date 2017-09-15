@@ -150,7 +150,8 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff, bri
 				if desiredCoordinateParameters:
 					desiredSystemSize = desiredCoordinateParameters['desiredSystemSize']
 					distList = desiredCoordinateParameters['distList']
-					dist = np.round(displacement / ANG2BOHR, 5)
+					prec = desiredCoordinateParameters['prec']
+					dist = np.round(displacement, prec)
 					if dist in distList:
 						print dist
 						print 'center class:', centerSiteClassList[centerSiteIndex]

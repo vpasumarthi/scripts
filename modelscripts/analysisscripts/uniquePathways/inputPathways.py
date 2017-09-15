@@ -11,7 +11,7 @@ avoidElementType = 'O' # 'O' for cutoffDistKey = 'O:O'; '' for V
 neighborCutoff = 4
 bridgeCutoff = 2.51 # 2.62 for Zr:Zr; 3.50 for S:S; 2.51 for O:O
 roundLatticeParameters = {} #{'base': 0.05, 'prec': 2}
-printPathwayList = 0
+printPathwayList = 1
 printEquivalency = 0
 equivalencyPrec = 4
 pathwayPrec = 5
@@ -21,7 +21,8 @@ unitCellCenterSiteClassList = unitCellNeighborSiteClassList = np.array([1, 1, 2,
 classList = [unitCellCenterSiteClassList, unitCellNeighborSiteClassList]
 # classList = []
 
-desiredCoordinateParameters = {} # {'desiredSystemSize': np.array([2, 2, 2]), 'distList': [2.96781, 2.99576]}
+desiredCoordinateParameters = {} # {'desiredSystemSize': np.array([2, 2, 2]), 'distList': [2.96781, 2.99576], 'prec': 5}
+
 cwd = os.path.dirname(os.path.realpath(__file__))
 inputFileLocation = os.path.join(cwd, inputCoordinateFileName)
 
