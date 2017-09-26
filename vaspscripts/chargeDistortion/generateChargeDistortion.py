@@ -1,8 +1,6 @@
 #/usr/bin/env python
 
 from chargeDistortion import chargeDistortion
-import numpy as np
-from shutil import copymode
 import os
 
 # Frequently modified input parameters:
