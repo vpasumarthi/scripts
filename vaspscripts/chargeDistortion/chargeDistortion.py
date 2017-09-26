@@ -2,11 +2,11 @@ import numpy as np
 from shutil import copymode
 import os
 
-def readPOSCAR(inputFilePath):
+def readPOSCAR(srcFilePath, coordStartLineNumber):
     latticeMatrix = np.zeros((3, 3))
     latticeParameterIndex = 0
     latticeParametersLineRange = range(3, 6)
-    inputFile = open(inputFilePath, 'r')
+    inputFile = open(srcFilePath, 'r')
     for lineIndex, line in enumerate(inputFile):
         lineNumber = lineIndex + 1
         if lineNumber in latticeParametersLineRange:
@@ -19,19 +19,17 @@ def readPOSCAR(inputFilePath):
             totalElements = nElements.sum()
             fractionalCoords = np.zeros((totalElements, 3))
             elementIndex = 0
-        elif lineNumber > 8 and elementIndex < totalElements:
+        elif lineNumber >= coordStartLineNumber and elementIndex < totalElements:
             fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
             elementIndex += 1
     inputFile.close()
     POSCAR_INFO = np.array([latticeMatrix, elementTypes, nElements, fractionalCoords], dtype=object)
     return POSCAR_INFO
 
-def writePOSCAR(outputFilePath):
-    pass
-
-def chargeDistortion(inputFileLocation, localizedElementType, localizedSiteNumber, neighborElementType, 
+def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, neighborElementType, 
                      neighborCutoff, stretchLength):
-    [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(inputFileLocation)
+    coordStartLineNumber = 9
+    [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(srcFilePath, coordStartLineNumber)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
@@ -79,14 +77,29 @@ def chargeDistortion(inputFileLocation, localizedElementType, localizedSiteNumbe
             centerSiteCoordList.append(centerSiteCoords)
 
     # generate distortion
-    newNeighborSiteCoords = np.copy(neighborSiteCoords)
     numNeighbors = len(neighborList)
+    lineIndices = np.empty(numNeighbors)
+    headStart = coordStartLineNumber - 1 + nElements_consolidated[:neighborElementTypeIndex].sum()
+    newCoordinateList = np.empty((numNeighbors, 3))
     for iNeighbor in range(numNeighbors):
         latticeDirection = neighborSiteCoords[neighborList[iNeighbor]] - centerSiteCoordList[iNeighbor]
         displacement = np.linalg.norm(np.dot(latticeDirection, latticeMatrix))
         unitVector = latticeDirection / displacement
-        newNeighborSiteCoords[neighborList[iNeighbor]] = centerSiteCoordList[iNeighbor] + unitVector * (displacement + stretchLength)
-    
-    import pdb; pdb.set_trace()
-    writePOSCAR(outputFilePath)
+        lineIndices[iNeighbor] = headStart + neighborList[iNeighbor]
+        newCoordinateList[iNeighbor] = centerSiteCoordList[iNeighbor] + unitVector * (displacement + stretchLength)
+    writePOSCAR(srcFilePath, lineIndices, newCoordinateList)
     return
+
+def writePOSCAR(srcFilePath, lineIndices, newCoordinateList):
+    dstFilePath = srcFilePath + '_Distorted'
+    srcFile = open(srcFilePath, 'r')
+    open(dstFilePath, 'w').close()
+    dstFile = open(dstFilePath, 'a')
+    neighborIndex = 0
+    for lineIndex, line in enumerate(srcFile):
+        if lineIndex in lineIndices:
+            line = ''.join([' ' * 5, '%11.9f' % newCoordinateList[neighborIndex][0], 
+                            ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][1],
+                            ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][2]]) + '\n'
+            neighborIndex += 1
+        dstFile.write(line)
