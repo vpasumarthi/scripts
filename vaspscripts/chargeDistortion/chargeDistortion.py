@@ -27,8 +27,8 @@ def readPOSCAR(srcFilePath, coordStartLineNumber):
     POSCAR_INFO = np.array([latticeMatrix, elementTypes, nElements, fractionalCoords], dtype=object)
     return POSCAR_INFO
 
-def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, neighborElementType, 
-                     neighborCutoff, stretchLength):
+def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, neighborElementTypeList, 
+                     neighborCutoffList, stretchLengthList):
     coordStartLineNumber = 9
     [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(srcFilePath, coordStartLineNumber)
     elementTypes_consolidated = []
@@ -43,10 +43,7 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, nei
         nElements_consolidated[uniqueElementTypeIndex] += nElements[elementTypeIndex]
     localizedElementTypeIndex = elementTypes_consolidated.index(localizedElementType)
     localizedSiteCoords = fractionalCoords[nElements_consolidated[:localizedElementTypeIndex].sum() + localizedSiteNumber - 1]
-    neighborElementTypeIndex = elementTypes_consolidated.index(neighborElementType)
-    neighborSiteCoords = fractionalCoords[nElements_consolidated[:neighborElementTypeIndex].sum() + range(nElements_consolidated[neighborElementTypeIndex])]
-    neighborCutoffDistLimits = [0, neighborCutoff]
-    
+
     # generate array of unit cell translational coordinates
     pbc = np.ones(3, int)
     numCells = 3**sum(pbc)
@@ -62,32 +59,38 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, nei
                 index += 1
     localizedSiteCoords_imageconsolidated = localizedSiteCoords + cellTranslationalCoords
     
-    # generate neighbor list
-    neighborList = []
-    centerSiteCoordList = []
-    for neighborSiteIndex, neighborSiteCoord in enumerate(neighborSiteCoords):
-        latticeDirections = localizedSiteCoords_imageconsolidated - neighborSiteCoord
-        minDisp = np.linalg.norm(np.sum(latticeMatrix, axis=0))
-        for iCell in range(numCells):
-            displacement = np.linalg.norm(np.dot(latticeDirections[iCell], latticeMatrix))
-            if displacement < minDisp:
-                minDisp = displacement
-                centerSiteCoords = localizedSiteCoords_imageconsolidated[iCell]
-        if neighborCutoffDistLimits[0] < minDisp <= neighborCutoffDistLimits[1]:
-            neighborList.append(neighborSiteIndex)
-            centerSiteCoordList.append(centerSiteCoords)
-
-    # generate distortion
-    numNeighbors = len(neighborList)
-    lineIndices = np.empty(numNeighbors)
-    headStart = coordStartLineNumber - 1 + nElements_consolidated[:neighborElementTypeIndex].sum()
-    newCoordinateList = np.empty((numNeighbors, 3))
-    for iNeighbor in range(numNeighbors):
-        latticeDirection = neighborSiteCoords[neighborList[iNeighbor]] - centerSiteCoordList[iNeighbor]
-        displacement = np.linalg.norm(np.dot(latticeDirection, latticeMatrix))
-        unitVector = latticeDirection / displacement
-        lineIndices[iNeighbor] = headStart + neighborList[iNeighbor]
-        newCoordinateList[iNeighbor] = centerSiteCoordList[iNeighbor] + unitVector * (displacement + stretchLength)
+    lineIndices = []
+    newCoordinateList = []
+    for distortElementTypeIndex, distortElementType in enumerate(neighborElementTypeList):
+        neighborElementTypeIndex = elementTypes_consolidated.index(distortElementType)
+        neighborSiteCoords = fractionalCoords[nElements_consolidated[:neighborElementTypeIndex].sum() + range(nElements_consolidated[neighborElementTypeIndex])]
+        neighborCutoffDistLimits = [0, neighborCutoffList[distortElementTypeIndex]]
+        
+        # generate neighbor list
+        neighborList = []
+        centerSiteCoordList = []
+        for neighborSiteIndex, neighborSiteCoord in enumerate(neighborSiteCoords):
+            latticeDirections = localizedSiteCoords_imageconsolidated - neighborSiteCoord
+            minDisp = np.linalg.norm(np.sum(latticeMatrix, axis=0))
+            for iCell in range(numCells):
+                displacement = np.linalg.norm(np.dot(latticeDirections[iCell], latticeMatrix))
+                if displacement < minDisp:
+                    minDisp = displacement
+                    centerSiteCoords = localizedSiteCoords_imageconsolidated[iCell]
+            if neighborCutoffDistLimits[0] < minDisp <= neighborCutoffDistLimits[1]:
+                neighborList.append(neighborSiteIndex)
+                centerSiteCoordList.append(centerSiteCoords)
+    
+        # generate distortion
+        numNeighbors = len(neighborList)
+        headStart = coordStartLineNumber - 1 + nElements_consolidated[:neighborElementTypeIndex].sum()
+        for iNeighbor in range(numNeighbors):
+            latticeDirection = neighborSiteCoords[neighborList[iNeighbor]] - centerSiteCoordList[iNeighbor]
+            displacement = np.linalg.norm(np.dot(latticeDirection, latticeMatrix))
+            unitVector = latticeDirection / displacement
+            lineIndices.append(headStart + neighborList[iNeighbor])
+            newCoordinateList.append(centerSiteCoordList[iNeighbor] + unitVector * (displacement + stretchLengthList[distortElementTypeIndex]))
+    newCoordinateList = np.asarray(newCoordinateList)
     writePOSCAR(srcFilePath, lineIndices, newCoordinateList)
     return
 
