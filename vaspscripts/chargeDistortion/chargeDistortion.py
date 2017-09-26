@@ -1,5 +1,6 @@
+#/usr/bin/env python
+
 import numpy as np
-from shutil import copymode
 import os
 
 def readPOSCAR(srcFilePath, coordStartLineNumber):
@@ -92,9 +93,9 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber, nei
 
 def writePOSCAR(srcFilePath, lineIndices, newCoordinateList):
     dstFilePath = srcFilePath + '_Distorted'
-    srcFile = open(srcFilePath, 'r')
-    open(dstFilePath, 'w').close()
-    dstFile = open(dstFilePath, 'a')
+    srcFile = open(srcFilePath, 'rb')
+    open(dstFilePath, 'wb').close()
+    dstFile = open(dstFilePath, 'ab')
     neighborIndex = 0
     for lineIndex, line in enumerate(srcFile):
         if lineIndex in lineIndices:
@@ -103,3 +104,5 @@ def writePOSCAR(srcFilePath, lineIndices, newCoordinateList):
                             ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][2]]) + '\n'
             neighborIndex += 1
         dstFile.write(line)
+    srcFile.close()
+    dstFile.close()
