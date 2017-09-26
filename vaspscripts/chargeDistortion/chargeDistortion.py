@@ -65,16 +65,28 @@ def chargeDistortion(inputFileLocation, localizedElementType, localizedSiteNumbe
     
     # generate neighbor list
     neighborList = []
+    centerSiteCoordList = []
     for neighborSiteIndex, neighborSiteCoord in enumerate(neighborSiteCoords):
         latticeDirections = localizedSiteCoords_imageconsolidated - neighborSiteCoord
         minDisp = np.linalg.norm(np.sum(latticeMatrix, axis=0))
         for iCell in range(numCells):
-            disp = np.linalg.norm(np.dot(latticeDirections[iCell], latticeMatrix))
-            if disp < minDisp:
-                minDisp = disp
+            displacement = np.linalg.norm(np.dot(latticeDirections[iCell], latticeMatrix))
+            if displacement < minDisp:
+                minDisp = displacement
+                centerSiteCoords = localizedSiteCoords_imageconsolidated[iCell]
         if neighborCutoffDistLimits[0] < minDisp <= neighborCutoffDistLimits[1]:
             neighborList.append(neighborSiteIndex)
+            centerSiteCoordList.append(centerSiteCoords)
 
+    # generate distortion
+    newNeighborSiteCoords = np.copy(neighborSiteCoords)
+    numNeighbors = len(neighborList)
+    for iNeighbor in range(numNeighbors):
+        latticeDirection = neighborSiteCoords[neighborList[iNeighbor]] - centerSiteCoordList[iNeighbor]
+        displacement = np.linalg.norm(np.dot(latticeDirection, latticeMatrix))
+        unitVector = latticeDirection / displacement
+        newNeighborSiteCoords[neighborList[iNeighbor]] = centerSiteCoordList[iNeighbor] + unitVector * (displacement + stretchLength)
+    
     import pdb; pdb.set_trace()
     writePOSCAR(outputFilePath)
     return
