@@ -34,7 +34,7 @@ def readPOSCAR(srcFilePath, coordStartLineNumber):
 
 def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
                      neighborElementTypeList, neighborCutoffList,
-                     stretchLengthList):
+                     stretchPercentList):
     coordStartLineNumber = 9
     [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(
                                                         srcFilePath,
@@ -120,7 +120,8 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
             lineIndices.append(headStart + neighborList[iNeighbor])
             newCoordinateList.append(
                 centerSiteCoordList[iNeighbor] + unitVector
-                * (displacement + stretchLengthList[distortElementTypeIndex]))
+                * (displacement
+                   * (1 + stretchPercentList[distortElementTypeIndex] / 100)))
     newCoordinateList = np.asarray(newCoordinateList)
     writePOSCAR(srcFilePath, lineIndices, newCoordinateList)
     return
@@ -128,17 +129,18 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
 
 def writePOSCAR(srcFilePath, lineIndices, newCoordinateList):
     dstFilePath = srcFilePath + '_Distorted'
-    srcFile = open(srcFilePath, 'rb')
-    open(dstFilePath, 'wb').close()
-    dstFile = open(dstFilePath, 'ab')
+    srcFile = open(srcFilePath, 'r')
+    open(dstFilePath, 'w').close()
+    dstFile = open(dstFilePath, 'a')
     neighborIndex = 0
     for lineIndex, line in enumerate(srcFile):
         if lineIndex in lineIndices:
-            line = ''.join([
-                ' ' * 5, '%11.9f' % newCoordinateList[neighborIndex][0],
-                ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][1],
-                ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][2]])
-            + '\n'
+            line = (
+                ''.join([
+                    ' ' * 5, '%11.9f' % newCoordinateList[neighborIndex][0],
+                    ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][1],
+                    ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][2]])
+                + '\n')
             neighborIndex += 1
         dstFile.write(line)
     srcFile.close()
