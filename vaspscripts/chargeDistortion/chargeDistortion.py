@@ -3,20 +3,27 @@
 import numpy as np
 
 
-def readPOSCAR(srcFilePath, coordStartLineNumber):
+def readPOSCAR(srcFilePath, fileFormatIndex):
+    # fileFormatIndex: 0=VASP; 1=VESTA
     latticeMatrix = np.zeros((3, 3))
     latticeParameterIndex = 0
     latticeParametersLineRange = range(3, 6)
+    elementTypesLineNumber = 6 * fileFormatIndex
+    numElementsLineNumber = 6 + fileFormatIndex
+    coordStartLineNumber = 8 + fileFormatIndex
     inputFile = open(srcFilePath, 'r')
     for lineIndex, line in enumerate(inputFile):
         lineNumber = lineIndex + 1
-        if lineNumber in latticeParametersLineRange:
+        if lineNumber == 1 and not fileFormatIndex:
+            elementTypes = line[:-1].split()
+        elif lineNumber in latticeParametersLineRange:
             latticeMatrix[latticeParameterIndex, :] = np.fromstring(line,
                                                                     sep=' ')
             latticeParameterIndex += 1
-        elif lineNumber == 6:
+        elif (lineNumber == elementTypesLineNumber
+              and 'elementTypes' not in locals()):
             elementTypes = line.split()
-        elif lineNumber == 7:
+        elif lineNumber == numElementsLineNumber:
             nElements = np.fromstring(line, dtype=int, sep=' ')
             totalElements = nElements.sum()
             fractionalCoords = np.zeros((totalElements, 3))
@@ -32,13 +39,13 @@ def readPOSCAR(srcFilePath, coordStartLineNumber):
     return POSCAR_INFO
 
 
-def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
-                     neighborElementTypeList, neighborCutoffList,
-                     stretchPercentList):
-    coordStartLineNumber = 9
+def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
+                     localizedSiteNumber, neighborElementTypeList,
+                     neighborCutoffList, stretchPercentList):
+    coordStartLineNumber = 8 + fileFormatIndex
     [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(
                                                         srcFilePath,
-                                                        coordStartLineNumber)
+                                                        fileFormatIndex)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
@@ -123,25 +130,39 @@ def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
                 * (displacement
                    * (1 + stretchPercentList[distortElementTypeIndex] / 100)))
     newCoordinateList = np.asarray(newCoordinateList)
-    writePOSCAR(srcFilePath, lineIndices, newCoordinateList)
+    writePOSCAR(srcFilePath, fileFormatIndex, lineIndices, newCoordinateList)
     return
 
 
-def writePOSCAR(srcFilePath, lineIndices, newCoordinateList):
-    dstFilePath = srcFilePath + '_Distorted'
+def writePOSCAR(srcFilePath, fileFormatIndex, lineIndices, newCoordinateList):
+    dstFilePath = srcFilePath + '.out'
     srcFile = open(srcFilePath, 'r')
     open(dstFilePath, 'w').close()
     dstFile = open(dstFilePath, 'a')
-    neighborIndex = 0
+    # fileFormatIndex: 0=VASP; 1=VESTA
     for lineIndex, line in enumerate(srcFile):
         if lineIndex in lineIndices:
-            line = (
-                ''.join([
-                    ' ' * 5, '%11.9f' % newCoordinateList[neighborIndex][0],
-                    ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][1],
-                    ' ' * 9, '%11.9f' % newCoordinateList[neighborIndex][2]])
-                + '\n')
-            neighborIndex += 1
+            neighborIndex = lineIndices.index(lineIndex)
+            if fileFormatIndex == 0:
+                line = (
+                    ''.join([
+                        ' ' * 2,
+                        '%18.16f' % newCoordinateList[neighborIndex][0],
+                        ' ' * 2,
+                        '%18.16f' % newCoordinateList[neighborIndex][1],
+                        ' ' * 2,
+                        '%18.16f' % newCoordinateList[neighborIndex][2]])
+                    + '\n')
+            elif fileFormatIndex == 1:
+                line = (
+                    ''.join([
+                        ' ' * 5,
+                        '%11.9f' % newCoordinateList[neighborIndex][0],
+                        ' ' * 9,
+                        '%11.9f' % newCoordinateList[neighborIndex][1],
+                        ' ' * 9,
+                        '%11.9f' % newCoordinateList[neighborIndex][2]])
+                    + '\n')
         dstFile.write(line)
     srcFile.close()
     dstFile.close()
