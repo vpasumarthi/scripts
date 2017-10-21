@@ -51,11 +51,11 @@ def generateQuantumIndices(systemSize, systemElementIndex,
     return quantumIndices
 
 
-def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
-                           bridgeCutoff, outdir, pathwayPrec, equivalencyPrec,
-                           classList=[], avoidElementType='',
-                           roundLatticeParameters={}, printPathwayList=0,
-                           printEquivalency=0, desiredCoordinateParameters={}):
+def uniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
+                   bridgeCutoff, outdir, pathwayPrec, equivalencyPrec,
+                   classList=[], avoidElementType='',
+                   roundLatticeParameters={}, printPathwayList=0,
+                   printEquivalency=0, desiredCoordinateParameters={}):
     """ generate unique pathways for the given set of element types"""
     # define input parameters
     [latticeMatrix, elementTypes, nElementsPerUnitCell,
@@ -197,19 +197,19 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
                     prec = desiredCoordinateParameters['prec']
                     dist = np.round(displacement, prec)
                     if dist in distList:
-                        print dist
-                        print ('center class:',
-                               centerSiteClassList[centerSiteIndex])
-                        print ('neighbor class:',
-                               neighborSiteClassList[neighborSiteIndex])
-                        print ('num of bonds:',
-                               len(bridgeNeighborList[centerSiteIndex]))
-                        print ('center:',
-                               np.round(np.divide(centerSiteFractCoord,
-                                                  desiredSystemSize), 3))
-                        print ('neighbor:',
-                               np.round(np.divide(neighborSiteFractCoord,
-                                                  desiredSystemSize), 3))
+                        print(dist)
+                        print('center class:',
+                              centerSiteClassList[centerSiteIndex])
+                        print('neighbor class:',
+                              neighborSiteClassList[neighborSiteIndex])
+                        print('num of bonds:',
+                              len(bridgeNeighborList[centerSiteIndex]))
+                        print('center:',
+                              np.round(np.divide(centerSiteFractCoord,
+                                                 desiredSystemSize), 3))
+                        print('neighbor:',
+                              np.round(np.divide(neighborSiteFractCoord,
+                                                 desiredSystemSize), 3))
 
                 # determine class pair list
                 if classList:
@@ -276,7 +276,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
                         classPairList[iCenterElementIndex][
                             displacementList[iCenterElementIndex].argsort()])
         if roundLatticeParameters:
-            latticeDirectionList[iCenterElementIndex] = (
+            latticeDirectionList[iCenterElementIndex] = np.round(
                 latticeDirectionList[iCenterElementIndex] / base).astype(int)
             centerSiteLDList = latticeDirectionList[iCenterElementIndex]
             for index in range(numNeighbors[iCenterElementIndex]):
@@ -305,14 +305,15 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
         if printEquivalency:
             if classList:
                 refIndex = (
-                        np.argmax(centerSiteClassList
-                                  == centerSiteClassList[iCenterElementIndex]))
-            else:
+                    np.argmax(centerSiteClassList
+                              == centerSiteClassList[iCenterElementIndex]))
                 refIndex = 0
-            print np.array_equal(
-                np.round(sortedDisplacementList[refIndex], equivalencyPrec),
-                np.round(sortedDisplacementList[iCenterElementIndex],
-                         equivalencyPrec))
+            print(
+                np.array_equal(np.round(sortedDisplacementList[refIndex],
+                                        equivalencyPrec),
+                               np.round(sortedDisplacementList[
+                                   iCenterElementIndex],
+                                        equivalencyPrec)))
 
         # generate center site pathway list
         if classList:
@@ -334,7 +335,7 @@ def generateUniquePathways(inputFileLocation, cutoffDistKey, neighborCutoff,
 
         if printPathwayList:
             np.set_printoptions(suppress=True)
-            print centerSitePathwayList
+            print(centerSitePathwayList)
 
     latticeDirectionListFileName = ('latticeDirectionList_' + centerElementType
                                     + '-' + neighborElementType + '_cutoff='
