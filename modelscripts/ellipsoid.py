@@ -3,46 +3,41 @@
 # Source: https://github.com/minillinim/ellipsoid/blob/master/ellipsoid.py
 
 from __future__ import division
-#from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import animation
 import matplotlib.pyplot as plt
 import importlib
-plt.switch_backend('Agg')
-importlib.import_module('mpl_toolkits.mplot3d').Axes3D
-import sys 
 import numpy as np
 from numpy import linalg
-from random import random
+
 
 class EllipsoidTool:
     """Some stuff for playing with ellipsoids"""
     def __init__(self): pass
-    
+
     def getMinVolEllipse(self, P=None, tolerance=0.01):
         """ Find the minimum volume ellipsoid which holds all the points
-        
+
         Based on work by Nima Moshtagh
         http://www.mathworks.com/matlabcentral/fileexchange/9542
         and also by looking at:
         http://cctbx.sourceforge.net/current/python/scitbx.math.minimum_covering_ellipsoid.html
         Which is based on the first reference anyway!
-        
+
         Here, P is a numpy array of N dimensional points like this:
         P = [[x,y,z,...], <-- one point per line
              [x,y,z,...],
              [x,y,z,...]]
-        
+
         Returns:
         (center, radii, rotation)
-        
+
         """
         (N, d) = np.shape(P)
         d = float(d)
-    
+
         # Q will be our working array
-        Q = np.vstack([np.copy(P.T), np.ones(N)]) 
-        QT = Q.T 
-    
+        Q = np.vstack([np.copy(P.T), np.ones(N)])
+        QT = Q.T
+
         # initializations
         err = 1.0 + tolerance
         u = (1.0 / N) * np.ones(N)
@@ -50,7 +45,8 @@ class EllipsoidTool:
         # Khachiyan Algorithm
         while err > tolerance:
             V = np.dot(Q, np.dot(np.diag(u), QT))
-            M = np.diag(np.dot(QT , np.dot(linalg.inv(V), Q)))    # M the diagonal vector of an NxN matrix
+            # M the diagonal vector of an NxN matrix
+            M = np.diag(np.dot(QT, np.dot(linalg.inv(V), Q)))
             j = np.argmax(M)
             maximum = M[j]
             step_size = (maximum - d - 1.0) / ((d + 1.0) * (maximum - 1.0))
@@ -59,7 +55,7 @@ class EllipsoidTool:
             err = np.linalg.norm(new_u - u)
             u = new_u
 
-        # center of the ellipse 
+        # center of the ellipse
         center = np.dot(P.T, u)
 
         # the A matrix for the ellipse
@@ -69,7 +65,7 @@ class EllipsoidTool:
                        ) / d
 
         # Get the values we'd like to return
-        U, s, rotation = linalg.svd(A)
+        _, s, rotation = linalg.svd(A)
         radii = 1.0/np.sqrt(s)
 
         return (center, radii, rotation)
@@ -78,9 +74,10 @@ class EllipsoidTool:
         """Calculate the volume of the blob"""
         return 4./3.*np.pi*radii[0]*radii[1]*radii[2]
 
-    def plotEllipsoid(self, center, radii, rotation, ax=None, plotAxes=False, cageColor='b', cageAlpha=0.2):
+    def plotEllipsoid(self, center, radii, rotation, ax=None, plotAxes=False,
+                      cageColor='b', cageAlpha=0.2):
         """Plot an ellipsoid"""
-        make_ax = ax == None
+        make_ax = ax is None
         if make_ax:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
@@ -95,18 +92,18 @@ class EllipsoidTool:
         # rotate accordingly
         for i in range(len(x)):
             for j in range(len(x)):
-                [x[i,j],y[i,j],z[i,j]] = np.dot([x[i,j],y[i,j],z[i,j]], rotation) + center
-
+                [x[i, j], y[i, j], z[i, j]] = (
+                                np.dot([x[i, j], y[i, j], z[i, j]], rotation)
+                                + center)
 
         if plotAxes:
             # make some purdy axes
-            axes = np.array([[radii[0],0.0,0.0],
-                             [0.0,radii[1],0.0],
-                             [0.0,0.0,radii[2]]])
+            axes = np.array([[radii[0], 0.0, 0.0],
+                             [0.0, radii[1], 0.0],
+                             [0.0, 0.0, radii[2]]])
             # rotate accordingly
             for i in range(len(axes)):
                 axes[i] = np.dot(axes[i], rotation)
-
 
             # plot axes
             for p in axes:
@@ -116,7 +113,8 @@ class EllipsoidTool:
                 ax.plot(X3, Y3, Z3, color=cageColor)
 
         # plot ellipsoid
-        ax.plot_wireframe(x, y, z,  rstride=4, cstride=4, color=cageColor, alpha=cageAlpha)
+        ax.plot_wireframe(x, y, z,  rstride=4, cstride=4, color=cageColor,
+                          alpha=cageAlpha)
         ax.set_xlim(xmin=-1000, xmax=1000)
         ax.set_ylim(ymin=-1000, ymax=1000)
         ax.set_zlim(zmin=-1000, zmax=1000)
@@ -124,6 +122,7 @@ class EllipsoidTool:
             plt.show()
             plt.close(fig)
             del fig
+
 
 if __name__ == "__main__":
     # make 100 random points
@@ -142,7 +141,10 @@ if __name__ == "__main__":
         for step in range(numPathStepsPerTraj):
             stepPosition = positionArray[headStart + step]
             for speciesIndex in range(nSpecies):
-                dataArray[step, trajIndex * nSpecies + speciesIndex, :] = stepPosition[speciesIndex * 3: (speciesIndex + 1) * 3]
+                dataArray[step, trajIndex * nSpecies + speciesIndex, :] = (
+                        stepPosition[speciesIndex * 3: (speciesIndex + 1) * 3])
+    plt.switch_backend('Agg')
+    importlib.import_module('mpl_toolkits.mplot3d').Axes3D
     # find the ellipsoid
     # import pdb; pdb.set_trace()
     index = 0
@@ -151,13 +153,13 @@ if __name__ == "__main__":
             P = dataArray[step]
             ET = EllipsoidTool()
             (center, radii, rotation) = ET.getMinVolEllipse(P, .01)
-        
+
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-        
+
             # plot points
-            ax.scatter(P[:,0], P[:,1], P[:,2], color='g', marker='*', s=100)
-        
+            ax.scatter(P[:, 0], P[:, 1], P[:, 2], color='g', marker='*', s=100)
+
             # plot ellipsoid
             ET.plotEllipsoid(center, radii, rotation, ax=ax, plotAxes=True)
 
