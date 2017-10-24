@@ -115,9 +115,6 @@ class EllipsoidTool:
         # plot ellipsoid
         ax.plot_wireframe(x, y, z,  rstride=4, cstride=4, color=cageColor,
                           alpha=cageAlpha)
-        ax.set_xlim(xmin=-1000, xmax=1000)
-        ax.set_ylim(ymin=-1000, ymax=1000)
-        ax.set_zlim(zmin=-1000, zmax=1000)
         if make_ax:
             plt.show()
             plt.close(fig)
@@ -125,8 +122,6 @@ class EllipsoidTool:
 
 
 if __name__ == "__main__":
-    # make 100 random points
-    # P = np.reshape([random()*100 for i in range(300)],(100,3))
     fileName = 'unwrappedTraj.dat'
     numTrajRecorded = int(1.00E+02)
     tFinal = 1.00E-04
@@ -145,9 +140,9 @@ if __name__ == "__main__":
                         stepPosition[speciesIndex * 3: (speciesIndex + 1) * 3])
     plt.switch_backend('Agg')
     importlib.import_module('mpl_toolkits.mplot3d').Axes3D
+
     # find the ellipsoid
-    # import pdb; pdb.set_trace()
-    index = 0
+    index = 1
     for step in range(numPathStepsPerTraj):
         if step % 100 == 0 and step != 0:
             P = dataArray[step]
@@ -164,7 +159,7 @@ if __name__ == "__main__":
             ET.plotEllipsoid(center, radii, rotation, ax=ax, plotAxes=True)
 
             plt.show()
-            plt.savefig('ellipsoid_new' + str(index) + '.png')
+            plt.savefig('ellipsoid' + str(index) + '.png')
             plt.close(fig)
             del fig
             index += 1
