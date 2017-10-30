@@ -20,6 +20,7 @@ def readPOSCAR(srcFilePath):
     latticeParametersLineRange = range(3, 6)
     elementTypesLineNumber = 6 * elementTypesExist
     numElementsLineNumber = 6 + elementTypesExist
+    coordinateTypeNumber = 7 + elementTypesExist
     coordStartLineNumber = 8 + elementTypesExist
     for lineIndex, line in enumerate(inputFile):
         lineNumber = lineIndex + 1
@@ -37,6 +38,8 @@ def readPOSCAR(srcFilePath):
             nElements = np.fromstring(line, dtype=int, sep=' ')
             totalElements = nElements.sum()
             fractionalCoords = np.zeros((totalElements, 3))
+        elif lineNumber == coordinateTypeNumber:
+            coordinateType = line.split()[0]
         elif lineNumber == coordStartLineNumber:
             elementIndex = 0
             fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
@@ -53,16 +56,16 @@ def readPOSCAR(srcFilePath):
             fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
     inputFile.close()
     POSCAR_INFO = np.array(
-                    [latticeMatrix, elementTypes, nElements, fractionalCoords,
-                     fileFormat], dtype=object)
+                    [latticeMatrix, elementTypes, nElements, coordinateType,
+                     fractionalCoords, fileFormat], dtype=object)
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, siteElementTypeList,
-            siteNumberList, bridgeSearchDepth, terminatingElementType,
+def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
+            bridgeSearchDepth, terminatingElementType,
             terminatingBondDistance):
-    [latticeMatrix, elementTypes, nElements, fractionalCoords, fileFormat] = (
-                                                    readPOSCAR(srcFilePath))
+    [latticeMatrix, elementTypes, nElements, coordinateType, fractionalCoords,
+     fileFormat] = readPOSCAR(srcFilePath)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
@@ -74,114 +77,73 @@ def cluster(srcFilePath, siteElementTypeList,
             elementTypes_consolidated.append(elementType)
         nElements_consolidated[uniqueElementTypeIndex] += nElements[
                                                             elementTypeIndex]
-    import pdb; pdb.set_trace()
-    localizedElementTypeIndex = elementTypes_consolidated.index(
-                                                        localizedElementType)
-    localizedSiteCoords = (
-        fractionalCoords[nElements_consolidated[
-                                            :localizedElementTypeIndex].sum()
-                         + localizedSiteNumber - 1])
+    elementWiseCoordinateList = [[] for _ in range(numUniqueElementTypes)]
+    for siteIndex, siteElementType in enumerate(siteElementTypeList):
+        siteElementTypeIndex = elementTypes_consolidated.index(siteElementType)
+        siteCoordinates = fractionalCoords[
+                            sum(nElements_consolidated[:siteElementTypeIndex])
+                            + siteNumberList[siteIndex] - 1]
+        elementWiseCoordinateList[siteElementTypeIndex].append(siteCoordinates)
 
-    # generate array of unit cell translational coordinates
-    pbc = np.ones(3, int)
-    numCells = 3**sum(pbc)
-    xRange = range(-1, 2) if pbc[0] == 1 else [0]
-    yRange = range(-1, 2) if pbc[1] == 1 else [0]
-    zRange = range(-1, 2) if pbc[2] == 1 else [0]
-    cellTranslationalCoords = np.zeros((numCells, 3))  # Initialization
-    index = 0
-    for xOffset in xRange:
-        for yOffset in yRange:
-            for zOffset in zRange:
-                cellTranslationalCoords[index] = np.array([xOffset,
-                                                           yOffset,
-                                                           zOffset])
-                index += 1
-    localizedSiteCoords_imageconsolidated = (localizedSiteCoords
-                                             + cellTranslationalCoords)
-    lineIndices = []
-    newCoordinateList = []
-    for distortElementTypeIndex, distortElementType in enumerate(
-                                                    neighborElementTypeList):
-        neighborElementTypeIndex = elementTypes_consolidated.index(
-                                                            distortElementType)
-        neighborSiteCoords = fractionalCoords[
-                    nElements_consolidated[:neighborElementTypeIndex].sum()
-                    + range(nElements_consolidated[neighborElementTypeIndex])]
-        neighborCutoffDistLimits = [
-                                0,
-                                neighborCutoffList[distortElementTypeIndex]]
-
-        # generate neighbor list
-        neighborList = []
-        centerSiteCoordList = []
-        for neighborSiteIndex, neighborSiteCoord in enumerate(
-                                                        neighborSiteCoords):
-            latticeDirections = (localizedSiteCoords_imageconsolidated
-                                 - neighborSiteCoord)
-            minDisp = np.linalg.norm(np.sum(latticeMatrix, axis=0))
-            for iCell in range(numCells):
-                displacement = np.linalg.norm(np.dot(latticeDirections[iCell],
-                                                     latticeMatrix))
-                if displacement < minDisp:
-                    minDisp = displacement
-                    centerSiteCoords = localizedSiteCoords_imageconsolidated[
-                                                                        iCell]
-            if (neighborCutoffDistLimits[0] < minDisp
-                    <= neighborCutoffDistLimits[1]):
-                neighborList.append(neighborSiteIndex)
-                centerSiteCoordList.append(centerSiteCoords)
-
-        # generate distortion
-        numNeighbors = len(neighborList)
-        headStart = (coordStartLineNumber - 1
-                     + nElements_consolidated[:neighborElementTypeIndex].sum())
-        for iNeighbor in range(numNeighbors):
-            latticeDirection = (neighborSiteCoords[neighborList[iNeighbor]]
-                                - centerSiteCoordList[iNeighbor])
-            displacement = np.linalg.norm(np.dot(latticeDirection,
-                                                 latticeMatrix))
-            unitVector = latticeDirection / displacement
-            lineIndices.append(headStart + neighborList[iNeighbor])
-            newCoordinateList.append(
-                centerSiteCoordList[iNeighbor] + unitVector
-                * (displacement
-                   * (1 + stretchPercentList[distortElementTypeIndex] / 100)))
-    newCoordinateList = np.asarray(newCoordinateList)
-    writePOSCAR(srcFilePath, fileFormatIndex, elementTypes_cluster,
-                nElements_cluster, coordinates_cluster)
+    elementTypes_cluster = []
+    nElements_cluster = []
+    numCoordinates = 0
+    for elementIndex in range(numUniqueElementTypes):
+        elementIndexNumElements = len(elementWiseCoordinateList[elementIndex])
+        if elementIndexNumElements != 0:
+            elementTypes_cluster.append(
+                                    elementTypes_consolidated[elementIndex])
+            nElements_cluster.append(elementIndexNumElements)
+            numCoordinates += elementIndexNumElements
+    coordinates_cluster = [
+            coordinates for elementWiseCoordinates in elementWiseCoordinateList
+            for coordinates in elementWiseCoordinates]
+    writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
+                nElements_cluster, coordinateType, coordinates_cluster)
     return None
 
 
-def writePOSCAR(srcFilePath, fileFormatIndex, lineIndices, newCoordinateList):
+def writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
+                nElements_cluster, coordinateType, coordinates_cluster):
+    unmodifiedLineNumberLimit = 5
     dstFilePath = srcFilePath + '.out'
     srcFile = open(srcFilePath, 'r')
     open(dstFilePath, 'w').close()
     dstFile = open(dstFilePath, 'a')
-    # fileFormatIndex: 0=VASP; 1=VESTA
     for lineIndex, line in enumerate(srcFile):
-        if lineIndex in lineIndices:
-            neighborIndex = lineIndices.index(lineIndex)
-            if fileFormatIndex == 0:
-                line = (
-                    ''.join([
-                        ' ' * 2,
-                        '%18.16f' % newCoordinateList[neighborIndex][0],
-                        ' ' * 2,
-                        '%18.16f' % newCoordinateList[neighborIndex][1],
-                        ' ' * 2,
-                        '%18.16f' % newCoordinateList[neighborIndex][2]])
-                    + '\n')
-            elif fileFormatIndex == 1:
-                line = (
-                    ''.join([
-                        ' ' * 5,
-                        '%11.9f' % newCoordinateList[neighborIndex][0],
-                        ' ' * 9,
-                        '%11.9f' % newCoordinateList[neighborIndex][1],
-                        ' ' * 9,
-                        '%11.9f' % newCoordinateList[neighborIndex][2]])
-                    + '\n')
-        dstFile.write(line)
+        lineNumber = lineIndex + 1
+        if lineNumber <= unmodifiedLineNumberLimit:
+            dstFile.write(line)
+        else:
+            break
     srcFile.close()
+    elementTypesLine = (' ' * 3 + (' ' * 4).join(elementTypes_cluster) + '\n')
+    dstFile.write(elementTypesLine)
+    # import pdb; pdb.set_trace()
+    nElementsLine = (' ' * 3 + (' ' * 4).join(map(str, nElements_cluster))
+                     + '\n')
+    dstFile.write(nElementsLine)
+    dstFile.write(coordinateType + '\n')
+    for elementCoordinates in coordinates_cluster:
+        if fileFormat == 'VASP' or fileFormat == 'unknown':
+            line = (
+                ''.join([
+                    ' ' * 2,
+                    '%18.16f' % elementCoordinates[0],
+                    ' ' * 2,
+                    '%18.16f' % elementCoordinates[1],
+                    ' ' * 2,
+                    '%18.16f' % elementCoordinates[2]])
+                + '\n')
+        elif fileFormat == 'VESTA':
+            line = (
+                ''.join([
+                    ' ' * 5,
+                    '%11.9f' % elementCoordinates[0],
+                    ' ' * 9,
+                    '%11.9f' % elementCoordinates[1],
+                    ' ' * 9,
+                    '%11.9f' % elementCoordinates[2]])
+                + '\n')
+        dstFile.write(line)
     dstFile.close()
