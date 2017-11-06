@@ -66,6 +66,7 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
             terminatingBondDistance):
     [latticeMatrix, elementTypes, nElements, coordinateType, fractionalCoords,
      fileFormat] = readPOSCAR(srcFilePath)
+    numSites = len(siteElementTypeList)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
@@ -84,6 +85,25 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
                             sum(nElements_consolidated[:siteElementTypeIndex])
                             + siteNumberList[siteIndex] - 1]
         elementWiseCoordinateList[siteElementTypeIndex].append(siteCoordinates)
+
+    # generate array of cell translational coordinates
+    pbc = np.ones(3, int)
+    numCells = 3**sum(pbc)
+    xRange = range(-1, 2) if pbc[0] == 1 else [0]
+    yRange = range(-1, 2) if pbc[1] == 1 else [0]
+    zRange = range(-1, 2) if pbc[2] == 1 else [0]
+    cellTranslationalCoords = np.zeros((numCells, 3))  # Initialization
+    index = 0
+    for xOffset in xRange:
+        for yOffset in yRange:
+            for zOffset in zRange:
+                cellTranslationalCoords[index] = np.array([xOffset,
+                                                           yOffset,
+                                                           zOffset])
+                index += 1
+
+    siteBasedNeighborList = [[[] for _ in range(numSites)]
+                             for _ in range(bridgeSearchDepth)]
 
     elementTypes_cluster = []
     nElements_cluster = []
@@ -117,9 +137,9 @@ def writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
         else:
             break
     srcFile.close()
+
     elementTypesLine = (' ' * 3 + (' ' * 4).join(elementTypes_cluster) + '\n')
     dstFile.write(elementTypesLine)
-    # import pdb; pdb.set_trace()
     nElementsLine = (' ' * 3 + (' ' * 4).join(map(str, nElements_cluster))
                      + '\n')
     dstFile.write(nElementsLine)
@@ -147,3 +167,4 @@ def writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
                 + '\n')
         dstFile.write(line)
     dstFile.close()
+    return None
