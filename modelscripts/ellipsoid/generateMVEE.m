@@ -1,5 +1,8 @@
 close all
-fileName = 'unwrappedTraj.dat';
+materialName = 'BVO';
+speciesType = 'hole';
+numSpecies = 2;
+inputFileName = 'unwrappedTraj.dat';
 numTrajRecorded = 1.00E+02;
 tFinal = 1.00E-05;
 timeInterval = 1.00E-09;
@@ -15,14 +18,23 @@ for trajIndex = 0:numTrajRecorded-1
     for step =0:numPathStepsPerTraj-1
         stepPosition = positionArray(headStart + step + 1, :);
         for speciesIndex = 0:nSpecies-1
-            dataArray(step + 1, trajIndex * nSpecies + speciesIndex + 1, :) = stepPosition(speciesIndex * 3 + 1: (speciesIndex + 1) * 3);
+            dataArray(...
+                step + 1, trajIndex * nSpecies + speciesIndex + 1, :) = ...
+                stepPosition(speciesIndex * 3 + 1: (speciesIndex + 1) * 3);
         end
     end
 end
 
 loops = 1000;
 F(loops) = struct('cdata',[],'colormap',[]);
-v = VideoWriter('bvo_2hole.avi');
+if numSpecies > 1
+    speciesTail = 's';
+else
+    speciesTail = '';
+end
+outputFileName = strcat(materialName, '_', num2str(numSpecies), ...
+                        speciesType, speciesTail, '.avi');
+v = VideoWriter(outputFileName);
 open(v);
 index = 1;
 figure('visible', 'off');
@@ -42,7 +54,10 @@ for step = 0:numPathStepsPerTraj-1
         xlabel(xlabelstr)
         ylabel(ylabelstr)
         zlabel(zlabelstr)
-        title('Diffusion of 2 holes depicted over 100 traj in ms-BVO')
+        figTitle = ['Diffusion of ', num2str(numSpecies), ' ', ...
+                    speciesType, speciesTail, ...
+                    ' depicted over 100 traj in ms-BVO'];
+        title(figTitle)
         xlim([-1000, 1000]) % bvo_2hole
         ylim([-1000, 1000]) % bvo_2hole
         zlim([-1000, 1000]) % bvo_2hole
