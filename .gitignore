@@ -109,13 +109,13 @@ ENV/
 .mypy_cache/
 
 # ellipsoid files
-/modelscripts/ellipsoid/**/*.avi
-/modelscripts/ellipsoid/**/*.png
-/modelscripts/ellipsoid/**/*.dat
+/PyCT/ellipsoid/**/*.avi
+/PyCT/ellipsoid/**/*.png
+/PyCT/ellipsoid/**/*.dat
 
 # cluster files
-/vaspscripts/cluster/**/*CAR*
+/VASP/cluster/**/*CAR*
 
 # uniquePathway files
-/modelscripts/uniquePathways/**/*CAR*
-/modelscripts/uniquePathways/**/*.npy
+/PyCT/uniquePathways/**/*CAR*
+/PyCT/uniquePathways/**/*.npy
