@@ -91,8 +91,12 @@ class simulationFiles(object):
                 if self.exclusive:
                     dstFile.write('#SBATCH --exclusive\n')
                 if self.mem:
-                    dstFile.write(f'#SBATCH --mem={self.mem}\n')
+                    dstFile.write(f'#SBATCH --mem={self.mem}\n\n')
+                if self.email:
+                    dstFile.write(f'#SBATCH --mail-user={self.email}\n')
+                    dstFile.write("#SBATCH --mail-type=END\n")
                 dstFile.write(
+                    "#SBATCH --constraint=IB\n"
                     "\n# Job description:\n"
                     "# run KMC simulation followed by performing MSD analysis"
                     " of the output trajectories\n\n"
