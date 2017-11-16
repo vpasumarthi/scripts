@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from pathlib import Path
-from shutil import copymode
 
 import numpy as np
 import yaml
@@ -24,16 +23,13 @@ class simulationFiles(object):
         for key, value in params.items():
             setattr(self, key, value)
 
-    def slurmFiles(self, srcDirPath, varSpeciesTypeIndex, varSpeciesCountList,
+    def slurmFiles(self, varSpeciesTypeIndex, varSpeciesCountList,
                    kmcPrec=1.00E+04):
         # keywords
-        commentKey = '##'
         jobNameKey = ('--job-name="' + self.material + '-'
                       + 'x'.join(str(element) for element in self.systemSize))
         outputKey = ('--output=' + self.material + '-'
                      + 'x'.join(str(element) for element in self.systemSize))
-        partitionKey = '--partition='
-        timeKey = '--time='
 
         chargeComb = self.ionChargeType[0] + self.speciesChargeType[0]
         nRuns = len(varSpeciesCountList)
@@ -65,40 +61,64 @@ class simulationFiles(object):
             Path.mkdir(workDirPath, parents=True, exist_ok=True)
             dstFilePath = workDirPath.joinpath(self.dstFileName)
 
-            # generate run file
-            srcFilePath = srcDirPath / self.srcFileName
-            with srcFilePath.open('r') as srcFile, \
-                    dstFilePath.open('w') as dstFile:
-                for line in srcFile:
-                    if jobNameKey in line and line[:2] != commentKey:
-                        line = ('#SBATCH ' + jobNameKey + '_' + chargeComb
-                                + '_' + str(varSpeciesCountList[iRun]) + '"\n')
-                    elif outputKey in line and line[:2] != commentKey:
-                        line = ('#SBATCH ' + outputKey + '_' + chargeComb + '_'
-                                + str(varSpeciesCountList[iRun]) + '.out\n')
-                    elif partitionKey in line and line[:2] != commentKey:
-                        line = ('#SBATCH ' + partitionKey + self.partitionValue
-                                + '\n')
-                    elif timeKey in line and line[:2] != commentKey:
-                        numDays = numHours = numMins = numSec = 0
-                        if self.partitionValue is 'debug':
-                            numHours = 1
-                        elif self.partitionValue is 'mdupuis2':
-                            numDays = self.mdSlurmJobMaxTimeLimit
-                        else:
-                            estRunTime = self.runTime(speciesCountList,
-                                                      varSpeciesTypeIndex,
-                                                      kmcPrec)
-                            if estRunTime > self.gcSlurmJobMaxTimeLimit:
-                                numHours = self.gcSlurmJobMaxTimeLimit
-                            else:
-                                numHours = estRunTime // self.HR2SEC
-                                numMins = ((estRunTime // self.MIN2SEC)
-                                           % self.MIN2SEC)
-                        timeLimit = f'{numDays:02d}-{numHours:02d}:{numMins:02d}:{numSec:02d}'
-                        line = '#SBATCH ' + timeKey + timeLimit + '\n'
-                    dstFile.write(line)
-            copymode(self.srcFileName, str(dstFilePath))
+            # generate slurm file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write('#!/bin/sh\n')
+                dstFile.write('#SBATCH ' + jobNameKey + '_' + chargeComb + '_'
+                              + str(varSpeciesCountList[iRun]) + '"\n')
+                dstFile.write('#SBATCH ' + outputKey + '_' + chargeComb + '_'
+                              + str(varSpeciesCountList[iRun]) + '.out\n')
+                dstFile.write(f'#SBATCH --partition={self.partitionValue}\n')
+                if self.partitionValue == 'mdupuis2':
+                    dstFile.write('#SBATCH --clusters=chemistry\n')
+                numDays = numHours = numMins = numSec = 0
+                if self.partitionValue == 'debug':
+                    numHours = 1
+                elif self.partitionValue == 'mdupuis2':
+                    numDays = self.mdSlurmJobMaxTimeLimit
+                else:
+                    estRunTime = self.runTime(speciesCountList,
+                                              varSpeciesTypeIndex, kmcPrec)
+                    if estRunTime > self.gcSlurmJobMaxTimeLimit:
+                        numHours = self.gcSlurmJobMaxTimeLimit
+                    else:
+                        numHours = estRunTime // self.HR2SEC
+                        numMins = (estRunTime // self.MIN2SEC) % self.MIN2SEC
+                timeLimit = f'{numDays:02d}-{numHours:02d}:{numMins:02d}:{numSec:02d}'
+                dstFile.write(f'#SBATCH --time={timeLimit}\n')
+                dstFile.write(f'#SBATCH --nodes={self.numNodes}\n')
+                dstFile.write(f'#SBATCH --tasks-per-node={self.numTasksPerNode}\n')
+                if self.exclusive:
+                    dstFile.write('#SBATCH --exclusive\n')
+                if self.mem:
+                    dstFile.write(f'#SBATCH --mem={self.mem}\n')
+                dstFile.write(
+                    "\n# Job description:\n"
+                    "# run KMC simulation followed by performing MSD analysis"
+                    " of the output trajectories\n\n"
+                    "echo \"SLURM_JOBID=\"$SLURM_JOBID\n"
+                    "echo \"SLURM_JOB_NODELIST\"=$SLURM_JOB_NODELIST\n"
+                    "echo \"SLURM_NNODES\"=$SLURM_NNODES\n"
+                    "echo \"SLURMTMPDIR=\"$SLURMTMPDIR\n\n"
+                    "echo \"working directory = \"$SLURM_SUBMIT_DIR\n\n"
+                    "module load python\n"
+                    "source activate py36\n"
+                    "module list\n"
+                    "ulimit -s unlimited\n\n"
+                    "# The initial srun will trigger the SLURM prologue on"
+                    " the compute nodes.\n"
+                    "NPROCS=`srun --nodes=${SLURM_NNODES}"
+                    " bash -c 'hostname' |wc -l`\n"
+                    "echo NPROCS=$NPROCS\n"
+                    "echo \"Launch mymodel with srun\"\n\n"
+                    "#The PMI library is necessary for srun\n"
+                    "export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so\n")
+                if self.submitRun:
+                    dstFile.write("srun Run.py\n")
+                if self.submitMSD:
+                    dstFile.write("srun MSD.py\n")
+                dstFile.write("\necho \"All Done!\"\n")
+        return None
 
     def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
         kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
