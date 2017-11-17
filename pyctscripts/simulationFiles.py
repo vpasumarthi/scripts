@@ -23,6 +23,53 @@ class simulationFiles(object):
         for key, value in params.items():
             setattr(self, key, value)
 
+    def dstPath(self, speciesCountList):
+        # determine destination path
+        childDir1 = 'SimulationFiles'
+        childDir2 = ('ionChargeType=' + self.system['ionChargeType']
+                     + ';speciesChargeType='
+                     + self.system['speciesChargeType'])
+        childDir3 = (
+                    str(speciesCountList[0])
+                    + ('electron' if speciesCountList[0] == 1 else 'electrons')
+                    + ',' + str(speciesCountList[1])
+                    + ('hole' if speciesCountList[1] == 1 else 'holes'))
+        childDir4 = str(self.system['Temp']) + 'K'
+        workDir = (('%1.2E' % self.run['tFinal']) + 'SEC,'
+                   + ('%1.2E' % self.run['timeInterval']) + 'TimeInterval,'
+                   + ('%1.2E' % self.run['nTraj']) + 'Traj')
+        systemDirectoryPath = Path.cwd()
+        workDirPath = (systemDirectoryPath / childDir1 / childDir2 / childDir3
+                       / childDir4 / workDir)
+        workDirDepth = len(workDirPath.parts) - len(systemDirectoryPath.parts)
+        return (workDirPath, workDirDepth)
+
+    def simParmFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
+        nRuns = len(varSpeciesCountList)
+        speciesCountList = [0] * len(self.system['speciesCount'])
+        for iRun in range(nRuns):
+            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
+            speciesCountList[nonVarSpeciesTypeIndex] = (
+                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
+            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
+
+            (workDirPath, workDirDepth) = self.dstPath(speciesCountList)
+            self.system['workDirDepth'] = workDirDepth
+            Path.mkdir(workDirPath, parents=True, exist_ok=True)
+            dstFilePath = workDirPath.joinpath(self.system['dstFileName'])
+
+            # generate simulation parameter file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write('# System parameters:\n')
+                yaml.dump(self.system, dstFile)
+                dstFile.write('\n')
+                dstFile.write('# Run parameters:\n')
+                yaml.dump(self.run, dstFile, default_flow_style=False)
+                dstFile.write('\n')
+                dstFile.write('# MSD parameters:\n')
+                yaml.dump(self.msd, dstFile, default_flow_style=False)
+        return None
+
     def slurmFiles(self, varSpeciesTypeIndex, varSpeciesCountList,
                    kmcPrec=1.00E+04):
         # keywords
@@ -31,34 +78,16 @@ class simulationFiles(object):
         outputKey = ('--output=' + self.material + '-'
                      + 'x'.join(str(element) for element in self.systemSize))
 
-        chargeComb = self.ionChargeType[0] + self.speciesChargeType[0]
+        chargeComb = (self.system['ionChargeType'][0] + self.system['speciesChargeType'][0])
         nRuns = len(varSpeciesCountList)
-        speciesCountList = [0] * len(self.speciesCount)
+        speciesCountList = [0] * len(self.system['speciesCount'])
         for iRun in range(nRuns):
             # estimate simulation run time in sec
             nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = self.speciesCount[
+            speciesCountList[nonVarSpeciesTypeIndex] = self.system['speciesCount'][
                                                         nonVarSpeciesTypeIndex]
             speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
-
-            # determine destination path
-            parentDir1 = 'SimulationFiles'
-            parentDir2 = ('ionChargeType=' + self.ionChargeType
-                          + ';speciesChargeType=' + self.speciesChargeType)
-            parentDir3 = (
-                    str(speciesCountList[0])
-                    + ('electron' if speciesCountList[0] == 1 else 'electrons')
-                    + ',' + str(speciesCountList[1])
-                    + ('hole' if speciesCountList[1] == 1 else 'holes'))
-            parentDir4 = str(self.Temp) + 'K'
-            workDir = (('%1.2E' % self.tFinal) + 'SEC,'
-                       + ('%1.2E' % self.timeInterval) + 'TimeInterval,'
-                       + ('%1.2E' % self.nTraj) + 'Traj')
-            systemDirectoryPath = Path.cwd()
-            workDirPath = (systemDirectoryPath / parentDir1 / parentDir2
-                            / parentDir3 / parentDir4 / workDir)
-            workDirDepth = (len(workDirPath.parts)
-                            - len(systemDirectoryPath.parts))
+            (workDirPath, _) = self.dstPath(speciesCountList)
             Path.mkdir(workDirPath, parents=True, exist_ok=True)
             dstFilePath = workDirPath.joinpath(self.dstFileName)
 
@@ -128,11 +157,11 @@ class simulationFiles(object):
     def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
         kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
         timeStep = 1 / kTotal
-        kmcSteps = int(np.ceil(self.tFinal / timeStep / kmcPrec) * kmcPrec)
+        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec) * kmcPrec)
         numStatesPerStep = np.dot(self.numStatesPerSpecies,
                                   speciesCountList)
         totalStatesPerTraj = numStatesPerStep * kmcSteps
-        estRunTime = int(self.timePerState[varSpeciesTypeIndex] * self.nTraj
+        estRunTime = int(self.timePerState[varSpeciesTypeIndex] * self.run['nTraj']
                          * totalStatesPerTraj
                          + (self.addOnTimeLimit * self.HR2SEC))
         return estRunTime
