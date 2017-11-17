@@ -73,23 +73,26 @@ class simulationFiles(object):
     def slurmFiles(self, varSpeciesTypeIndex, varSpeciesCountList,
                    kmcPrec=1.00E+04):
         # keywords
-        jobNameKey = ('--job-name="' + self.material + '-'
-                      + 'x'.join(str(element) for element in self.systemSize))
-        outputKey = ('--output=' + self.material + '-'
-                     + 'x'.join(str(element) for element in self.systemSize))
+        jobNameKey = ('--job-name="' + self.system['material'] + '-'
+                      + 'x'.join(str(element)
+                                 for element in self.system['systemSize']))
+        outputKey = ('--output=' + self.system['material'] + '-'
+                     + 'x'.join(str(element)
+                                for element in self.system['systemSize']))
 
-        chargeComb = (self.system['ionChargeType'][0] + self.system['speciesChargeType'][0])
+        chargeComb = (self.system['ionChargeType'][0]
+                      + self.system['speciesChargeType'][0])
         nRuns = len(varSpeciesCountList)
         speciesCountList = [0] * len(self.system['speciesCount'])
         for iRun in range(nRuns):
             # estimate simulation run time in sec
             nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = self.system['speciesCount'][
-                                                        nonVarSpeciesTypeIndex]
+            speciesCountList[nonVarSpeciesTypeIndex] = (
+                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
             speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
             (workDirPath, _) = self.dstPath(speciesCountList)
             Path.mkdir(workDirPath, parents=True, exist_ok=True)
-            dstFilePath = workDirPath.joinpath(self.dstFileName)
+            dstFilePath = workDirPath.joinpath(self.slurm['dstFileName'])
 
             # generate slurm file
             with dstFilePath.open('w') as dstFile:
@@ -98,14 +101,14 @@ class simulationFiles(object):
                               + str(varSpeciesCountList[iRun]) + '"\n')
                 dstFile.write('#SBATCH ' + outputKey + '_' + chargeComb + '_'
                               + str(varSpeciesCountList[iRun]) + '.out\n')
-                dstFile.write(f'#SBATCH --partition={self.partitionValue}\n')
-                if self.partitionValue == 'mdupuis2':
+                dstFile.write(f"#SBATCH --partition={self.slurm['partitionValue']}\n")
+                if self.slurm['partitionValue'] == 'mdupuis2':
                     dstFile.write('#SBATCH --clusters=chemistry\n')
                 numDays = numHours = numMins = numSec = 0
-                if self.partitionValue == 'debug':
+                if self.slurm['partitionValue'] == 'debug':
                     numHours = 1
-                elif self.partitionValue == 'mdupuis2':
-                    numDays = self.mdSlurmJobMaxTimeLimit
+                elif self.slurm['partitionValue'] == 'mdupuis2':
+                    numDays = self.slurm['mdSlurmJobMaxTimeLimit']
                 else:
                     estRunTime = self.runTime(speciesCountList,
                                               varSpeciesTypeIndex, kmcPrec)
@@ -116,14 +119,14 @@ class simulationFiles(object):
                         numMins = (estRunTime // self.MIN2SEC) % self.MIN2SEC
                 timeLimit = f'{numDays:02d}-{numHours:02d}:{numMins:02d}:{numSec:02d}'
                 dstFile.write(f'#SBATCH --time={timeLimit}\n')
-                dstFile.write(f'#SBATCH --nodes={self.numNodes}\n')
-                dstFile.write(f'#SBATCH --tasks-per-node={self.numTasksPerNode}\n')
-                if self.exclusive:
+                dstFile.write(f"#SBATCH --nodes={self.slurm['numNodes']}\n")
+                dstFile.write(f"#SBATCH --tasks-per-node={self.slurm['numTasksPerNode']}\n")
+                if self.slurm['exclusive']:
                     dstFile.write('#SBATCH --exclusive\n')
-                if self.mem:
-                    dstFile.write(f'#SBATCH --mem={self.mem}\n\n')
-                if self.email:
-                    dstFile.write(f'#SBATCH --mail-user={self.email}\n')
+                if self.slurm['mem']:
+                    dstFile.write(f"#SBATCH --mem={self.slurm['mem']}\n\n")
+                if self.slurm['email']:
+                    dstFile.write(f"#SBATCH --mail-user={self.slurm['email']}\n")
                     dstFile.write("#SBATCH --mail-type=END\n")
                 dstFile.write(
                     "#SBATCH --constraint=IB\n"
@@ -147,9 +150,9 @@ class simulationFiles(object):
                     "echo \"Launch mymodel with srun\"\n\n"
                     "#The PMI library is necessary for srun\n"
                     "export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so\n")
-                if self.submitRun:
+                if self.slurm['submitRun']:
                     dstFile.write("srun Run.py\n")
-                if self.submitMSD:
+                if self.slurm['submitMSD']:
                     dstFile.write("srun MSD.py\n")
                 dstFile.write("\necho \"All Done!\"\n")
         return None
@@ -157,11 +160,12 @@ class simulationFiles(object):
     def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
         kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
         timeStep = 1 / kTotal
-        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec) * kmcPrec)
+        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec)
+                       * kmcPrec)
         numStatesPerStep = np.dot(self.numStatesPerSpecies,
                                   speciesCountList)
         totalStatesPerTraj = numStatesPerStep * kmcSteps
-        estRunTime = int(self.timePerState[varSpeciesTypeIndex] * self.run['nTraj']
-                         * totalStatesPerTraj
+        estRunTime = int(self.timePerState[varSpeciesTypeIndex]
+                         * self.run['nTraj'] * totalStatesPerTraj
                          + (self.addOnTimeLimit * self.HR2SEC))
         return estRunTime
