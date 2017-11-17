@@ -55,9 +55,10 @@ class simulationFiles(object):
                        + ('%1.2E' % self.timeInterval) + 'TimeInterval,'
                        + ('%1.2E' % self.nTraj) + 'Traj')
             systemDirectoryPath = Path.cwd()
-            workDirPath = systemDirectoryPath.joinpath(parentDir1, parentDir2,
-                                                       parentDir3, parentDir4,
-                                                       workDir)
+            workDirPath = (systemDirectoryPath / parentDir1 / parentDir2
+                            / parentDir3 / parentDir4 / workDir)
+            workDirDepth = (len(workDirPath.parts)
+                            - len(systemDirectoryPath.parts))
             Path.mkdir(workDirPath, parents=True, exist_ok=True)
             dstFilePath = workDirPath.joinpath(self.dstFileName)
 
