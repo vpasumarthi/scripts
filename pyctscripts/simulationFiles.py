@@ -191,3 +191,25 @@ class simulationFiles(object):
                     "dstPath = Path.cwd()\n"
                     "materialRun(dstPath)\n")
         return None
+
+    def msdFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
+        nRuns = len(varSpeciesCountList)
+        speciesCountList = [0] * len(self.system['speciesCount'])
+        for iRun in range(nRuns):
+            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
+            speciesCountList[nonVarSpeciesTypeIndex] = (
+                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
+            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
+
+            (workDirPath, _) = self.dstPath(speciesCountList)
+            dstFilePath = workDirPath.joinpath(self.msd['dstFileName'])
+
+            # generate simulation parameter file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write(
+                    "#!/usr/bin/env python\n\n"
+                    "from pathlib import Path\n\n"
+                    "from PyCT.materialMSD import materialMSD\n\n"
+                    "dstPath = Path.cwd()\n"
+                    "materialMSD(dstPath)\n")
+        return None
