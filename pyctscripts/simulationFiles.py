@@ -70,6 +70,19 @@ class simulationFiles(object):
                 yaml.dump(self.msd, dstFile, default_flow_style=False)
         return None
 
+    def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
+        kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
+        timeStep = 1 / kTotal
+        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec)
+                       * kmcPrec)
+        numStatesPerStep = np.dot(self.numStatesPerSpecies,
+                                  speciesCountList)
+        totalStatesPerTraj = numStatesPerStep * kmcSteps
+        estRunTime = int(self.timePerState[varSpeciesTypeIndex]
+                         * self.run['nTraj'] * totalStatesPerTraj
+                         + (self.addOnTimeLimit * self.HR2SEC))
+        return estRunTime
+
     def slurmFiles(self, varSpeciesTypeIndex, varSpeciesCountList,
                    kmcPrec=1.00E+04):
         # keywords
@@ -157,15 +170,24 @@ class simulationFiles(object):
                 dstFile.write("\necho \"All Done!\"\n")
         return None
 
-    def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
-        kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
-        timeStep = 1 / kTotal
-        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec)
-                       * kmcPrec)
-        numStatesPerStep = np.dot(self.numStatesPerSpecies,
-                                  speciesCountList)
-        totalStatesPerTraj = numStatesPerStep * kmcSteps
-        estRunTime = int(self.timePerState[varSpeciesTypeIndex]
-                         * self.run['nTraj'] * totalStatesPerTraj
-                         + (self.addOnTimeLimit * self.HR2SEC))
-        return estRunTime
+    def runFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
+        nRuns = len(varSpeciesCountList)
+        speciesCountList = [0] * len(self.system['speciesCount'])
+        for iRun in range(nRuns):
+            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
+            speciesCountList[nonVarSpeciesTypeIndex] = (
+                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
+            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
+
+            (workDirPath, _) = self.dstPath(speciesCountList)
+            dstFilePath = workDirPath.joinpath(self.run['dstFileName'])
+
+            # generate simulation parameter file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write(
+                    "#!/usr/bin/env python\n\n"
+                    "from pathlib import Path\n\n"
+                    "from PyCT.materialRun import materialRun\n\n"
+                    "dstPath = Path.cwd()\n"
+                    "materialRun(dstPath)\n")
+        return None
