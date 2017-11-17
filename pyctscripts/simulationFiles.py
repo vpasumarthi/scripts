@@ -13,7 +13,8 @@ class simulationFiles(object):
     MIN2SEC = 60
     HR2SEC = 60 * MIN2SEC
 
-    def __init__(self, simParamFileName):
+    def __init__(self, simParamFileName, varSpeciesTypeIndex,
+                 varSpeciesCountList):
         # Load simulation parameters
         with open(simParamFileName, 'r') as stream:
             try:
@@ -22,6 +23,10 @@ class simulationFiles(object):
                 print(exc)
         for key, value in params.items():
             setattr(self, key, value)
+        self.varSpeciesTypeIndex = varSpeciesTypeIndex
+        self.nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
+        self.varSpeciesCountList = varSpeciesCountList
+        self.nRuns = len(varSpeciesCountList)
 
     def dstPath(self, speciesCountList):
         # determine destination path
@@ -44,14 +49,13 @@ class simulationFiles(object):
         workDirDepth = len(workDirPath.parts) - len(systemDirectoryPath.parts)
         return (workDirPath, workDirDepth)
 
-    def simParmFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
-        nRuns = len(varSpeciesCountList)
+    def simParmFiles(self):
         speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(nRuns):
-            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = (
-                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
-            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
+        for iRun in range(self.nRuns):
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
 
             (workDirPath, workDirDepth) = self.dstPath(speciesCountList)
             self.system['workDirDepth'] = workDirDepth
@@ -70,7 +74,7 @@ class simulationFiles(object):
                 yaml.dump(self.msd, dstFile, default_flow_style=False)
         return None
 
-    def runTime(self, speciesCountList, varSpeciesTypeIndex, kmcPrec):
+    def runTime(self, speciesCountList, kmcPrec):
         kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
         timeStep = 1 / kTotal
         kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec)
@@ -78,13 +82,12 @@ class simulationFiles(object):
         numStatesPerStep = np.dot(self.numStatesPerSpecies,
                                   speciesCountList)
         totalStatesPerTraj = numStatesPerStep * kmcSteps
-        estRunTime = int(self.timePerState[varSpeciesTypeIndex]
+        estRunTime = int(self.timePerState[self.varSpeciesTypeIndex]
                          * self.run['nTraj'] * totalStatesPerTraj
                          + (self.addOnTimeLimit * self.HR2SEC))
         return estRunTime
 
-    def slurmFiles(self, varSpeciesTypeIndex, varSpeciesCountList,
-                   kmcPrec=1.00E+04):
+    def slurmFiles(self, kmcPrec=1.00E+04):
         # keywords
         jobNameKey = ('--job-name="' + self.system['material'] + '-'
                       + 'x'.join(str(element)
@@ -95,14 +98,13 @@ class simulationFiles(object):
 
         chargeComb = (self.system['ionChargeType'][0]
                       + self.system['speciesChargeType'][0])
-        nRuns = len(varSpeciesCountList)
         speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(nRuns):
+        for iRun in range(self.nRuns):
             # estimate simulation run time in sec
-            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = (
-                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
-            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
             (workDirPath, _) = self.dstPath(speciesCountList)
             Path.mkdir(workDirPath, parents=True, exist_ok=True)
             dstFilePath = workDirPath.joinpath(self.slurm['dstFileName'])
@@ -111,9 +113,9 @@ class simulationFiles(object):
             with dstFilePath.open('w') as dstFile:
                 dstFile.write('#!/bin/sh\n')
                 dstFile.write('#SBATCH ' + jobNameKey + '_' + chargeComb + '_'
-                              + str(varSpeciesCountList[iRun]) + '"\n')
+                              + str(self.varSpeciesCountList[iRun]) + '"\n')
                 dstFile.write('#SBATCH ' + outputKey + '_' + chargeComb + '_'
-                              + str(varSpeciesCountList[iRun]) + '.out\n')
+                              + str(self.varSpeciesCountList[iRun]) + '.out\n')
                 dstFile.write(f"#SBATCH --partition={self.slurm['partitionValue']}\n")
                 if self.slurm['partitionValue'] == 'mdupuis2':
                     dstFile.write('#SBATCH --clusters=chemistry\n')
@@ -123,8 +125,7 @@ class simulationFiles(object):
                 elif self.slurm['partitionValue'] == 'mdupuis2':
                     numDays = self.slurm['mdSlurmJobMaxTimeLimit']
                 else:
-                    estRunTime = self.runTime(speciesCountList,
-                                              varSpeciesTypeIndex, kmcPrec)
+                    estRunTime = self.runTime(speciesCountList, kmcPrec)
                     if estRunTime > self.gcSlurmJobMaxTimeLimit:
                         numHours = self.gcSlurmJobMaxTimeLimit
                     else:
@@ -170,15 +171,13 @@ class simulationFiles(object):
                 dstFile.write("\necho \"All Done!\"\n")
         return None
 
-    def runFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
-        nRuns = len(varSpeciesCountList)
+    def runFiles(self):
         speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(nRuns):
-            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = (
-                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
-            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
-
+        for iRun in range(self.nRuns):
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
             (workDirPath, _) = self.dstPath(speciesCountList)
             dstFilePath = workDirPath.joinpath(self.run['dstFileName'])
 
@@ -192,15 +191,13 @@ class simulationFiles(object):
                     "materialRun(dstPath)\n")
         return None
 
-    def msdFiles(self, varSpeciesTypeIndex, varSpeciesCountList):
-        nRuns = len(varSpeciesCountList)
+    def msdFiles(self):
         speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(nRuns):
-            nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-            speciesCountList[nonVarSpeciesTypeIndex] = (
-                        self.system['speciesCount'][nonVarSpeciesTypeIndex])
-            speciesCountList[varSpeciesTypeIndex] = varSpeciesCountList[iRun]
-
+        for iRun in range(self.nRuns):
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
             (workDirPath, _) = self.dstPath(speciesCountList)
             dstFilePath = workDirPath.joinpath(self.msd['dstFileName'])
 
