@@ -14,7 +14,7 @@ class simulationFiles(object):
     HR2SEC = 60 * MIN2SEC
 
     def __init__(self, simParamFileName, varSpeciesTypeIndex,
-                 varSpeciesCountList):
+                 varSpeciesCountList, kmcPrec):
         # Load simulation parameters
         with open(simParamFileName, 'r') as stream:
             try:
@@ -27,6 +27,19 @@ class simulationFiles(object):
         self.nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
         self.varSpeciesCountList = varSpeciesCountList
         self.nRuns = len(varSpeciesCountList)
+        self.kmcPrec = kmcPrec
+
+    def generateFiles(self, genParamsFiles, genRunFiles, genMSDFiles,
+                      genSlurmFiles):
+        if genParamsFiles:
+            self.simulationParameterFiles()
+        if genRunFiles:
+            self.runFiles()
+        if genMSDFiles:
+            self.msdFiles()
+        if genSlurmFiles:
+            self.slurmFiles(self.kmcPrec)
+        return None
 
     def dstPath(self, speciesCountList):
         # determine destination path
@@ -49,7 +62,7 @@ class simulationFiles(object):
         workDirDepth = len(workDirPath.parts) - len(systemDirectoryPath.parts)
         return (workDirPath, workDirDepth)
 
-    def simParmFiles(self):
+    def simulationParameterFiles(self):
         speciesCountList = [0] * len(self.system['speciesCount'])
         for iRun in range(self.nRuns):
             speciesCountList[self.nonVarSpeciesTypeIndex] = (
@@ -74,6 +87,46 @@ class simulationFiles(object):
                 yaml.dump(self.msd, dstFile, default_flow_style=False)
         return None
 
+    def runFiles(self):
+        speciesCountList = [0] * len(self.system['speciesCount'])
+        for iRun in range(self.nRuns):
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
+            (workDirPath, _) = self.dstPath(speciesCountList)
+            dstFilePath = workDirPath.joinpath(self.run['dstFileName'])
+
+            # generate simulation parameter file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write(
+                    "#!/usr/bin/env python\n\n"
+                    "from pathlib import Path\n\n"
+                    "from PyCT.materialRun import materialRun\n\n"
+                    "dstPath = Path.cwd()\n"
+                    "materialRun(dstPath)\n")
+        return None
+
+    def msdFiles(self):
+        speciesCountList = [0] * len(self.system['speciesCount'])
+        for iRun in range(self.nRuns):
+            speciesCountList[self.nonVarSpeciesTypeIndex] = (
+                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
+            speciesCountList[self.varSpeciesTypeIndex] = (
+                                                self.varSpeciesCountList[iRun])
+            (workDirPath, _) = self.dstPath(speciesCountList)
+            dstFilePath = workDirPath.joinpath(self.msd['dstFileName'])
+
+            # generate simulation parameter file
+            with dstFilePath.open('w') as dstFile:
+                dstFile.write(
+                    "#!/usr/bin/env python\n\n"
+                    "from pathlib import Path\n\n"
+                    "from PyCT.materialMSD import materialMSD\n\n"
+                    "dstPath = Path.cwd()\n"
+                    "materialMSD(dstPath)\n")
+        return None
+
     def runTime(self, speciesCountList, kmcPrec):
         kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
         timeStep = 1 / kTotal
@@ -87,7 +140,7 @@ class simulationFiles(object):
                          + (self.addOnTimeLimit * self.HR2SEC))
         return estRunTime
 
-    def slurmFiles(self, kmcPrec=1.00E+04):
+    def slurmFiles(self, kmcPrec):
         # keywords
         jobNameKey = ('--job-name="' + self.system['material'] + '-'
                       + 'x'.join(str(element)
@@ -169,44 +222,4 @@ class simulationFiles(object):
                 if self.slurm['submitMSD']:
                     dstFile.write("srun MSD.py\n")
                 dstFile.write("\necho \"All Done!\"\n")
-        return None
-
-    def runFiles(self):
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
-            (workDirPath, _) = self.dstPath(speciesCountList)
-            dstFilePath = workDirPath.joinpath(self.run['dstFileName'])
-
-            # generate simulation parameter file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write(
-                    "#!/usr/bin/env python\n\n"
-                    "from pathlib import Path\n\n"
-                    "from PyCT.materialRun import materialRun\n\n"
-                    "dstPath = Path.cwd()\n"
-                    "materialRun(dstPath)\n")
-        return None
-
-    def msdFiles(self):
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
-            (workDirPath, _) = self.dstPath(speciesCountList)
-            dstFilePath = workDirPath.joinpath(self.msd['dstFileName'])
-
-            # generate simulation parameter file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write(
-                    "#!/usr/bin/env python\n\n"
-                    "from pathlib import Path\n\n"
-                    "from PyCT.materialMSD import materialMSD\n\n"
-                    "dstPath = Path.cwd()\n"
-                    "materialMSD(dstPath)\n")
         return None
