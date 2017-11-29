@@ -26,34 +26,40 @@ def trajAnalysis(dstPath, dispPrec):
 
     positionArray = (np.loadtxt(dstPath.joinpath('unwrappedTraj.dat'))
                      / ANG2BOHR)
+    numPositions = len(positionArray)
+    desired_indices = [0]
+    for stepIndex in range(1, numPositions):
+        if not np.array_equal(
+                            np.round(positionArray[stepIndex, :], dispPrec),
+                            np.round(positionArray[stepIndex-1, :], dispPrec)):
+            desired_indices.append(stepIndex)
+    positionArray = positionArray[desired_indices]
+
     dispVecArray = np.diff(positionArray, axis=0)
     dispArray = np.linalg.norm(dispVecArray, axis=1)
 
     # round displacements to given precision
     dispArray = np.round(dispArray, dispPrec)
 
-    # delete zero displacements
-    dispArray = dispArray[dispArray != 0]
-
     # collect to bins
-    [uni, cou] = np.unique(dispArray, return_counts=True)
+    [unique, counts] = np.unique(dispArray, return_counts=True)
 
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    y_pos = np.arange(len(uni))
-    xtick_items = ['%1.4f' % item for item in uni]
-    plt.bar(y_pos, cou, align='center', alpha=0.5, edgecolor='black')
-    plt.xticks(y_pos, xtick_items, rotation='vertical')
+    proc_indices = np.arange(len(unique))
+    xtick_items = ['%1.4f' % item for item in unique]
+    plt.bar(proc_indices, counts, align='center', alpha=0.5, edgecolor='black')
+    plt.xticks(proc_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(cou):
+    for i, v in enumerate(counts):
         ax.text(i - 0.2, v + 100, str(v), color='green', rotation='vertical',
                 fontweight='bold')
     addRectangle = 1
     if addRectangle:
         ax.add_patch(patches.Rectangle((13.5, -10), 4, 500, fill=False,
                                        color='red'))
-    ax.set_xlabel('Process Number')
+    ax.set_xlabel('Hopping Distance')
     ax.set_ylabel('Counts')
     ax.set_title('Histogram of processes')
     filename = 'process_histogram'
