@@ -33,9 +33,9 @@ def trajAnalysis(dstPath, dispPrec):
                             np.round(positionArray[stepIndex, :], dispPrec),
                             np.round(positionArray[stepIndex-1, :], dispPrec)):
             desired_indices.append(stepIndex)
-    positionArray = positionArray[desired_indices]
+    newPositionArray = np.copy(positionArray[desired_indices])
 
-    dispVecArray = np.diff(positionArray, axis=0)
+    dispVecArray = np.diff(newPositionArray, axis=0)
     dispArray = np.linalg.norm(dispVecArray, axis=1)
 
     # round displacements to given precision
