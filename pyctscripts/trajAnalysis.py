@@ -38,6 +38,27 @@ def trajAnalysis(dstPath, dispPrec):
     dispVecArray = np.diff(newPositionArray, axis=0)
     dispArray = np.linalg.norm(dispVecArray, axis=1)
 
+    numSteps = len(newPositionArray) - 1
+    rattleList = []
+    numRattles = 1
+    for stepIndex in range(2, numSteps+1):
+        if np.array_equal(np.round(newPositionArray[stepIndex, :], dispPrec),
+                          np.round(newPositionArray[stepIndex-2, :], dispPrec)):
+            numRattles += 1
+        else:
+            if numRattles > 2:
+                rattleDist = np.linalg.norm(newPositionArray[stepIndex-1, :]
+                                            - newPositionArray[stepIndex-2, :])
+                escapeDist = np.linalg.norm(newPositionArray[stepIndex, :]
+                                            - newPositionArray[stepIndex-1, :])
+                rattleList.append([np.round(rattleDist, dispPrec),
+                                   numRattles,
+                                   escapeDist])
+                numRattles = 1
+    rattleArray = np.asarray(rattleList)
+    print(rattleArray)
+    import pdb; pdb.set_trace()
+
     # round displacements to given precision
     dispArray = np.round(dispArray, dispPrec)
 
