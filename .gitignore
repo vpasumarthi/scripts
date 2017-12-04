@@ -119,3 +119,9 @@ ENV/
 # uniquePathway files
 /pyctscripts/uniquePathways/**/*CAR*
 /pyctscripts/uniquePathways/**/*.npy
+
+# IntelliJ
+/.idea
+
+# macOS
+.DS_Store
