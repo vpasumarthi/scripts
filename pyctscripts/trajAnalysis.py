@@ -4,28 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from PyCT import constants
+
 
 def trajAnalysis(dstPath, dispPrec):
-    # CONSTANTS
-    EPSILON0 = 8.854187817E-12  # Electric constant in F.m-1
-    ANG = 1E-10  # Angstrom in m
-
-    # FUNDAMENTAL ATOMIC UNITS
-    # Source: http://physics.nist.gov/cuu/Constants/Table/allascii.txt
-    EMASS = 9.10938356E-31  # Electron mass in Kg
-    ECHARGE = 1.6021766208E-19  # Elementary charge in C
-    HBAR = 1.054571800E-34  # Reduced Planck's constant in J.sec
-    KE = 1 / (4 * np.pi * EPSILON0)
-
-    # DERIVED ATOMIC UNITS
-    # Bohr radius in m
-    BOHR = HBAR**2 / (EMASS * ECHARGE**2 * KE)
-
-    # CONVERSIONS
-    ANG2BOHR = ANG / BOHR
-
     positionArray = (np.loadtxt(dstPath.joinpath('unwrappedTraj.dat'))
-                     / ANG2BOHR)
+                     / constants.ANG2BOHR)
     numPositions = len(positionArray)
     desired_indices = [0]
     for stepIndex in range(1, numPositions):
@@ -56,8 +40,6 @@ def trajAnalysis(dstPath, dispPrec):
                                    escapeDist])
                 numRattles = 1
     rattleArray = np.asarray(rattleList)
-    print(rattleArray)
-    import pdb; pdb.set_trace()
 
     # round displacements to given precision
     dispArray = np.round(dispArray, dispPrec)
