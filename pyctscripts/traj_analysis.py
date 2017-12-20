@@ -2,7 +2,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 from PyCT import constants
 
@@ -10,23 +9,15 @@ from PyCT import constants
 def traj_analysis(dst_path, disp_prec):
     intra_poly_dist_list = np.array([2.8541, 2.8600, 2.9958, 3.0473])
 
-    position_array = (np.loadtxt(dst_path.joinpath('unwrappedTraj.dat'))
+    position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
                       / constants.ANG2BOHR)
-    num_positions = len(position_array)
-    desired_indices = [0]
-    for step_index in range(1, num_positions):
-        if not np.array_equal(
-                        np.round(position_array[step_index, :], disp_prec),
-                        np.round(position_array[step_index-1, :], disp_prec)):
-            desired_indices.append(step_index)
-    newposition_array = np.copy(position_array[desired_indices])
 
-    disp_vec_array = np.diff(newposition_array, axis=0)
+    disp_vec_array = np.diff(position_array, axis=0)
     disp_array = np.linalg.norm(disp_vec_array, axis=1)
     # round displacements to given precision
     disp_array_prec = np.round(disp_array, disp_prec)
-
-    num_steps = len(disp_array)
+    
+    num_steps = position_array.shape[0] - 1
     num_rattles = 0
     rattle_dist_list = []
     rattle_event_list = []
@@ -90,10 +81,7 @@ def traj_analysis(dst_path, disp_prec):
     for i, v in enumerate(counts_hops):
         ax.text(i - 0.2, v + 100, str(v), color='green', rotation='vertical',
                 fontweight='bold')
-    add_rectangle = 1
-    if add_rectangle:
-        ax.add_patch(patches.Rectangle((13.5, -10), 4, 500, fill=False,
-                                       color='red'))
+
     ax.set_xlabel('Hopping Distance')
     ax.set_ylabel('Counts')
     ax.set_title('Histogram of processes')
@@ -115,10 +103,6 @@ def traj_analysis(dst_path, disp_prec):
     for i, v in enumerate(escape_counts):
         ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                 fontweight='bold')
-    add_rectangle = 1
-    if add_rectangle:
-        ax.add_patch(patches.Rectangle((9.5, -10), 3, 60, fill=False,
-                                       color='red'))
     ax.set_xlabel('Escape Distance')
     ax.set_ylabel('Counts')
     ax.set_title('Histogram of Escape Distances')
@@ -143,10 +127,6 @@ def traj_analysis(dst_path, disp_prec):
     for i, v in enumerate(counts_mobil_hops):
         ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                 fontweight='bold')
-    add_rectangle = 1
-    if add_rectangle:
-        ax.add_patch(patches.Rectangle((12.5, -10), 4, 70, fill=False,
-                                       color='red'))
     ax.set_xlabel('Hop Distance')
     ax.set_ylabel('Counts')
     ax.set_title('Histogram of Hop Distances contributing to mobility')
