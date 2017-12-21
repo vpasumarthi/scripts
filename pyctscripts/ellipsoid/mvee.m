@@ -1,25 +1,15 @@
-% Frequently modified parameters
-materialName = 'ms-BVO';
-speciesType = 'electron';
-numSpecies = 5;
-numTrajRecorded = 1.00E+02;
-tFinal = 1.00E-04;
-timeInterval = 1.00E-08;
-numFrames = 100;
-plotEllipsoid = 1;
-plotPrincipalAxes = 1;
-average_ellipsoid = 1; % average_ellipsoid=0 imply superposition
+function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
+              tFinal, timeInterval, numFrames, plotEllipsoid, ...
+              plotPrincipalAxes, average_ellipsoid, inputFileName, ...
+              bohr2ang, tol)
 
-% Not so frequently modified parameters
-inputFileName = 'unwrappedTraj.dat';
-bohr2ang = 0.529177249;
-positionArray = dlmread('unwrappedTraj.dat') * bohr2ang;
+positionArray = dlmread(inputFileName) * bohr2ang;
 numPathStepsPerTraj = round(tFinal / timeInterval) + 1;
 positionArraySize = size(positionArray);
 nSpecies = positionArraySize(2) / 3;
 posDataArray = zeros(numPathStepsPerTraj, numTrajRecorded * nSpecies, 3);
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
-tol = 0.001;
+
 if numSpecies > 1
     speciesTail = 's';
 else
@@ -131,4 +121,6 @@ if plotPrincipalAxes
     title('Time evolution of cartesian projected ellipsoid shape')
     legend('a', 'b', 'c', 'Location', 'southeast')
     saveas(gcf, 'CartesianEllipsoidShape.png')
+end
+
 end
