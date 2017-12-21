@@ -1,17 +1,14 @@
 % Frequently modified parameters
 materialName = 'ms-BVO';
-speciesType = 'hole';
-numSpecies = 2;
+speciesType = 'electron';
+numSpecies = 5;
 numTrajRecorded = 1.00E+02;
-tFinal = 1.00E-05;
-timeInterval = 1.00E-09;
-maxLim = 1000; % Hem-2e: 1400, BVO-2e: 700, BVO-2h: 1000
-xlimits = [-maxLim, maxLim];
-ylimits = [-maxLim, maxLim];
-zlimits = [-maxLim, maxLim];
+tFinal = 1.00E-04;
+timeInterval = 1.00E-08;
 numFrames = 100;
 plotEllipsoid = 1;
 plotPrincipalAxes = 1;
+average_ellipsoid = 1; % average_ellipsoid=0 imply superposition
 
 % Not so frequently modified parameters
 inputFileName = 'unwrappedTraj.dat';
@@ -57,14 +54,39 @@ figure('visible', 'off');
 xlabelstr = sprintf('x (%c)', 197);
 ylabelstr = sprintf('y (%c)', 197);
 zlabelstr = sprintf('z (%c)', 197);
+finalPosArray = reshape(posDataArray(step + 1, :, :), ...
+                        numTrajRecorded * nSpecies, 3);
+minPosLimit = min(min(finalPosArray, [], 1));
+maxPosLimit = max(max(finalPosArray, [], 1));
+posLimits = max(abs(minPosLimit), abs(maxPosLimit));
+numDigits = ceil(log10(posLimits));
+boundLimits = round(posLimits / 10^(numDigits - 1)) * 10^(numDigits - 1);
+xlimits = [-boundLimits, boundLimits];
+ylimits = [-boundLimits, boundLimits];
+zlimits = [-boundLimits, boundLimits];
 for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
         stepPosData = reshape(posDataArray(step + 1, :, :), ...
                               numTrajRecorded * nSpecies, 3)';
-        [ellipseMatrix , center] = MinVolEllipse(stepPosData, tol);
+        if average_ellipsoid
+            sumEllipseMatrix = zeros(3);
+            sumCenter = zeros(3, 1);
+            for trajIndex = 0:numTrajRecorded-1
+                trajStepPosData = stepPosData(...
+                                :, trajIndex * nSpecies + (1:nSpecies));
+                [trajEllipseMatrix , trajCenter] = MinVolEllipse(...
+                                                    trajStepPosData, tol);
+                sumEllipseMatrix = sumEllipseMatrix + trajEllipseMatrix;
+                sumCenter = sumCenter + trajCenter;
+            end
+            ellipseMatrix = sumEllipseMatrix / numTrajRecorded;
+            center = sumCenter / numTrajRecorded;
+        else
+            [ellipseMatrix , center] = MinVolEllipse(stepPosData, tol);
+        end
         if plotEllipsoid
-            plot3(stepPosData(1,:),stepPosData(2,:),stepPosData(3,:),'*')
-            hold on
+%             plot3(stepPosData(1,:),stepPosData(2,:),stepPosData(3,:),'*')
+%             hold on
             Ellipse_plot(ellipseMatrix,center)
             hold off
             xlabel(xlabelstr)
