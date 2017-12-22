@@ -39,41 +39,10 @@ open(videoFile);
 frameIndex = 1;
 finalPosArray = reshape(posDataArray(step + 1, :, :), ...
                         numTrajRecorded * numSpecies, nDim)';
-if plotPosData
-    minPosLimit = min(min(finalPosArray, [], 2));
-    maxPosLimit = max(max(finalPosArray, [], 2));
-    posLimits = max(abs(minPosLimit), abs(maxPosLimit));
-    numDigits = ceil(log10(posLimits));
-    boundLimitValue = round(posLimits / 10^(numDigits - 1)) ...
-                            * 10^(numDigits - 1);
-    boundLimits = ones(nDim, 2) .* [-1, 1] * boundLimitValue;
-else
-    if ellipsoidConstruct
-        sumEllipseMatrix = zeros(nDim);
-        sumCenter = zeros(nDim, 1);
-        for trajIndex = 0:numTrajRecorded-1
-            trajStepPosData = finalPosArray(...
-                            :, trajIndex * numSpecies + (1:numSpecies));
-            [trajEllipseMatrix , trajCenter] = MinVolEllipse(...
-                                                trajStepPosData, tol);
-            sumEllipseMatrix = sumEllipseMatrix + trajEllipseMatrix;
-            sumCenter = sumCenter + trajCenter;
-        end
-        ellipseMatrix = sumEllipseMatrix / numTrajRecorded;
-        center = sumCenter / numTrajRecorded;
-    else
-        [ellipseMatrix , center] = MinVolEllipse(finalPosArray, tol);
-    end
-    [semiAxesLengths, cartesianSemiAxesLengths] = ...
-                                                axesLengths(ellipseMatrix);
-    maxSemiAxesLength = max(cartesianSemiAxesLengths);
-    posLimits = [center - maxSemiAxesLength, center + maxSemiAxesLength];
-    numDigits = ceil(log10(abs(posLimits)));
-    boundLimits = sign(posLimits) .* ...
-                  ceil(abs(posLimits) ./ 10.^(numDigits - 1)) ...
-                       .* 10.^(numDigits - 1);
-end
 
+boundLimits = computeFrameLimits(finalPosArray, plotPosData, ...
+                                 ellipsoidConstruct, nDim, ...
+                                 numTrajRecorded, numSpecies, tol);
 if plotPrincipalAxes
     semiAxesLengths = zeros(numFrames, nDim);
     cartesianSemiAxesLengths = zeros(numFrames, nDim);
@@ -190,4 +159,44 @@ xlim(boundLimits(1, :))
 ylim(boundLimits(2, :))
 zlim(boundLimits(3, :))
 F = getframe(gcf);
+end
+
+function boundLimits = computeFrameLimits(finalPosArray, plotPosData, ...
+                                          ellipsoidConstruct, nDim, ...
+                                          numTrajRecorded, numSpecies, tol)
+
+if plotPosData
+    minPosLimit = min(min(finalPosArray, [], 2));
+    maxPosLimit = max(max(finalPosArray, [], 2));
+    posLimits = max(abs(minPosLimit), abs(maxPosLimit));
+    numDigits = ceil(log10(posLimits));
+    boundLimitValue = ceil(posLimits / 10^(numDigits - 1)) ...
+                           * 10^(numDigits - 1);
+    boundLimits = ones(nDim, 2) .* [-1, 1] * boundLimitValue;
+else
+    if ellipsoidConstruct
+        sumEllipseMatrix = zeros(nDim);
+        sumCenter = zeros(nDim, 1);
+        for trajIndex = 0:numTrajRecorded-1
+            trajStepPosData = finalPosArray(...
+                            :, trajIndex * numSpecies + (1:numSpecies));
+            [trajEllipseMatrix , trajCenter] = MinVolEllipse(...
+                                                trajStepPosData, tol);
+            sumEllipseMatrix = sumEllipseMatrix + trajEllipseMatrix;
+            sumCenter = sumCenter + trajCenter;
+        end
+        ellipseMatrix = sumEllipseMatrix / numTrajRecorded;
+        center = sumCenter / numTrajRecorded;
+    else
+        [ellipseMatrix , center] = MinVolEllipse(finalPosArray, tol);
+    end
+    [~, cartesianSemiAxesLengths] = axesLengths(ellipseMatrix);
+    maxSemiAxesLength = max(cartesianSemiAxesLengths);
+    posLimits = [center - maxSemiAxesLength, center + maxSemiAxesLength];
+    numDigits = ceil(log10(abs(posLimits)));
+    boundLimits = sign(posLimits) .* ...
+                  ceil(abs(posLimits) ./ 10.^(numDigits - 1)) ...
+                       .* 10.^(numDigits - 1);
+end
+
 end
