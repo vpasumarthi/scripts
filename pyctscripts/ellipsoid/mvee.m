@@ -1,13 +1,14 @@
 function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
               tFinal, timeInterval, numFrames, plotEllipsoid, ...
               plotPosData, plotPrincipalAxes, average_ellipsoid, ...
-              inputFileName, bohr2ang, tol)
+              inputFileName, bohr2ang, nDim, tol)
 
 positionArray = dlmread(inputFileName) * bohr2ang;
 numPathStepsPerTraj = round(tFinal / timeInterval) + 1;
 positionArraySize = size(positionArray);
-nSpecies = positionArraySize(2) / 3;
-posDataArray = zeros(numPathStepsPerTraj, numTrajRecorded * nSpecies, 3);
+nSpecies = positionArraySize(2) / nDim;
+posDataArray = zeros(numPathStepsPerTraj, numTrajRecorded * nSpecies, ...
+                     nDim);
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 
 if numSpecies > 1
@@ -23,7 +24,8 @@ for trajIndex = 0:numTrajRecorded-1
         for speciesIndex = 0:nSpecies-1
             posDataArray(...
                 step + 1, trajIndex * nSpecies + speciesIndex + 1, :) = ...
-                stepPosition(speciesIndex * 3 + 1: (speciesIndex + 1) * 3);
+                stepPosition(speciesIndex * nDim + 1: ...
+                             (speciesIndex + 1) * nDim);
         end
     end
 end
@@ -41,7 +43,7 @@ xlabelstr = sprintf('x (%c)', 197);
 ylabelstr = sprintf('y (%c)', 197);
 zlabelstr = sprintf('z (%c)', 197);
 finalPosArray = reshape(posDataArray(step + 1, :, :), ...
-                        numTrajRecorded * nSpecies, 3)';
+                        numTrajRecorded * nSpecies, nDim)';
 if plotPosData
     minPosLimit = min(min(finalPosArray, [], 2));
     maxPosLimit = max(max(finalPosArray, [], 2));
@@ -54,8 +56,8 @@ if plotPosData
     zlimits = [-boundLimits, boundLimits];
 else
     if average_ellipsoid
-        sumEllipseMatrix = zeros(3);
-        sumCenter = zeros(3, 1);
+        sumEllipseMatrix = zeros(nDim);
+        sumCenter = zeros(nDim, 1);
         for trajIndex = 0:numTrajRecorded-1
             trajStepPosData = finalPosArray(...
                             :, trajIndex * nSpecies + (1:nSpecies));
@@ -83,17 +85,19 @@ else
 end
 
 if plotPrincipalAxes
-    semiAxesLengths = zeros(numFrames, 3);
-    cartesianSemiAxesLengths = zeros(numFrames, 3);
+    semiAxesLengths = zeros(numFrames, nDim);
+    cartesianSemiAxesLengths = zeros(numFrames, nDim);
 end
 
 for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
         stepPosData = reshape(posDataArray(step + 1, :, :), ...
-                              numTrajRecorded * nSpecies, 3)';
+                              numTrajRecorded * nSpecies, nDim)';
         if average_ellipsoid
-            sumEllipseMatrix = zeros(3);
-            sumCenter = zeros(3, 1);
+            sumEllipseMatrix = zeros(nDim);
+            sumCenter = zeros(nDim, 1);
+            sumSemiAxesLengths = zeros(1, nDim);
+            sumCartesianSemiAxesLengths = zeros(1, nDim);
             for trajIndex = 0:numTrajRecorded-1
                 trajStepPosData = stepPosData(...
                                 :, trajIndex * nSpecies + (1:nSpecies));
@@ -101,11 +105,32 @@ for step = 0:numPathStepsPerTraj-1
                                                     trajStepPosData, tol);
                 sumEllipseMatrix = sumEllipseMatrix + trajEllipseMatrix;
                 sumCenter = sumCenter + trajCenter;
+                if plotPrincipalAxes
+                   [trajSemiAxesLengths, ...
+                       trajCartesianSemiAxesLengths] = ...
+                                            axesLengths(trajEllipseMatrix);
+                   sumSemiAxesLengths = sumSemiAxesLengths + ...
+                                                    trajSemiAxesLengths;
+                   sumCartesianSemiAxesLengths = ...
+                                       sumCartesianSemiAxesLengths + ...
+                                       trajCartesianSemiAxesLengths;
+                end
             end
             ellipseMatrix = sumEllipseMatrix / numTrajRecorded;
             center = sumCenter / numTrajRecorded;
+            if plotPrincipalAxes
+                semiAxesLengths(frameIndex, :) = sumSemiAxesLengths / ...
+                                                        numTrajRecorded;
+                cartesianSemiAxesLengths(frameIndex, :) = ...
+                            sumCartesianSemiAxesLengths / numTrajRecorded;
+            end
         else
             [ellipseMatrix , center] = MinVolEllipse(stepPosData, tol);
+            if plotPrincipalAxes
+               [semiAxesLengths(frameIndex, :), ...
+                cartesianSemiAxesLengths(frameIndex, :)] = ...
+                                                axesLengths(ellipseMatrix);
+            end
         end
         if plotEllipsoid
             if plotPosData
@@ -129,11 +154,6 @@ for step = 0:numPathStepsPerTraj-1
             FrameStruct(frameIndex) = getframe(gcf);
             writeVideo(v, FrameStruct(frameIndex));
         end
-        if plotPrincipalAxes
-           [semiAxesLengths(frameIndex, :), ...
-            cartesianSemiAxesLengths(frameIndex, :)] = ...
-                                                axesLengths(ellipseMatrix);
-        end
         frameIndex = frameIndex + 1;
     end
 end
@@ -151,7 +171,8 @@ if plotPrincipalAxes
     figure('visible', 'off');
     plot(cartesianSemiAxesLengths)
     xlabel('Frame Number')
-    ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
+    ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', ...
+                                                                    197));
     title('Time evolution of cartesian projected ellipsoid shape')
     legend('a', 'b', 'c', 'Location', 'southeast')
     saveas(gcf, 'CartesianEllipsoidShape.png')
