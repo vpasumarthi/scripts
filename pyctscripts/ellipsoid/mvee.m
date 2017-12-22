@@ -2,7 +2,7 @@ function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
     tFinal, timeInterval, numFrames, plotPosData, ellipsoidConstruct, ...
     highResolution, inputFileName, bohr2ang, nDim, tol)
 
-global speciesTail
+global speciesTail timeIntervalPerFrame SEC2uS
 
 % Construct array of positional data
 positionArray = dlmread(inputFileName) * bohr2ang;
@@ -42,6 +42,8 @@ axesLimits = computeFrameLimits(finalPosArray, plotPosData, ...
 % Generate video frame from ellipsoid analysis
 frameIndex = 1;
 tempFileName = 'temp';
+SEC2uS = 1.00E+06;
+timeIntervalPerFrame = tFinal / numFrames * SEC2uS;
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 semiAxesLengths = zeros(numFrames, nDim);
 cartesianSemiAxesLengths = zeros(numFrames, nDim);
@@ -81,23 +83,28 @@ for step = 0:numPathStepsPerTraj-1
                 cartesianSemiAxesLengths(frameIndex, :)] = ...
                 axesLengths(ellipseMatrix);
         end
+        timeFrame = frameIndex * timeIntervalPerFrame;
         videoFrame = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
             ellipseMatrix, center, plotPosData, stepPosData, ...
-            axesLimits, highResolution, tempFileName);
+            axesLimits, timeFrame, highResolution, tempFileName);
         writeVideo(videoFile, videoFrame);
         frameIndex = frameIndex + 1;
     end
 end
 close(videoFile);
-delete([tempFileName, '.png'])
+if highResolution
+    delete([tempFileName, '.png'])
+end
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
-    tFinal, numFrames, speciesType, numTrajRecorded, numSpecies)
+    tFinal, speciesType, numTrajRecorded, numSpecies)
+
 end
 
 function [semiAxesLengths, cartesianSemiAxesLengths] = ...
     axesLengths(ellipseMatrix)
+
 nDim = length(ellipseMatrix);
 semiAxesLengths = zeros(1, nDim);
 cartesianSemiAxesLengths = zeros(1, nDim);
@@ -105,12 +112,13 @@ cartesianSemiAxesLengths = zeros(1, nDim);
 eigVal = diag(eigValMatrix);
 semiAxesLengths(1, :) = eigVal.^-0.5;
 cartesianSemiAxesLengths(1, :) = abs(eigVec * semiAxesLengths');
+
 end
 
 function F = generateVideoFrame(...
     numSpecies, speciesType, numTrajRecorded, materialName, ...
     ellipseMatrix, center, plotPosData, stepPosData, boundLimits, ...
-    highResolution, tempFileName)
+    timeFrame, highResolution, tempFileName)
 
 global speciesTail
 
@@ -132,6 +140,10 @@ title(figTitle)
 xlim(boundLimits(1, :))
 ylim(boundLimits(2, :))
 zlim(boundLimits(3, :))
+
+dim = [.8 .25 .3 .3];
+text = ['Time = ', num2str(timeFrame), sprintf(' %cs', 956)];
+annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on');
 
 if highResolution
     print(gcf, tempFileName, '-dpng', '-r300')
@@ -181,15 +193,12 @@ end
 end
 
 function plotTimeEvolutionSeries(semiAxesLengths, ...
-    cartesianSemiAxesLengths, tFinal, numFrames, speciesType, ...
-    numTrajRecorded, numSpecies)
+    cartesianSemiAxesLengths, tFinal, speciesType, numTrajRecorded, ...
+    numSpecies)
 
-global speciesTail
+global speciesTail timeIntervalPerFrame SEC2uS
 
-SEC2uS = 1.00E+06;
-timeIntervalPerFrame = tFinal / numFrames;
-timeSeries = SEC2uS * (timeIntervalPerFrame:timeIntervalPerFrame:tFinal);
-
+timeSeries = timeIntervalPerFrame:timeIntervalPerFrame:(tFinal * SEC2uS);
 % Plot time evolution of ellipsoid shape
 figure('visible', 'off');
 plot(timeSeries, semiAxesLengths)
@@ -231,7 +240,7 @@ plot(timeSeries, degreeOfAnisotropy)
 xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel('Degree of anisotropy')
 title('Time evolution of anisotropy in ab-plane vs. c-direction')
-dim = [.55 .55 .3 .3];
+dim = [.55 .6 .3 .3];
 text = {['Num_{', speciesType, speciesTail, '} = ', ...
     num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
 annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on', ...
