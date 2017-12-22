@@ -1,6 +1,6 @@
 function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
     tFinal, timeInterval, numFrames, plotPosData, ellipsoidConstruct, ...
-    inputFileName, bohr2ang, nDim, tol)
+    highResolution, inputFileName, bohr2ang, nDim, tol)
 
 global speciesTail
 
@@ -41,6 +41,7 @@ axesLimits = computeFrameLimits(finalPosArray, plotPosData, ...
 
 % Generate video frame from ellipsoid analysis
 frameIndex = 1;
+tempFileName = 'temp';
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 semiAxesLengths = zeros(numFrames, nDim);
 cartesianSemiAxesLengths = zeros(numFrames, nDim);
@@ -82,12 +83,14 @@ for step = 0:numPathStepsPerTraj-1
         end
         videoFrame = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
-            ellipseMatrix, center, plotPosData, stepPosData, axesLimits);
+            ellipseMatrix, center, plotPosData, stepPosData, ...
+            axesLimits, highResolution, tempFileName);
         writeVideo(videoFile, videoFrame);
         frameIndex = frameIndex + 1;
     end
 end
 close(videoFile);
+delete([tempFileName, '.png'])
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
     tFinal, numFrames, speciesType, numTrajRecorded, numSpecies)
@@ -106,7 +109,8 @@ end
 
 function F = generateVideoFrame(...
     numSpecies, speciesType, numTrajRecorded, materialName, ...
-    ellipseMatrix, center, plotPosData, stepPosData, boundLimits)
+    ellipseMatrix, center, plotPosData, stepPosData, boundLimits, ...
+    highResolution, tempFileName)
 
 global speciesTail
 
@@ -128,7 +132,14 @@ title(figTitle)
 xlim(boundLimits(1, :))
 ylim(boundLimits(2, :))
 zlim(boundLimits(3, :))
-F = getframe(gcf);
+
+if highResolution
+    print(gcf, tempFileName, '-dpng', '-r300')
+    F = imread([tempFileName , '.png']);
+else
+    F = getframe(gcf);
+end
+
 end
 
 function boundLimits = computeFrameLimits(finalPosArray, plotPosData, ...
