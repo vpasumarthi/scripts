@@ -90,7 +90,7 @@ end
 close(videoFile);
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
-    tFinal, numFrames)
+    tFinal, numFrames, speciesType, numTrajRecorded, numSpecies)
 end
 
 function [semiAxesLengths, cartesianSemiAxesLengths] = ...
@@ -170,7 +170,10 @@ end
 end
 
 function plotTimeEvolutionSeries(semiAxesLengths, ...
-    cartesianSemiAxesLengths, tFinal, numFrames)
+    cartesianSemiAxesLengths, tFinal, numFrames, speciesType, ...
+    numTrajRecorded, numSpecies)
+
+global speciesTail
 
 SEC2uS = 1.00E+06;
 timeIntervalPerFrame = tFinal / numFrames;
@@ -183,7 +186,14 @@ xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel(sprintf('Magnitude of semi-axes (%c)', 197));
 title('Time evolution of ellipsoid shape')
 legend('a', 'b', 'c', 'Location', 'southeast')
-saveas(gcf, 'EllipsoidShape.png')
+dim = [.15 .55 .3 .3];
+text = {['Num_{', speciesType, speciesTail, '} = ', ...
+    num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
+annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on', ...
+    'HorizontalAlignment', 'center');
+figTitle = ['EllipsoidShape_', num2str(numSpecies), speciesType, ...
+    speciesTail, '.png'];
+saveas(gcf, figTitle)
 
 % Plot time evolution of bounding box limits
 figure('visible', 'off');
@@ -192,7 +202,14 @@ xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
 title('Time evolution of cartesian projected ellipsoid shape')
 legend('a', 'b', 'c', 'Location', 'southeast')
-saveas(gcf, 'CartesianEllipsoidShape.png')
+dim = [.15 .55 .3 .3];
+text = {['Num_{', speciesType, speciesTail, '} = ', ...
+    num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
+annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on', ...
+    'HorizontalAlignment', 'center');
+figTitle = ['CartesianEllipsoidShape_', num2str(numSpecies), ...
+    speciesType, speciesTail, '.png'];
+saveas(gcf, figTitle)
 
 % Plot time evolution of ab/c anisotropy
 figure('visible', 'off');
@@ -203,6 +220,13 @@ plot(timeSeries, degreeOfAnisotropy)
 xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel('Degree of anisotropy')
 title('Time evolution of anisotropy in ab-plane vs. c-direction')
-saveas(gcf, 'DegreeOfAnistropy.png')
+dim = [.55 .55 .3 .3];
+text = {['Num_{', speciesType, speciesTail, '} = ', ...
+    num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
+annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on', ...
+    'HorizontalAlignment', 'center');
+figTitle = ['DegreeOfAnistropy_', num2str(numSpecies), speciesType, ...
+    speciesTail, '.png'];
+saveas(gcf, figTitle)
 
 end
