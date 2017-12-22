@@ -224,7 +224,7 @@ plot(timeSeries, cartesianSemiAxesLengths)
 xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
 title('Time evolution of cartesian projected ellipsoid shape')
-legend('a', 'b', 'c', 'Location', 'southeast')
+legend('X', 'Y', 'Z', 'Location', 'southeast')
 dim = [.15 .55 .3 .3];
 text = {['Num_{', speciesType, speciesTail, '} = ', ...
     num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
