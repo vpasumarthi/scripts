@@ -188,4 +188,15 @@ title('Time evolution of cartesian projected ellipsoid shape')
 legend('a', 'b', 'c', 'Location', 'southeast')
 saveas(gcf, 'CartesianEllipsoidShape.png')
 
+% Plot time evolution of ab/c anisotropy
+figure('visible', 'off');
+abPlaneBoundingLimits = sum(cartesianSemiAxesLengths(:, 1:2).^2, 2).^0.5;
+cDirBoundingLimits = cartesianSemiAxesLengths(:, 3);
+degreeOfAnisotropy = abPlaneBoundingLimits ./ cDirBoundingLimits;
+plot(degreeOfAnisotropy)
+xlabel('Frame Number')
+ylabel('Degree of anisotropy')
+title('Time evolution of anisotropy in ab-plane vs. c-direction')
+saveas(gcf, 'DegreeOfAnistropy.png')
+
 end
