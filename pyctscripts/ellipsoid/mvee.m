@@ -1,6 +1,6 @@
 function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
               tFinal, timeInterval, numFrames, plotEllipsoid, ...
-              plotPosData, plotPrincipalAxes, average_ellipsoid, ...
+              plotPosData, plotPrincipalAxes, ellipsoidConstruct, ...
               inputFileName, bohr2ang, nDim, tol)
 
 positionArray = dlmread(inputFileName) * bohr2ang;
@@ -55,7 +55,7 @@ if plotPosData
     ylimits = [-boundLimits, boundLimits];
     zlimits = [-boundLimits, boundLimits];
 else
-    if average_ellipsoid
+    if ellipsoidConstruct
         sumEllipseMatrix = zeros(nDim);
         sumCenter = zeros(nDim, 1);
         for trajIndex = 0:numTrajRecorded-1
@@ -93,7 +93,7 @@ for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
         stepPosData = reshape(posDataArray(step + 1, :, :), ...
                               numTrajRecorded * nSpecies, nDim)';
-        if average_ellipsoid
+        if ellipsoidConstruct
             sumEllipseMatrix = zeros(nDim);
             sumCenter = zeros(nDim, 1);
             sumSemiAxesLengths = zeros(1, nDim);
