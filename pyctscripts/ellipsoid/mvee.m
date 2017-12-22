@@ -2,6 +2,7 @@ function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
     tFinal, timeInterval, numFrames, plotPosData, ellipsoidConstruct, ...
     anisotropy, highResolution, inputFileName, bohr2ang, nDim, tol)
 
+tic
 global speciesTail timeIntervalPerFrame SEC2uS
 
 % Construct array of positional data
@@ -99,6 +100,8 @@ end
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
     anisotropy, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
+
+toc
 
 end
 
