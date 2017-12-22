@@ -1,7 +1,7 @@
 function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
               tFinal, timeInterval, numFrames, plotEllipsoid, ...
-              plotPrincipalAxes, average_ellipsoid, inputFileName, ...
-              bohr2ang, tol)
+              plotPosData, plotPrincipalAxes, average_ellipsoid, ...
+              inputFileName, bohr2ang, tol)
 
 positionArray = dlmread(inputFileName) * bohr2ang;
 numPathStepsPerTraj = round(tFinal / timeInterval) + 1;
@@ -35,25 +35,60 @@ if plotEllipsoid
     v = VideoWriter(outputVideoFileName);
     open(v);
 end
-if plotPrincipalAxes
-    semiAxesLengths = zeros(numFrames, 3);
-    cartesianSemiAxesLengths = zeros(numFrames, 3);
-end
 frameIndex = 1;
 figure('visible', 'off');
 xlabelstr = sprintf('x (%c)', 197);
 ylabelstr = sprintf('y (%c)', 197);
 zlabelstr = sprintf('z (%c)', 197);
 finalPosArray = reshape(posDataArray(step + 1, :, :), ...
-                        numTrajRecorded * nSpecies, 3);
-minPosLimit = min(min(finalPosArray, [], 1));
-maxPosLimit = max(max(finalPosArray, [], 1));
-posLimits = max(abs(minPosLimit), abs(maxPosLimit));
-numDigits = ceil(log10(posLimits));
-boundLimits = round(posLimits / 10^(numDigits - 1)) * 10^(numDigits - 1);
-xlimits = [-boundLimits, boundLimits];
-ylimits = [-boundLimits, boundLimits];
-zlimits = [-boundLimits, boundLimits];
+                        numTrajRecorded * nSpecies, 3)';
+if plotPosData
+    minPosLimit = min(min(finalPosArray, [], 2));
+    maxPosLimit = max(max(finalPosArray, [], 2));
+    posLimits = max(abs(minPosLimit), abs(maxPosLimit));
+    numDigits = ceil(log10(posLimits));
+    boundLimits = round(posLimits / 10^(numDigits - 1)) ...
+                        * 10^(numDigits - 1);
+    xlimits = [-boundLimits, boundLimits];
+    ylimits = [-boundLimits, boundLimits];
+    zlimits = [-boundLimits, boundLimits];
+else
+    if average_ellipsoid
+        sumEllipseMatrix = zeros(3);
+        sumCenter = zeros(3, 1);
+        for trajIndex = 0:numTrajRecorded-1
+            trajStepPosData = finalPosArray(...
+                            :, trajIndex * nSpecies + (1:nSpecies));
+            [trajEllipseMatrix , trajCenter] = MinVolEllipse(...
+                                                trajStepPosData, tol);
+            sumEllipseMatrix = sumEllipseMatrix + trajEllipseMatrix;
+            sumCenter = sumCenter + trajCenter;
+        end
+        ellipseMatrix = sumEllipseMatrix / numTrajRecorded;
+        center = sumCenter / numTrajRecorded;
+    else
+        [ellipseMatrix , center] = MinVolEllipse(finalPosArray, tol);
+    end
+    [eigVec, eigValMatrix] = eig(ellipseMatrix);
+    eigVal = diag(eigValMatrix);
+    semiAxesLengths = eigVal.^-0.5';
+    cartesianSemiAxesLengths = abs(eigVec * semiAxesLengths);
+    maxSemiAxesLength = max(cartesianSemiAxesLengths);
+    posLimits = [center - maxSemiAxesLength, center + maxSemiAxesLength];
+    numDigits = ceil(log10(abs(posLimits)));
+    boundLimits = sign(posLimits) .* ...
+                  ceil(abs(posLimits) ./ 10.^(numDigits - 1)) ...
+                       .* 10.^(numDigits - 1);
+    xlimits = boundLimits(1, :);
+    ylimits = boundLimits(2, :);
+    zlimits = boundLimits(3, :);
+end
+
+if plotPrincipalAxes
+    semiAxesLengths = zeros(numFrames, 3);
+    cartesianSemiAxesLengths = zeros(numFrames, 3);
+end
+
 for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
         stepPosData = reshape(posDataArray(step + 1, :, :), ...
@@ -75,9 +110,12 @@ for step = 0:numPathStepsPerTraj-1
             [ellipseMatrix , center] = MinVolEllipse(stepPosData, tol);
         end
         if plotEllipsoid
-%             plot3(stepPosData(1,:),stepPosData(2,:),stepPosData(3,:),'*')
-%             hold on
-            Ellipse_plot(ellipseMatrix,center)
+            if plotPosData
+                plot3(stepPosData(1,:), stepPosData(2,:), ...
+                      stepPosData(3,:), '*')
+                hold on
+            end
+            Ellipse_plot(ellipseMatrix, center)
             hold off
             xlabel(xlabelstr)
             ylabel(ylabelstr)
@@ -91,7 +129,7 @@ for step = 0:numPathStepsPerTraj-1
             ylim(ylimits)
             zlim(zlimits)
             FrameStruct(frameIndex) = getframe(gcf);
-            writeVideo(v,FrameStruct(frameIndex));
+            writeVideo(v, FrameStruct(frameIndex));
         end
         if plotPrincipalAxes
            [eigVec, eigValMatrix] = eig(ellipseMatrix);
