@@ -39,6 +39,7 @@ finalPosArray = reshape(...
 axesLimits = computeFrameLimits(finalPosArray, plotPosData, ...
     ellipsoidConstruct, nDim, numTrajRecorded, numSpecies, tol);
 
+% Generate video frame from ellipsoid analysis
 frameIndex = 1;
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 semiAxesLengths = zeros(numFrames, nDim);
@@ -88,20 +89,7 @@ for step = 0:numPathStepsPerTraj-1
 end
 close(videoFile);
 
-figure('visible', 'off');
-plot(semiAxesLengths)
-xlabel('Frame Number')
-ylabel(sprintf('Magnitude of semi-axes (%c)', 197));
-title('Time evolution of ellipsoid shape')
-legend('a', 'b', 'c', 'Location', 'southeast')
-saveas(gcf, 'EllipsoidShape.png')
-figure('visible', 'off');
-plot(cartesianSemiAxesLengths)
-xlabel('Frame Number')
-ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
-title('Time evolution of cartesian projected ellipsoid shape')
-legend('a', 'b', 'c', 'Location', 'southeast')
-saveas(gcf, 'CartesianEllipsoidShape.png')
+plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths)
 end
 
 function [semiAxesLengths, cartesianSemiAxesLengths] = ...
@@ -177,5 +165,27 @@ else
     boundLimits = sign(posLimits) .* ceil(abs(posLimits) ...
         ./ 10.^(numDigits - 1)) .* 10.^(numDigits - 1);
 end
+
+end
+
+function plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths)
+
+% Plot time evolution of ellipsoid shape
+figure('visible', 'off');
+plot(semiAxesLengths)
+xlabel('Frame Number')
+ylabel(sprintf('Magnitude of semi-axes (%c)', 197));
+title('Time evolution of ellipsoid shape')
+legend('a', 'b', 'c', 'Location', 'southeast')
+saveas(gcf, 'EllipsoidShape.png')
+
+% Plot time evolution of bounding box limits
+figure('visible', 'off');
+plot(cartesianSemiAxesLengths)
+xlabel('Frame Number')
+ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
+title('Time evolution of cartesian projected ellipsoid shape')
+legend('a', 'b', 'c', 'Location', 'southeast')
+saveas(gcf, 'CartesianEllipsoidShape.png')
 
 end
