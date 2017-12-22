@@ -89,7 +89,8 @@ for step = 0:numPathStepsPerTraj-1
 end
 close(videoFile);
 
-plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths)
+plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
+    tFinal, numFrames)
 end
 
 function [semiAxesLengths, cartesianSemiAxesLengths] = ...
@@ -168,12 +169,17 @@ end
 
 end
 
-function plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths)
+function plotTimeEvolutionSeries(semiAxesLengths, ...
+    cartesianSemiAxesLengths, tFinal, numFrames)
+
+SEC2uS = 1.00E+06;
+timeIntervalPerFrame = tFinal / numFrames;
+timeSeries = SEC2uS * (timeIntervalPerFrame:timeIntervalPerFrame:tFinal);
 
 % Plot time evolution of ellipsoid shape
 figure('visible', 'off');
-plot(semiAxesLengths)
-xlabel('Frame Number')
+plot(timeSeries, semiAxesLengths)
+xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel(sprintf('Magnitude of semi-axes (%c)', 197));
 title('Time evolution of ellipsoid shape')
 legend('a', 'b', 'c', 'Location', 'southeast')
@@ -181,8 +187,8 @@ saveas(gcf, 'EllipsoidShape.png')
 
 % Plot time evolution of bounding box limits
 figure('visible', 'off');
-plot(cartesianSemiAxesLengths)
-xlabel('Frame Number')
+plot(timeSeries, cartesianSemiAxesLengths)
+xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel(sprintf('Magnitude of cartesian projected semi-axes (%c)', 197));
 title('Time evolution of cartesian projected ellipsoid shape')
 legend('a', 'b', 'c', 'Location', 'southeast')
@@ -193,8 +199,8 @@ figure('visible', 'off');
 abPlaneBoundingLimits = sum(cartesianSemiAxesLengths(:, 1:2).^2, 2).^0.5;
 cDirBoundingLimits = cartesianSemiAxesLengths(:, 3);
 degreeOfAnisotropy = abPlaneBoundingLimits ./ cDirBoundingLimits;
-plot(degreeOfAnisotropy)
-xlabel('Frame Number')
+plot(timeSeries, degreeOfAnisotropy)
+xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel('Degree of anisotropy')
 title('Time evolution of anisotropy in ab-plane vs. c-direction')
 saveas(gcf, 'DegreeOfAnistropy.png')
