@@ -1,6 +1,6 @@
 function mvee(materialName, speciesType, numSpecies, numTrajRecorded, ...
     tFinal, timeInterval, numFrames, plotPosData, ellipsoidConstruct, ...
-    highResolution, inputFileName, bohr2ang, nDim, tol)
+    anisotropy, highResolution, inputFileName, bohr2ang, nDim, tol)
 
 global speciesTail timeIntervalPerFrame SEC2uS
 
@@ -98,7 +98,7 @@ if highResolution
 end
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
-    tFinal, speciesType, numTrajRecorded, numSpecies)
+    anisotropy, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
 
 end
 
@@ -193,8 +193,8 @@ end
 end
 
 function plotTimeEvolutionSeries(semiAxesLengths, ...
-    cartesianSemiAxesLengths, tFinal, speciesType, numTrajRecorded, ...
-    numSpecies)
+    cartesianSemiAxesLengths, anisotropy, tFinal, speciesType, ...
+    numTrajRecorded, numSpecies, nDim)
 
 global speciesTail timeIntervalPerFrame SEC2uS
 
@@ -231,15 +231,27 @@ figTitle = ['CartesianEllipsoidShape_', num2str(numSpecies), ...
     speciesType, speciesTail, '.png'];
 saveas(gcf, figTitle)
 
-% Plot time evolution of ab/c anisotropy
+% Plot time evolution of anisotropy
 figure('visible', 'off');
-abPlaneBoundingLimits = sum(cartesianSemiAxesLengths(:, 1:2).^2, 2).^0.5;
-cDirBoundingLimits = cartesianSemiAxesLengths(:, 3);
-degreeOfAnisotropy = abPlaneBoundingLimits ./ cDirBoundingLimits;
+dir01 = anisotropy;
+dir02 = setdiff(1:nDim, anisotropy);
+axesLabels = ['a', 'b', 'c'];
+if length(dir01) > 1
+    str01 = [axesLabels(dir01), '-plane'];
+    str02 = [axesLabels(dir02), '-direction'];
+    boundingLimits01 = sum(cartesianSemiAxesLengths(:, dir01).^2, 2).^0.5;
+    boundingLimits02 = cartesianSemiAxesLengths(:, dir02);
+else
+    str01 = [axesLabels(dir01), '-direction'];
+    str02 = [axesLabels(dir02), '-plane'];
+    boundingLimits01 = cartesianSemiAxesLengths(:, dir01);
+    boundingLimits02 = sum(cartesianSemiAxesLengths(:, dir02).^2, 2).^0.5;
+end
+degreeOfAnisotropy = boundingLimits01 ./ boundingLimits02;
 plot(timeSeries, degreeOfAnisotropy)
 xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel('Degree of anisotropy')
-title('Time evolution of anisotropy in ab-plane vs. c-direction')
+title(['Time evolution of anisotropy in ', str01, ' vs. ', str02])
 dim = [.55 .6 .3 .3];
 text = {['Num_{', speciesType, speciesTail, '} = ', ...
     num2str(numSpecies)], ['Num_{traj} = ', num2str(numTrajRecorded)]};
