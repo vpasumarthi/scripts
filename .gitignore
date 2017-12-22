@@ -125,3 +125,6 @@ ENV/
 
 # macOS
 .DS_Store
+
+# MATLAB
+*.asv
