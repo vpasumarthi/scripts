@@ -69,10 +69,8 @@ else
     else
         [ellipseMatrix , center] = MinVolEllipse(finalPosArray, tol);
     end
-    [eigVec, eigValMatrix] = eig(ellipseMatrix);
-    eigVal = diag(eigValMatrix);
-    semiAxesLengths = eigVal.^-0.5';
-    cartesianSemiAxesLengths = abs(eigVec * semiAxesLengths);
+    [semiAxesLengths, cartesianSemiAxesLengths] = ...
+                                                axesLengths(ellipseMatrix);
     maxSemiAxesLength = max(cartesianSemiAxesLengths);
     posLimits = [center - maxSemiAxesLength, center + maxSemiAxesLength];
     numDigits = ceil(log10(abs(posLimits)));
@@ -132,11 +130,9 @@ for step = 0:numPathStepsPerTraj-1
             writeVideo(v, FrameStruct(frameIndex));
         end
         if plotPrincipalAxes
-           [eigVec, eigValMatrix] = eig(ellipseMatrix);
-           eigVal = diag(eigValMatrix);
-           semiAxesLengths(frameIndex, :) = eigVal.^-0.5';
-           cartesianSemiAxesLengths(frameIndex, :) = ...
-                            abs(eigVec * semiAxesLengths(frameIndex, :)');
+           [semiAxesLengths(frameIndex, :), ...
+            cartesianSemiAxesLengths(frameIndex, :)] = ...
+                                                axesLengths(ellipseMatrix);
         end
         frameIndex = frameIndex + 1;
     end
@@ -161,4 +157,15 @@ if plotPrincipalAxes
     saveas(gcf, 'CartesianEllipsoidShape.png')
 end
 
+end
+
+function [semiAxesLengths, cartesianSemiAxesLengths] = ...
+                                                axesLengths(ellipseMatrix)
+nDim = length(ellipseMatrix);
+semiAxesLengths = zeros(1, nDim);
+cartesianSemiAxesLengths = zeros(1, nDim);
+[eigVec, eigValMatrix] = eig(ellipseMatrix);
+eigVal = diag(eigValMatrix);
+semiAxesLengths(1, :) = eigVal.^-0.5;
+cartesianSemiAxesLengths(1, :) = abs(eigVec * semiAxesLengths');
 end
