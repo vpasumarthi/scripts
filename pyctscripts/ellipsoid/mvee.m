@@ -102,7 +102,7 @@ end
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
     anisotropy, FA, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
 
-fileID = fopend('Run.log', 'w');
+fileID = fopen('Run.log', 'w');
 fprintf(fileID, ['Elapsed time is ', num2str(toc), ' seconds.']);
 fclose(fileID);
 
