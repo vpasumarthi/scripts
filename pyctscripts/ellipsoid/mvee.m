@@ -48,6 +48,7 @@ timeIntervalPerFrame = tFinal / numFrames * SEC2uS;
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 semiAxesLengths = zeros(numFrames, nDim);
 cartesianSemiAxesLengths = zeros(numFrames, nDim);
+FA = zeros(numFrames, 1);
 for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
         stepPosData = reshape(posDataArray(step + 1, :, :), ...
@@ -85,7 +86,7 @@ for step = 0:numPathStepsPerTraj-1
                 axesLengths(ellipseMatrix);
         end
         timeFrame = frameIndex * timeIntervalPerFrame;
-        videoFrame = generateVideoFrame(...
+        [videoFrame, FA(frameIndex)] = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
             ellipseMatrix, center, plotPosData, stepPosData, ...
             axesLimits, timeFrame, highResolution, tempFileName);
@@ -99,7 +100,7 @@ if highResolution
 end
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
-    anisotropy, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
+    anisotropy, FA, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
 
 toc
 
@@ -118,7 +119,7 @@ cartesianSemiAxesLengths(1, :) = abs(eigVec * semiAxesLengths');
 
 end
 
-function F = generateVideoFrame(...
+function [F, FA] = generateVideoFrame(...
     numSpecies, speciesType, numTrajRecorded, materialName, ...
     ellipseMatrix, center, plotPosData, stepPosData, boundLimits, ...
     timeFrame, highResolution, tempFileName)
@@ -144,8 +145,11 @@ xlim(boundLimits(1, :))
 ylim(boundLimits(2, :))
 zlim(boundLimits(3, :))
 
-dim = [.8 .25 .3 .3];
-text = ['Time = ', num2str(timeFrame), sprintf(' %cs', 956)];
+R = ellipseMatrix / trace(ellipseMatrix);
+FA = sqrt((3 - (1 / trace(R^2))) / 2);
+dim = [.8 .3 .3 .3];
+text = {['Time = ', num2str(timeFrame), sprintf(' %cs', 956)], ...
+    ['FA = ', num2str(FA)]};
 annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on');
 
 if highResolution
@@ -196,7 +200,7 @@ end
 end
 
 function plotTimeEvolutionSeries(semiAxesLengths, ...
-    cartesianSemiAxesLengths, anisotropy, tFinal, speciesType, ...
+    cartesianSemiAxesLengths, anisotropy, FA, tFinal, speciesType, ...
     numTrajRecorded, numSpecies, nDim)
 
 global speciesTail timeIntervalPerFrame SEC2uS
@@ -261,6 +265,16 @@ text = {['Num_{', speciesType, speciesTail, '} = ', ...
 annotation('textbox', dim, 'String', text, 'FitBoxToText', 'on', ...
     'HorizontalAlignment', 'center');
 figTitle = ['DegreeOfAnistropy_', num2str(numSpecies), speciesType, ...
+    speciesTail, '.png'];
+saveas(gcf, figTitle)
+
+% Plot time evolution of fractional anisotropy
+figure('visible', 'off');
+plot(timeSeries, FA)
+xlabel(sprintf('Simulation Time (%cs)', 956))
+ylabel('Fractional anisotropy')
+title('Time evolution of fractional anisotropy in ellipsoid shape')
+figTitle = ['FractionalAnistropy_', num2str(numSpecies), speciesType, ...
     speciesTail, '.png'];
 saveas(gcf, figTitle)
 
