@@ -56,16 +56,16 @@ def readPOSCAR(srcFilePath):
             fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
     inputFile.close()
     POSCAR_INFO = np.array(
-                    [latticeMatrix, elementTypes, nElements, coordinateType,
-                     fractionalCoords, fileFormat], dtype=object)
+                    [latticeMatrix, elementTypes, nElements, totalElements,
+                     coordinateType, fractionalCoords, fileFormat],
+                    dtype=object)
     return POSCAR_INFO
 
 
 def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
-            bridgeSearchDepth, terminatingElementType,
-            terminatingBondDistance):
-    [latticeMatrix, elementTypes, nElements, coordinateType, fractionalCoords,
-     fileFormat] = readPOSCAR(srcFilePath)
+            terminatingElementType, terminatingBondDistance):
+    [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
+     fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
     numSites = len(siteElementTypeList)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
@@ -86,24 +86,41 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
                             + siteNumberList[siteIndex] - 1]
         elementWiseCoordinateList[siteElementTypeIndex].append(siteCoordinates)
 
-    # generate array of cell translational coordinates
-    pbc = np.ones(3, int)
-    numCells = 3**sum(pbc)
-    xRange = range(-1, 2) if pbc[0] == 1 else [0]
-    yRange = range(-1, 2) if pbc[1] == 1 else [0]
-    zRange = range(-1, 2) if pbc[2] == 1 else [0]
-    cellTranslationalCoords = np.zeros((numCells, 3))  # Initialization
-    index = 0
-    for xOffset in xRange:
-        for yOffset in yRange:
-            for zOffset in zRange:
-                cellTranslationalCoords[index] = np.array([xOffset,
-                                                           yOffset,
-                                                           zOffset])
-                index += 1
+    nElements_cumulative = nElements.cumsum()
 
-    siteBasedNeighborList = [[[] for _ in range(numSites)]
-                             for _ in range(bridgeSearchDepth)]
+    # No PBC implemented here.
+    cartesianCoords = np.dot(fractionalCoords, latticeMatrix)
+    bondingNeighborListIndices = np.empty(totalElements, dtype=object)
+    bondingNeighborListElementTypes = np.empty(totalElements, dtype=object)
+    for center_site_index, center_coord in enumerate(cartesianCoords):
+        elementTypeIndex = np.where(
+                                nElements_cumulative > center_site_index)[0][0]
+        centerElementType = elementTypes[elementTypeIndex]
+        neighbor_list_indices =[]
+        neighbor_list_element_types = []
+        for neighbor_site_index, neighbor_coord in enumerate(cartesianCoords):
+            elementTypeIndex = np.where(
+                            nElements_cumulative > neighbor_site_index)[0][0]
+            neighborElementType = elementTypes[elementTypeIndex]
+            refKeys = [':'.join([centerElementType, neighborElementType]),
+                       ':'.join([neighborElementType, centerElementType])]
+            if refKeys[0] in bondLimits:
+                bondLimit = bondLimits[refKeys[0]]
+            elif refKeys[1] in bondLimits:
+                bondLimit = bondLimits[refKeys[1]]
+            else:
+                bondLimit = 0
+            if bondLimit != 0:
+                displacement_vector = neighbor_coord - center_coord
+                displacement = np.linalg.norm(displacement_vector)
+                if (0 < displacement < bondLimit):
+                    neighbor_list_indices.append(neighbor_site_index)
+                    neighbor_list_element_types.append(neighborElementType)
+        bondingNeighborListIndices[
+                        center_site_index] = np.asarray(neighbor_list_indices)
+        bondingNeighborListElementTypes[
+                center_site_index] = np.asarray(neighbor_list_element_types)
+    import pdb; pdb.set_trace()
 
     elementTypes_cluster = []
     nElements_cluster = []
@@ -118,6 +135,7 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
     coordinates_cluster = [
             coordinates for elementWiseCoordinates in elementWiseCoordinateList
             for coordinates in elementWiseCoordinates]
+    import pdb; pdb.set_trace()
     writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster)
     return None
@@ -126,7 +144,7 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
 def writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster):
     unmodifiedLineNumberLimit = 5
-    dstFilePath = srcFilePath + '.out'
+    dstFilePath = 'POSCAR'  # srcFilePath + '.out'
     srcFile = open(srcFilePath, 'r')
     open(dstFilePath, 'w').close()
     dstFile = open(dstFilePath, 'a')
