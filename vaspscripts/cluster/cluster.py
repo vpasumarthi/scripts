@@ -62,15 +62,16 @@ def readPOSCAR(srcFilePath):
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
-            terminatingElementType, terminatingBondDistance):
+def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
+            terminatingBondDistance):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
-    numSites = len(siteElementTypeList)
+    numSites = len(siteIndexList)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
     nElements_consolidated = np.zeros(numUniqueElementTypes, int)
+    nElements_cumulative = nElements.cumsum()
     uniqueElementTypeIndex = -1
     for elementTypeIndex, elementType in enumerate(elementTypes):
         if elementType not in elementTypes_consolidated:
@@ -78,16 +79,8 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
             elementTypes_consolidated.append(elementType)
         nElements_consolidated[uniqueElementTypeIndex] += nElements[
                                                             elementTypeIndex]
-    elementWiseCoordinateList = [[] for _ in range(numUniqueElementTypes)]
-    for siteIndex, siteElementType in enumerate(siteElementTypeList):
-        siteElementTypeIndex = elementTypes_consolidated.index(siteElementType)
-        siteCoordinates = fractionalCoords[
-                            sum(nElements_consolidated[:siteElementTypeIndex])
-                            + siteNumberList[siteIndex] - 1]
-        elementWiseCoordinateList[siteElementTypeIndex].append(siteCoordinates)
 
-    nElements_cumulative = nElements.cumsum()
-
+    # Generate Bonding Neighbor List
     # No PBC implemented here.
     cartesianCoords = np.dot(fractionalCoords, latticeMatrix)
     bondingNeighborListIndices = np.empty(totalElements, dtype=object)
@@ -96,7 +89,7 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
         elementTypeIndex = np.where(
                                 nElements_cumulative > center_site_index)[0][0]
         centerElementType = elementTypes[elementTypeIndex]
-        neighbor_list_indices =[]
+        neighbor_list_indices = []
         neighbor_list_element_types = []
         for neighbor_site_index, neighbor_coord in enumerate(cartesianCoords):
             elementTypeIndex = np.where(
@@ -120,8 +113,32 @@ def cluster(srcFilePath, siteElementTypeList, siteNumberList, bondLimits,
                         center_site_index] = np.asarray(neighbor_list_indices)
         bondingNeighborListElementTypes[
                 center_site_index] = np.asarray(neighbor_list_element_types)
-    import pdb; pdb.set_trace()
 
+    # Generate Cluster
+    cluster_element_indices = siteIndexList
+
+    bridgeFound = 0
+    bridgeDepth = 0
+    searchIndexLists = np.empty(numSites, dtype=object)
+    searchIndexLists.fill(np.empty(0, int))
+    for siteIndex in range(numSites):
+        searchIndexLists[siteIndex] = np.append(
+                        searchIndexLists[siteIndex], siteIndexList[siteIndex])
+    while not bridgeFound:
+        for siteIndex, searchIndexList in enumerate(searchIndexLists):
+            for searchIndex in searchIndexList:
+                searchIndexLists[siteIndex] = np.append(
+                                    searchIndexLists[siteIndex],
+                                    bondingNeighborListIndices[searchIndex])
+            searchIndexLists[siteIndex] = np.unique(searchIndexLists[
+                                                                    siteIndex])
+        bridgeIndices = np.intersect1d(searchIndexLists[0],
+                                       searchIndexLists[1])
+        bridgeDepth += 1
+        if len(bridgeIndices):
+            bridgeFound = 1
+
+    import pdb; pdb.set_trace()
     elementTypes_cluster = []
     nElements_cluster = []
     numCoordinates = 0
