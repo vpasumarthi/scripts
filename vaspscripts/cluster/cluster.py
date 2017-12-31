@@ -84,13 +84,13 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
     # No PBC implemented here.
     cartesianCoords = np.dot(fractionalCoords, latticeMatrix)
     bondingNeighborListIndices = np.empty(totalElements, dtype=object)
-    bondingNeighborListElementTypes = np.empty(totalElements, dtype=object)
+    elementTypeList = []
     for center_site_index, center_coord in enumerate(cartesianCoords):
         elementTypeIndex = np.where(
                                 nElements_cumulative > center_site_index)[0][0]
         centerElementType = elementTypes[elementTypeIndex]
+        elementTypeList.append(centerElementType)
         neighbor_list_indices = []
-        neighbor_list_element_types = []
         for neighbor_site_index, neighbor_coord in enumerate(cartesianCoords):
             elementTypeIndex = np.where(
                             nElements_cumulative > neighbor_site_index)[0][0]
@@ -108,14 +108,11 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
                 displacement = np.linalg.norm(displacement_vector)
                 if (0 < displacement < bondLimit):
                     neighbor_list_indices.append(neighbor_site_index)
-                    neighbor_list_element_types.append(neighborElementType)
         bondingNeighborListIndices[
                         center_site_index] = np.asarray(neighbor_list_indices)
-        bondingNeighborListElementTypes[
-                center_site_index] = np.asarray(neighbor_list_element_types)
 
     # Generate Cluster
-    cluster_element_indices = siteIndexList
+    cluster_element_indices = np.asarray(siteIndexList)
 
     bridgeFound = 0
     bridgeDepth = 0
@@ -138,21 +135,30 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
         if len(bridgeIndices):
             bridgeFound = 1
 
-    import pdb; pdb.set_trace()
-    elementTypes_cluster = []
-    nElements_cluster = []
-    numCoordinates = 0
-    for elementIndex in range(numUniqueElementTypes):
-        elementIndexNumElements = len(elementWiseCoordinateList[elementIndex])
-        if elementIndexNumElements != 0:
-            elementTypes_cluster.append(
-                                    elementTypes_consolidated[elementIndex])
-            nElements_cluster.append(elementIndexNumElements)
-            numCoordinates += elementIndexNumElements
-    coordinates_cluster = [
-            coordinates for elementWiseCoordinates in elementWiseCoordinateList
-            for coordinates in elementWiseCoordinates]
-    import pdb; pdb.set_trace()
+    # Add neighbor indices up to bridging species
+    '''
+    for siteIndex in range(numSites):
+        cluster_element_indices = np.append(cluster_element_indices,
+                                            searchIndexLists[siteIndex])
+    cluster_element_indices = np.unique(cluster_element_indices)
+    print(cluster_element_indices)
+    '''
+
+    # Generate input parameters to writePOSCAR
+    # import pdb; pdb.set_trace()
+    nElements_cluster = [0] * numUniqueElementTypes
+    coordinates_cluster = []
+    for element_index in cluster_element_indices:
+        elementType = elementTypeList[element_index]
+        elementTypeIndex = elementTypes_consolidated.index(elementType)
+        nElements_cluster[elementTypeIndex] += 1
+        coordinates_cluster.append(fractionalCoords[element_index])
+    nonZeroIndices = [index for index in range(numUniqueElementTypes)
+                      if nElements_cluster[index] != 0]
+    nElements_cluster = [nElements_cluster[index] for index in nonZeroIndices]
+    elementTypes_cluster = [elementTypes_consolidated[index]
+                            for index in nonZeroIndices]
+
     writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster)
     return None
