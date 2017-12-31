@@ -150,6 +150,26 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
                                     bondingNeighborListIndices[element_index])
     cluster_element_indices = np.unique(cluster_element_indices)
 
+    # Generate coordinates of terminating H sites
+    hCoordinatesList = []
+    for element_index in cluster_element_indices:
+        element_type = elementTypeList[element_index]
+        if element_type == 'O':
+            elementCartCoordinates = cartesianCoords[element_index]
+            bondedIndices = bondingNeighborListIndices[element_index]
+            for bondedIndex in bondedIndices:
+                if bondedIndex not in cluster_element_indices:
+                    bondedElementCartCoordinates = cartesianCoords[bondedIndex]
+                    dispVector = (bondedElementCartCoordinates
+                                  - elementCartCoordinates)
+                    displacement = np.linalg.norm(dispVector)
+                    hCartCoordinates = (elementCartCoordinates
+                                        + (dispVector / displacement
+                                           * terminatingBondDistance))
+                    hFractCoordinates = np.dot(hCartCoordinates,
+                                               np.linalg.inv(latticeMatrix))
+                    hCoordinatesList.append(hFractCoordinates)
+
     # Generate input parameters to writePOSCAR
     # import pdb; pdb.set_trace()
     nElements_cluster = [0] * numUniqueElementTypes
@@ -164,6 +184,13 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
     nElements_cluster = [nElements_cluster[index] for index in nonZeroIndices]
     elementTypes_cluster = [elementTypes_consolidated[index]
                             for index in nonZeroIndices]
+
+    # Add terminating H coordinates
+    numHSites = len(hCoordinatesList)
+    if numHSites:
+        elementTypes_cluster.append(terminatingElementType)
+        nElements_cluster.append(numHSites)
+        coordinates_cluster.extend(hCoordinatesList)
 
     writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster)
