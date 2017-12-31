@@ -136,13 +136,10 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
             bridgeFound = 1
 
     # Add neighbor indices up to bridging species
-    '''
     for siteIndex in range(numSites):
         cluster_element_indices = np.append(cluster_element_indices,
                                             searchIndexLists[siteIndex])
     cluster_element_indices = np.unique(cluster_element_indices)
-    print(cluster_element_indices)
-    '''
 
     # Generate input parameters to writePOSCAR
     # import pdb; pdb.set_trace()
