@@ -5,7 +5,7 @@ import os
 
 # Frequently modified input parameters:
 inputCoordinateFileName = 'CONTCAR'
-siteIndexList = [538, 589]
+siteIndexList = [1134, 1037]  # site number - 1
 bondLimits = {'Bi:O': 2.60, 'V:O': 1.80}
 terminatingElementType = 'H'
 terminatingBondDistance = 0.96  # angstrom

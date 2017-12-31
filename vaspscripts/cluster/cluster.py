@@ -141,6 +141,15 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
                                             searchIndexLists[siteIndex])
     cluster_element_indices = np.unique(cluster_element_indices)
 
+    # Add terminating O sites
+    for element_index in cluster_element_indices:
+        element_type = elementTypeList[element_index]
+        if element_type != 'O':
+            cluster_element_indices = np.append(
+                                    cluster_element_indices,
+                                    bondingNeighborListIndices[element_index])
+    cluster_element_indices = np.unique(cluster_element_indices)
+
     # Generate input parameters to writePOSCAR
     # import pdb; pdb.set_trace()
     nElements_cluster = [0] * numUniqueElementTypes
