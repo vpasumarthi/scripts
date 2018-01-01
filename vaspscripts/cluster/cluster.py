@@ -63,7 +63,7 @@ def readPOSCAR(srcFilePath):
 
 
 def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
-            terminatingBondDistance):
+            terminatingBondDistance, oxidationList, prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
     numSites = len(siteIndexList)
@@ -171,7 +171,6 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
                     hCoordinatesList.append(hFractCoordinates)
 
     # Generate input parameters to writePOSCAR
-    # import pdb; pdb.set_trace()
     nElements_cluster = [0] * numUniqueElementTypes
     coordinates_cluster = []
     for element_index in cluster_element_indices:
@@ -185,8 +184,50 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
     elementTypes_cluster = [elementTypes_consolidated[index]
                             for index in nonZeroIndices]
 
-    # Add terminating H coordinates
+    # Ensure cluster charge neutrality
     numHSites = len(hCoordinatesList)
+    cluster_charge = 0
+    for element_index, elementType in enumerate(elementTypes_cluster):
+        element_charge = oxidationList[elementType]
+        n_elements = nElements_cluster[element_index]
+        cluster_charge += element_charge * n_elements
+    cluster_charge += oxidationList['H'] * numHSites
+    if cluster_charge % 2 == 0:
+        numPairs = int(cluster_charge / 2)
+        center_of_sites = (fractionalCoords[siteIndexList[0]]
+                           + fractionalCoords[siteIndexList[1]]) / 2
+        hDirList = []
+        hDisp = []
+        for hCoordinates in hCoordinatesList:
+            dirVector = hCoordinates - center_of_sites
+            disp = np.linalg.norm(np.dot(dirVector, latticeMatrix))
+            hDirList.append(dirVector)
+            hDisp.append(disp)
+        hDirList = np.asarray(hDirList)
+        hDisp = np.asarray(hDisp)
+        sortIndices = hDisp.argsort()
+        sortedHDirList = np.round(hDirList[sortIndices], prec)
+        sortedHDisp = np.round(hDisp[sortIndices], prec)
+        discardIndices = []
+        numPairsDiscarded = 0
+        maxIndex = numHSites - 1
+        while numPairsDiscarded != numPairs:
+            if (np.array_equal(sortedHDirList[maxIndex],
+                               -sortedHDirList[maxIndex - 1])
+                    and sortedHDisp[maxIndex] == sortedHDisp[maxIndex - 1]):
+                discardIndices.extend([sortIndices[maxIndex - 1],
+                                       sortIndices[maxIndex]])
+                maxIndex -= 2
+                numPairsDiscarded += 1
+            else:
+                maxIndex -= 1
+
+        hCoordinatesList = [hCoordinatesList[index]
+                            for index in range(numHSites)
+                            if index not in discardIndices]
+        numHSites -= len(discardIndices)
+
+    # Add terminating H coordinates
     if numHSites:
         elementTypes_cluster.append(terminatingElementType)
         nElements_cluster.append(numHSites)
