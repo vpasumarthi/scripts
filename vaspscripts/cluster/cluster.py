@@ -152,6 +152,7 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
 
     # Generate coordinates of terminating H sites
     hCoordinatesList = []
+    hBondParentElementIndices = []
     for element_index in cluster_element_indices:
         element_type = elementTypeList[element_index]
         if element_type == 'O':
@@ -169,6 +170,8 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
                     hFractCoordinates = np.dot(hCartCoordinates,
                                                np.linalg.inv(latticeMatrix))
                     hCoordinatesList.append(hFractCoordinates)
+                    hBondParentElementIndices.append(element_index)
+    hBondParentElementIndices = np.asarray(hBondParentElementIndices)
 
     # Generate input parameters to writePOSCAR
     nElements_cluster = [0] * numUniqueElementTypes
@@ -208,17 +211,28 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
         sortIndices = hDisp.argsort()
         sortedHDirList = np.round(hDirList[sortIndices], prec)
         sortedHDisp = np.round(hDisp[sortIndices], prec)
+        sortedHBondParentElementIndices = hBondParentElementIndices[
+                                                                sortIndices]
         discardIndices = []
         numPairsDiscarded = 0
         maxIndex = numHSites - 1
         while numPairsDiscarded != numPairs:
-            if (np.array_equal(sortedHDirList[maxIndex],
-                               -sortedHDirList[maxIndex - 1])
-                    and sortedHDisp[maxIndex] == sortedHDisp[maxIndex - 1]):
-                discardIndices.extend([sortIndices[maxIndex - 1],
-                                       sortIndices[maxIndex]])
-                maxIndex -= 2
-                numPairsDiscarded += 1
+            # Check if the targeted O site has more than one proton attached
+            if sum(sortedHBondParentElementIndices
+                   == sortedHBondParentElementIndices[maxIndex]) > 1:
+                if (np.array_equal(sortedHDirList[maxIndex],
+                                   -sortedHDirList[maxIndex - 1])
+                        and (sortedHDisp[maxIndex]
+                             == sortedHDisp[maxIndex - 1])):
+                    discardIndices.extend([sortIndices[maxIndex - 1],
+                                           sortIndices[maxIndex]])
+                    sortedHBondParentElementIndices = np.delete(
+                                sortedHBondParentElementIndices,
+                                np.array([maxIndex - 1, maxIndex]))
+                    maxIndex -= 2
+                    numPairsDiscarded += 1
+                else:
+                    maxIndex -= 1
             else:
                 maxIndex -= 1
 
