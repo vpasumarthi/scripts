@@ -28,11 +28,11 @@ def hnd_input(input_coordinate_file_name, dst_file_name, dst_element_types):
         num_elements = n_elements[element_index]
         while num_elements != 0:
             if num_elements > num_elements_per_line:
-                element_list = ', '.join([element_type]
+                element_list = ', '.join(['%2s' % element_type]
                                          * num_elements_per_line)
                 num_elements -= num_elements_per_line
             else:
-                element_list = ', '.join([element_type] * num_elements)
+                element_list = ', '.join(['%2s' % element_type] * num_elements)
                 num_elements -= num_elements
             line = (''.join([' ' * headspace, element_list, ',\n']))
             dst_file.write(line)
