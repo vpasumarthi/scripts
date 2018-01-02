@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from cluster import cluster
+from vaspscripts.cluster import cluster
 import os
 
 # Frequently modified input parameters:
 inputCoordinateFileName = 'CONTCAR'
-siteIndexList = [1134, 1037]  # site number - 1
+siteIndexList = [1134, 1144]  # site number - 1
 bondLimits = {'Bi:O': 2.60, 'V:O': 1.80}
 terminatingElementType = 'H'
 terminatingBondDistance = 0.96  # angstrom
