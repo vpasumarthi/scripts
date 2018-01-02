@@ -22,7 +22,7 @@ def hnd_input(input_coordinate_file_name, dst_file_name, dst_element_types):
     # Order of atoms for reading basis sets
     headspace = 7
     num_elements_per_line = 12
-    dst_file.write(' $BAS')
+    dst_file.write(' $BAS\n')
     for element_type in dst_element_types:
         element_index = element_types.index(element_type)
         num_elements = n_elements[element_index]
@@ -37,4 +37,25 @@ def hnd_input(input_coordinate_file_name, dst_file_name, dst_element_types):
             line = (''.join([' ' * headspace, element_list, ',\n']))
             dst_file.write(line)
     dst_file.write(' $END\n\n')
+
+    # data group to specify geometry
+    column_sep_width = 3
+    dst_file.write(' $GEO\n')
+    for element_type in dst_element_types:
+        element_index = element_types.index(element_type)
+        num_elements = n_elements[element_index]
+        start_index = n_elements[:element_index].sum()
+        end_index = start_index + num_elements
+        element_type_coordinates = cartesian_coordinates[start_index:end_index]
+        for i_element in range(num_elements):
+            line = ''.join(['%2s' % element_type,
+                            ' ' * column_sep_width,
+                            '%9.6f' % element_type_coordinates[i_element][0],
+                            ' ' * column_sep_width,
+                            '%9.6f' % element_type_coordinates[i_element][1],
+                            ' ' * column_sep_width,
+                            '%9.6f' % element_type_coordinates[i_element][2],
+                            '\n'])
+            dst_file.write(line)
+    dst_file.write('\n $END\n')
     dst_file.close()
