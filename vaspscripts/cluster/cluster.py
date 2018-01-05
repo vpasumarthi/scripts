@@ -62,7 +62,7 @@ def readPOSCAR(srcFilePath):
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
+def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElementType,
             terminatingBondDistance, oxidationList, prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
@@ -247,15 +247,14 @@ def cluster(srcFilePath, siteIndexList, bondLimits, terminatingElementType,
         nElements_cluster.append(numHSites)
         coordinates_cluster.extend(hCoordinatesList)
 
-    writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
+    writePOSCAR(srcFilePath, dstFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster)
     return None
 
 
-def writePOSCAR(srcFilePath, fileFormat, elementTypes_cluster,
+def writePOSCAR(srcFilePath, dstFilePath, fileFormat, elementTypes_cluster,
                 nElements_cluster, coordinateType, coordinates_cluster):
     unmodifiedLineNumberLimit = 5
-    dstFilePath = 'POSCAR'  # srcFilePath + '.out'
     srcFile = open(srcFilePath, 'r')
     open(dstFilePath, 'w').close()
     dstFile = open(dstFilePath, 'a')
