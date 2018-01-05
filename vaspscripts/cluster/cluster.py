@@ -62,8 +62,8 @@ def readPOSCAR(srcFilePath):
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElementType,
-            terminatingBondDistance, oxidationList, prec):
+def cluster(srcFilePath, dstFilePath, bridgeSearchDepth, siteIndexList, bondLimits,
+            terminatingElementType, terminatingBondDistance, oxidationList, prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
     numSites = len(siteIndexList)
@@ -121,7 +121,7 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
     for siteIndex in range(numSites):
         searchIndexLists[siteIndex] = np.append(
                         searchIndexLists[siteIndex], siteIndexList[siteIndex])
-    while not bridgeFound:
+    while (not bridgeFound or bridgeDepth < bridgeSearchDepth):
         for siteIndex, searchIndexList in enumerate(searchIndexLists):
             for searchIndex in searchIndexList:
                 searchIndexLists[siteIndex] = np.append(
