@@ -62,8 +62,9 @@ def readPOSCAR(srcFilePath):
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, dstFilePath, bridgeSearchDepth, siteIndexList, bondLimits,
-            terminatingElementType, terminatingBondDistance, oxidationList, prec):
+def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElementType,
+            terminatingBondDistance, oxidationList, bridgeSearchDepth, chargeNeutral,
+            prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
     numSites = len(siteIndexList)
@@ -121,7 +122,7 @@ def cluster(srcFilePath, dstFilePath, bridgeSearchDepth, siteIndexList, bondLimi
     for siteIndex in range(numSites):
         searchIndexLists[siteIndex] = np.append(
                         searchIndexLists[siteIndex], siteIndexList[siteIndex])
-    while (not bridgeFound or bridgeDepth < bridgeSearchDepth):
+    while (not bridgeFound and bridgeDepth < bridgeSearchDepth):
         for siteIndex, searchIndexList in enumerate(searchIndexLists):
             for searchIndex in searchIndexList:
                 searchIndexLists[siteIndex] = np.append(
@@ -172,6 +173,7 @@ def cluster(srcFilePath, dstFilePath, bridgeSearchDepth, siteIndexList, bondLimi
                     hCoordinatesList.append(hFractCoordinates)
                     hBondParentElementIndices.append(element_index)
     hBondParentElementIndices = np.asarray(hBondParentElementIndices)
+    numHSites = len(hCoordinatesList)
 
     # Generate input parameters to writePOSCAR
     nElements_cluster = [0] * numUniqueElementTypes
@@ -188,59 +190,59 @@ def cluster(srcFilePath, dstFilePath, bridgeSearchDepth, siteIndexList, bondLimi
                             for index in nonZeroIndices]
 
     # Ensure cluster charge neutrality
-    numHSites = len(hCoordinatesList)
-    cluster_charge = 0
-    for element_index, elementType in enumerate(elementTypes_cluster):
-        element_charge = oxidationList[elementType]
-        n_elements = nElements_cluster[element_index]
-        cluster_charge += element_charge * n_elements
-    cluster_charge += oxidationList['H'] * numHSites
-    if cluster_charge % 2 == 0:
-        numPairs = int(cluster_charge / 2)
-        center_of_sites = (fractionalCoords[siteIndexList[0]]
-                           + fractionalCoords[siteIndexList[1]]) / 2
-        hDirList = []
-        hDisp = []
-        for hCoordinates in hCoordinatesList:
-            dirVector = hCoordinates - center_of_sites
-            disp = np.linalg.norm(np.dot(dirVector, latticeMatrix))
-            hDirList.append(dirVector)
-            hDisp.append(disp)
-        hDirList = np.asarray(hDirList)
-        hDisp = np.asarray(hDisp)
-        sortIndices = hDisp.argsort()
-        sortedHDirList = np.round(hDirList[sortIndices], prec)
-        sortedHDisp = np.round(hDisp[sortIndices], prec)
-        sortedHBondParentElementIndices = hBondParentElementIndices[
-                                                                sortIndices]
-        discardIndices = []
-        numPairsDiscarded = 0
-        maxIndex = numHSites - 1
-        while numPairsDiscarded != numPairs:
-            # Check if the targeted O site has more than one proton attached
-            if sum(sortedHBondParentElementIndices
-                   == sortedHBondParentElementIndices[maxIndex]) > 1:
-                if (np.array_equal(sortedHDirList[maxIndex],
-                                   -sortedHDirList[maxIndex - 1])
-                        and (sortedHDisp[maxIndex]
-                             == sortedHDisp[maxIndex - 1])):
-                    discardIndices.extend([sortIndices[maxIndex - 1],
-                                           sortIndices[maxIndex]])
-                    sortedHBondParentElementIndices = np.delete(
-                                sortedHBondParentElementIndices,
-                                np.array([maxIndex - 1, maxIndex]))
-                    maxIndex -= 2
-                    numPairsDiscarded += 1
+    if chargeNeutral:
+        cluster_charge = 0
+        for element_index, elementType in enumerate(elementTypes_cluster):
+            element_charge = oxidationList[elementType]
+            n_elements = nElements_cluster[element_index]
+            cluster_charge += element_charge * n_elements
+        cluster_charge += oxidationList['H'] * numHSites
+        if cluster_charge % 2 == 0:
+            numPairs = int(cluster_charge / 2)
+            center_of_sites = (fractionalCoords[siteIndexList[0]]
+                               + fractionalCoords[siteIndexList[1]]) / 2
+            hDirList = []
+            hDisp = []
+            for hCoordinates in hCoordinatesList:
+                dirVector = hCoordinates - center_of_sites
+                disp = np.linalg.norm(np.dot(dirVector, latticeMatrix))
+                hDirList.append(dirVector)
+                hDisp.append(disp)
+            hDirList = np.asarray(hDirList)
+            hDisp = np.asarray(hDisp)
+            sortIndices = hDisp.argsort()
+            sortedHDirList = np.round(hDirList[sortIndices], prec)
+            sortedHDisp = np.round(hDisp[sortIndices], prec)
+            sortedHBondParentElementIndices = hBondParentElementIndices[
+                                                                    sortIndices]
+            discardIndices = []
+            numPairsDiscarded = 0
+            maxIndex = numHSites - 1
+            while numPairsDiscarded != numPairs:
+                # Check if the targeted O site has more than one proton attached
+                if sum(sortedHBondParentElementIndices
+                       == sortedHBondParentElementIndices[maxIndex]) > 1:
+                    if (np.array_equal(sortedHDirList[maxIndex],
+                                       -sortedHDirList[maxIndex - 1])
+                            and (sortedHDisp[maxIndex]
+                                 == sortedHDisp[maxIndex - 1])):
+                        discardIndices.extend([sortIndices[maxIndex - 1],
+                                               sortIndices[maxIndex]])
+                        sortedHBondParentElementIndices = np.delete(
+                                    sortedHBondParentElementIndices,
+                                    np.array([maxIndex - 1, maxIndex]))
+                        maxIndex -= 2
+                        numPairsDiscarded += 1
+                    else:
+                        maxIndex -= 1
                 else:
                     maxIndex -= 1
-            else:
-                maxIndex -= 1
-
-        hCoordinatesList = [hCoordinatesList[index]
-                            for index in range(numHSites)
-                            if index not in discardIndices]
-        numHSites -= len(discardIndices)
-
+    
+            hCoordinatesList = [hCoordinatesList[index]
+                                for index in range(numHSites)
+                                if index not in discardIndices]
+            numHSites -= len(discardIndices)
+    
     # Add terminating H coordinates
     if numHSites:
         elementTypes_cluster.append(terminatingElementType)
