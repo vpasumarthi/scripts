@@ -216,7 +216,7 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
             discardIndices = []
             numPairsDiscarded = 0
             maxIndex = numHSites - 1
-            while numPairsDiscarded != numPairs:
+            while (numPairsDiscarded != numPairs and maxIndex >= 1):
                 # Check if the targeted O site has more than one proton attached
                 if sum(sortedHBondParentElementIndices
                        == sortedHBondParentElementIndices[maxIndex]) > 1:
