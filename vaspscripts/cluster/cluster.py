@@ -212,9 +212,7 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
             hDisp = np.asarray(hDisp)
             sortIndices = hDisp.argsort()
             sortedHDirList = np.round(hDirList[sortIndices], prec)
-            sortedHDisp = np.round(hDisp[sortIndices], prec)
-            sortedHBondParentElementIndices = hBondParentElementIndices[
-                                                                    sortIndices]
+            sortedHBondParentElementIndices = hBondParentElementIndices[sortIndices]
             discardIndices = []
             numPairsDiscarded = 0
             maxIndex = numHSites - 1
@@ -223,9 +221,7 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
                 if sum(sortedHBondParentElementIndices
                        == sortedHBondParentElementIndices[maxIndex]) > 1:
                     if (np.array_equal(sortedHDirList[maxIndex],
-                                       -sortedHDirList[maxIndex - 1])
-                            and (sortedHDisp[maxIndex]
-                                 == sortedHDisp[maxIndex - 1])):
+                                       -sortedHDirList[maxIndex - 1])):
                         discardIndices.extend([sortIndices[maxIndex - 1],
                                                sortIndices[maxIndex]])
                         sortedHBondParentElementIndices = np.delete(
