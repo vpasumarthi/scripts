@@ -233,7 +233,9 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
                         maxIndex -= 1
                 else:
                     maxIndex -= 1
-    
+            
+            cluster_charge -= 2 * numPairsDiscarded * oxidationList['H']
+            print('Final cluster charge: %d' % cluster_charge)
             hCoordinatesList = [hCoordinatesList[index]
                                 for index in range(numHSites)
                                 if index not in discardIndices]
