@@ -151,6 +151,20 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
                                     bondingNeighborListIndices[element_index])
     cluster_element_indices = np.unique(cluster_element_indices)
 
+    # Generate input parameters to writePOSCAR
+    nElements_cluster = [0] * numUniqueElementTypes
+    coordinates_cluster = []
+    for element_index in cluster_element_indices:
+        elementType = elementTypeList[element_index]
+        elementTypeIndex = elementTypes_consolidated.index(elementType)
+        nElements_cluster[elementTypeIndex] += 1
+        coordinates_cluster.append(fractionalCoords[element_index])
+    nonZeroIndices = [index for index in range(numUniqueElementTypes)
+                      if nElements_cluster[index] != 0]
+    nElements_cluster = [nElements_cluster[index] for index in nonZeroIndices]
+    elementTypes_cluster = [elementTypes_consolidated[index]
+                            for index in nonZeroIndices]
+
     # Generate coordinates of terminating H sites
     hCoordinatesList = []
     hBondParentElementIndices = []
@@ -174,20 +188,6 @@ def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElem
                     hBondParentElementIndices.append(element_index)
     hBondParentElementIndices = np.asarray(hBondParentElementIndices)
     numHSites = len(hCoordinatesList)
-
-    # Generate input parameters to writePOSCAR
-    nElements_cluster = [0] * numUniqueElementTypes
-    coordinates_cluster = []
-    for element_index in cluster_element_indices:
-        elementType = elementTypeList[element_index]
-        elementTypeIndex = elementTypes_consolidated.index(elementType)
-        nElements_cluster[elementTypeIndex] += 1
-        coordinates_cluster.append(fractionalCoords[element_index])
-    nonZeroIndices = [index for index in range(numUniqueElementTypes)
-                      if nElements_cluster[index] != 0]
-    nElements_cluster = [nElements_cluster[index] for index in nonZeroIndices]
-    elementTypes_cluster = [elementTypes_consolidated[index]
-                            for index in nonZeroIndices]
 
     # Ensure cluster charge neutrality
     if chargeNeutral:
