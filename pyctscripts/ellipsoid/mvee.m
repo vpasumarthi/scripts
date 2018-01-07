@@ -86,10 +86,18 @@ for step = 0:numPathStepsPerTraj-1
                 axesLengths(ellipseMatrix);
         end
         timeFrame = frameIndex * timeIntervalPerFrame;
+        
+        % Major axes properties
+        [eigVec, eigVal] = eig(ellipseMatrix);
+        [~, majorIndex] = min(diag(eigVal));
+        majorAxesVector = eigVec(:, majorIndex) * ...
+            semiAxesLengths(frameIndex, majorIndex);
+        majorAxes = [center, center] + [-majorAxesVector, majorAxesVector];
+        
         [videoFrame, FA(frameIndex)] = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
             ellipseMatrix, center, plotPosData, stepPosData, ...
-            axesLimits, timeFrame, highResolution, tempFileName);
+            axesLimits, timeFrame, highResolution, tempFileName, majorAxes);
         writeVideo(videoFile, videoFrame);
         frameIndex = frameIndex + 1;
     end
@@ -124,7 +132,7 @@ end
 function [F, FA] = generateVideoFrame(...
     numSpecies, speciesType, numTrajRecorded, materialName, ...
     ellipseMatrix, center, plotPosData, stepPosData, boundLimits, ...
-    timeFrame, highResolution, tempFileName)
+    timeFrame, highResolution, tempFileName, majorAxes)
 
 global speciesTail
 
@@ -134,6 +142,11 @@ if plotPosData
     hold on
 end
 Ellipse_plot(ellipseMatrix, center)
+displayMajorAxes = 1;
+if displayMajorAxes
+    hold on
+    plot3(majorAxes(1, :), majorAxes(2, :), majorAxes(3, :), 'r')
+end
 hold off
 
 xlabel(sprintf('x (%c)', 197))
