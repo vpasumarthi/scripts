@@ -93,11 +93,13 @@ for step = 0:numPathStepsPerTraj-1
         majorAxesVector = eigVec(:, majorIndex) * ...
             semiAxesLengths(frameIndex, majorIndex);
         majorAxes = [center, center] + [-majorAxesVector, majorAxesVector];
+        displayMajorAxes = 1;
         
         [videoFrame, FA(frameIndex)] = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
             ellipseMatrix, center, plotPosData, stepPosData, ...
-            axesLimits, timeFrame, highResolution, tempFileName, majorAxes);
+            axesLimits, timeFrame, highResolution, tempFileName, ...
+            majorAxes, displayMajorAxes);
         writeVideo(videoFile, videoFrame);
         frameIndex = frameIndex + 1;
     end
@@ -132,7 +134,7 @@ end
 function [F, FA] = generateVideoFrame(...
     numSpecies, speciesType, numTrajRecorded, materialName, ...
     ellipseMatrix, center, plotPosData, stepPosData, boundLimits, ...
-    timeFrame, highResolution, tempFileName, majorAxes)
+    timeFrame, highResolution, tempFileName, majorAxes, displayMajorAxes)
 
 global speciesTail
 
@@ -142,7 +144,6 @@ if plotPosData
     hold on
 end
 Ellipse_plot(ellipseMatrix, center)
-displayMajorAxes = 1;
 if displayMajorAxes
     hold on
     plot3(majorAxes(1, :), majorAxes(2, :), majorAxes(3, :), 'r')
