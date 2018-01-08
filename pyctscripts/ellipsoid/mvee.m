@@ -48,6 +48,7 @@ timeIntervalPerFrame = tFinal / numFrames * SEC2uS;
 numStepsPerFrame = round((numPathStepsPerTraj - 1) / numFrames);
 semiAxesLengths = zeros(numFrames, nDim);
 cartesianSemiAxesLengths = zeros(numFrames, nDim);
+majorAxesVectorMatrix = zeros(numFrames, nDim);
 FA = zeros(numFrames, 1);
 for step = 0:numPathStepsPerTraj-1
     if mod(step, numStepsPerFrame) == 0 && step ~= 0
@@ -92,8 +93,9 @@ for step = 0:numPathStepsPerTraj-1
         [~, majorIndex] = min(diag(eigVal));
         majorAxesVector = eigVec(:, majorIndex) * ...
             semiAxesLengths(frameIndex, majorIndex);
+        majorAxesVectorMatrix(frameIndex, :) = abs(eigVec(:, majorIndex))';
         majorAxes = [center, center] + [-majorAxesVector, majorAxesVector];
-        displayMajorAxes = 1;
+        displayMajorAxes = 0;
         
         [videoFrame, FA(frameIndex)] = generateVideoFrame(...
             numSpecies, speciesType, numTrajRecorded, materialName, ...
@@ -110,7 +112,8 @@ if highResolution
 end
 
 plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
-    anisotropy, FA, tFinal, speciesType, numTrajRecorded, numSpecies, nDim)
+    anisotropy, FA, tFinal, speciesType, numTrajRecorded, numSpecies, ...
+    nDim, majorAxesVectorMatrix)
 
 fileID = fopen('Run.log', 'w');
 fprintf(fileID, ['Elapsed time is ', num2str(toc), ' seconds.']);
@@ -217,7 +220,7 @@ end
 
 function plotTimeEvolutionSeries(semiAxesLengths, ...
     cartesianSemiAxesLengths, anisotropy, FA, tFinal, speciesType, ...
-    numTrajRecorded, numSpecies, nDim)
+    numTrajRecorded, numSpecies, nDim, majorAxesVectorMatrix)
 
 global speciesTail timeIntervalPerFrame SEC2uS
 
@@ -291,6 +294,17 @@ xlabel(sprintf('Simulation Time (%cs)', 956))
 ylabel('Fractional anisotropy')
 title('Time evolution of fractional anisotropy in ellipsoid shape')
 figTitle = ['FractionalAnistropy_', num2str(numSpecies), speciesType, ...
+    speciesTail, '.png'];
+saveas(gcf, figTitle)
+
+% Plot time evolution of major axes
+figure('visible', 'off');
+plot(timeSeries, majorAxesVectorMatrix)
+xlabel(sprintf('Simulation Time (%cs)', 956))
+ylabel('Fractional component in cartesian dimension')
+title('Time evolution of direction of major axes in ellipsoid shape')
+legend('X', 'Y', 'Z', 'Location', 'southeast')
+figTitle = ['MajorAxesVector_', num2str(numSpecies), speciesType, ...
     speciesTail, '.png'];
 saveas(gcf, figTitle)
 
