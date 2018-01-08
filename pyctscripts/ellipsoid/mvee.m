@@ -116,6 +116,12 @@ plotTimeEvolutionSeries(semiAxesLengths, cartesianSemiAxesLengths, ...
     nDim, majorAxesVectorMatrix)
 
 fileID = fopen('Run.log', 'w');
+fprintf(fileID, 'Properties of major axes vector:');
+fprintf(fileID, newline);
+fprintf(fileID, ['Average: [', num2str(mean(majorAxesVectorMatrix)), ']']);
+fprintf(fileID, newline);
+fprintf(fileID, ['Std: [', num2str(std(majorAxesVectorMatrix)), ']']);
+fprintf(fileID, newline);
 fprintf(fileID, ['Elapsed time is ', num2str(toc), ' seconds.']);
 fclose(fileID);
 
