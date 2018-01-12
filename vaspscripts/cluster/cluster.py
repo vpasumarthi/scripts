@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from PyCT.io import write_poscar
+
 
 def readPOSCAR(srcFilePath):
     inputFile = open(srcFilePath, 'r')
@@ -212,7 +214,8 @@ def extract_cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits,
             hDisp = np.asarray(hDisp)
             sortIndices = hDisp.argsort()
             sortedHDirList = np.round(hDirList[sortIndices], prec)
-            sortedHBondParentElementIndices = hBondParentElementIndices[sortIndices]
+            sortedHBondParentElementIndices = hBondParentElementIndices[
+                                                                sortIndices]
             discardIndices = []
             numPairsDiscarded = 0
             maxIndex = numHSites - 1
@@ -247,52 +250,6 @@ def extract_cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits,
         nElements_cluster.append(numHSites)
         coordinates_cluster.extend(hCoordinatesList)
 
-    writePOSCAR(srcFilePath, dstFilePath, fileFormat, elementTypes_cluster,
-                nElements_cluster, coordinateType, coordinates_cluster)
-    return None
-
-
-def writePOSCAR(srcFilePath, dstFilePath, fileFormat, elementTypes_cluster,
-                nElements_cluster, coordinateType, coordinates_cluster):
-    unmodifiedLineNumberLimit = 5
-    srcFile = open(srcFilePath, 'r')
-    open(dstFilePath, 'w').close()
-    dstFile = open(dstFilePath, 'a')
-    for lineIndex, line in enumerate(srcFile):
-        lineNumber = lineIndex + 1
-        if lineNumber <= unmodifiedLineNumberLimit:
-            dstFile.write(line)
-        else:
-            break
-    srcFile.close()
-
-    elementTypesLine = (' ' * 3 + (' ' * 4).join(elementTypes_cluster) + '\n')
-    dstFile.write(elementTypesLine)
-    nElementsLine = (' ' * 3 + (' ' * 4).join(map(str, nElements_cluster))
-                     + '\n')
-    dstFile.write(nElementsLine)
-    dstFile.write(coordinateType + '\n')
-    for elementCoordinates in coordinates_cluster:
-        if fileFormat == 'VASP' or fileFormat == 'unknown':
-            line = (
-                ''.join([
-                    ' ' * 2,
-                    '%18.16f' % elementCoordinates[0],
-                    ' ' * 2,
-                    '%18.16f' % elementCoordinates[1],
-                    ' ' * 2,
-                    '%18.16f' % elementCoordinates[2]])
-                + '\n')
-        elif fileFormat == 'VESTA':
-            line = (
-                ''.join([
-                    ' ' * 5,
-                    '%11.9f' % elementCoordinates[0],
-                    ' ' * 9,
-                    '%11.9f' % elementCoordinates[1],
-                    ' ' * 9,
-                    '%11.9f' % elementCoordinates[2]])
-                + '\n')
-        dstFile.write(line)
-    dstFile.close()
+    write_poscar(srcFilePath, dstFilePath, fileFormat, elementTypes_cluster,
+                 nElements_cluster, coordinateType, coordinates_cluster)
     return None
