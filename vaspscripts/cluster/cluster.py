@@ -2,73 +2,14 @@
 
 import numpy as np
 
-from PyCT.io import write_poscar
-
-
-def readPOSCAR(srcFilePath):
-    inputFile = open(srcFilePath, 'r')
-    elementTypesLineNumber = 6
-    for lineIndex, line in enumerate(inputFile):
-        lineNumber = lineIndex + 1
-        if lineNumber == elementTypesLineNumber:
-            prospectiveElementTypes = line[:-1].split()
-            elementTypesExist = prospectiveElementTypes[0].isalpha()
-            break
-    inputFile.close()
-
-    inputFile = open(srcFilePath, 'r')
-    latticeMatrix = np.zeros((3, 3))
-    latticeParameterIndex = 0
-    latticeParametersLineRange = range(3, 6)
-    elementTypesLineNumber = 6 * elementTypesExist
-    numElementsLineNumber = 6 + elementTypesExist
-    coordinateTypeNumber = 7 + elementTypesExist
-    coordStartLineNumber = 8 + elementTypesExist
-    for lineIndex, line in enumerate(inputFile):
-        lineNumber = lineIndex + 1
-        if lineNumber == 1 and not elementTypesExist:
-            elementTypes = line.split()
-            print(elementTypes)
-        elif lineNumber in latticeParametersLineRange:
-            latticeMatrix[latticeParameterIndex, :] = np.fromstring(line,
-                                                                    sep=' ')
-            latticeParameterIndex += 1
-        elif (lineNumber == elementTypesLineNumber
-              and 'elementTypes' not in locals()):
-            elementTypes = line.split()
-        elif lineNumber == numElementsLineNumber:
-            nElements = np.fromstring(line, dtype=int, sep=' ')
-            totalElements = nElements.sum()
-            fractionalCoords = np.zeros((totalElements, 3))
-        elif lineNumber == coordinateTypeNumber:
-            coordinateType = line.split()[0]
-        elif lineNumber == coordStartLineNumber:
-            elementIndex = 0
-            fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
-            coordinateStringLength = len(line.split()[0])
-            if coordinateStringLength == 18:
-                fileFormat = 'VASP'
-            elif coordinateStringLength == 11:
-                fileFormat = 'VESTA'
-            else:
-                fileFormat = 'unknown'
-        elif ((lineNumber > coordStartLineNumber)
-              and (elementIndex < totalElements - 1)):
-            elementIndex += 1
-            fractionalCoords[elementIndex, :] = np.fromstring(line, sep=' ')
-    inputFile.close()
-    POSCAR_INFO = np.array(
-                    [latticeMatrix, elementTypes, nElements, totalElements,
-                     coordinateType, fractionalCoords, fileFormat],
-                    dtype=object)
-    return POSCAR_INFO
+from PyCT.io import read_poscar, write_poscar
 
 
 def extract_cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits,
                     terminatingElementType, terminatingBondDistance,
                     oxidationList, bridgeSearchDepth, chargeNeutral, prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
-     fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
+     fractionalCoords, fileFormat] = read_poscar(srcFilePath)
     numSites = len(siteIndexList)
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
