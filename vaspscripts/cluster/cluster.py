@@ -62,9 +62,9 @@ def readPOSCAR(srcFilePath):
     return POSCAR_INFO
 
 
-def cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits, terminatingElementType,
-            terminatingBondDistance, oxidationList, bridgeSearchDepth, chargeNeutral,
-            prec):
+def extract_cluster(srcFilePath, dstFilePath, siteIndexList, bondLimits,
+                    terminatingElementType, terminatingBondDistance,
+                    oxidationList, bridgeSearchDepth, chargeNeutral, prec):
     [latticeMatrix, elementTypes, nElements, totalElements, coordinateType,
      fractionalCoords, fileFormat] = readPOSCAR(srcFilePath)
     numSites = len(siteIndexList)
