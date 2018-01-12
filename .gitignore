@@ -113,9 +113,6 @@ ENV/
 /pyctscripts/ellipsoid/**/*.png
 /pyctscripts/ellipsoid/**/*.dat
 
-# cluster files
-/vaspscripts/cluster/**/*CAR*
-
 # uniquePathway files
 /pyctscripts/uniquePathways/**/*CAR*
 /pyctscripts/uniquePathways/**/*.npy
