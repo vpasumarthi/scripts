@@ -5,7 +5,7 @@ import numpy as np
 from PyCT import io
 
 
-def create_hnd_input(dst_file_name):
+def create_dst_file(dst_file_name):
     open(dst_file_name, 'w').close()
     return None
 
