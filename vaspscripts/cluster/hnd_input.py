@@ -9,6 +9,7 @@ def create_dst_file(dst_file_name):
     open(dst_file_name, 'w').close()
     return None
 
+
 def basis_order(input_coordinate_file_name, dst_file_name, dst_element_types):
     poscar_info = io.read_poscar(input_coordinate_file_name)
     element_types = poscar_info[1]
@@ -38,12 +39,13 @@ def basis_order(input_coordinate_file_name, dst_file_name, dst_element_types):
 
 def geometry(input_coordinate_file_name, dst_file_name, dst_element_types):
     poscar_info = io.read_poscar(input_coordinate_file_name)
-    coordinate_type = poscar_info[-2]
+    coordinate_type = poscar_info[-3]
+    #import pdb; pdb.set_trace()
     if coordinate_type == 'Cartesian':
-        cartesian_coordinates = poscar_info[-1]
+        cartesian_coordinates = poscar_info[-2]
     else:
         lattice_matrix = poscar_info[0]
-        fractional_coordinates = poscar_info[-1]
+        fractional_coordinates = poscar_info[-2]
         cartesian_coordinates = np.dot(fractional_coordinates, lattice_matrix)
     element_types = poscar_info[1]
     n_elements = poscar_info[2]
