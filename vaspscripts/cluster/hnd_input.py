@@ -5,18 +5,14 @@ import numpy as np
 from PyCT import io
 
 
+def create_hnd_input(dst_file_name):
+    open(dst_file_name, 'w').close()
+    return None
+
 def basis_order(input_coordinate_file_name, dst_file_name, dst_element_types):
     poscar_info = io.read_poscar(input_coordinate_file_name)
-    coordinate_type = poscar_info[-2]
-    if coordinate_type == 'Cartesian':
-        cartesian_coordinates = poscar_info[-1]
-    else:
-        lattice_matrix = poscar_info[0]
-        fractional_coordinates = poscar_info[-1]
-        cartesian_coordinates = np.dot(fractional_coordinates, lattice_matrix)
     element_types = poscar_info[1]
     n_elements = poscar_info[2]
-    open(dst_file_name, 'w').close()
     dst_file = open(dst_file_name, 'a')
 
     # Order of atoms for reading basis sets
@@ -51,7 +47,6 @@ def geometry(input_coordinate_file_name, dst_file_name, dst_element_types):
         cartesian_coordinates = np.dot(fractional_coordinates, lattice_matrix)
     element_types = poscar_info[1]
     n_elements = poscar_info[2]
-    open(dst_file_name, 'w').close()
     dst_file = open(dst_file_name, 'a')
 
     # data group to specify geometry
@@ -79,9 +74,7 @@ def geometry(input_coordinate_file_name, dst_file_name, dst_element_types):
 
 
 def frz_orbitals(orbital_indices, dst_file_name):
-    open(dst_file_name, 'w').close()
     dst_file = open(dst_file_name, 'a')
-
     headspace = 15
     num_orbitals_per_line = 10
     start_line_parameter = 'IFRZ='
