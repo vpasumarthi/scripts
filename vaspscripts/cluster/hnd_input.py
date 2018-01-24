@@ -12,8 +12,8 @@ def create_dst_file(dst_file_name):
 
 def basis_order(input_coordinate_file_name, dst_file_name, dst_element_types):
     poscar_info = io.read_poscar(input_coordinate_file_name)
-    element_types = poscar_info[1]
-    n_elements = poscar_info[2]
+    element_types = poscar_info['element_types']
+    n_elements = poscar_info['num_elements']
     dst_file = open(dst_file_name, 'a')
 
     # Order of atoms for reading basis sets
@@ -39,16 +39,16 @@ def basis_order(input_coordinate_file_name, dst_file_name, dst_element_types):
 
 def geometry(input_coordinate_file_name, dst_file_name, dst_element_types):
     poscar_info = io.read_poscar(input_coordinate_file_name)
-    coordinate_type = poscar_info[-3]
+    coordinate_type = poscar_info['coordinate_type']
     #import pdb; pdb.set_trace()
     if coordinate_type == 'Cartesian':
-        cartesian_coordinates = poscar_info[-2]
+        cartesian_coordinates = poscar_info['coordinates']
     else:
-        lattice_matrix = poscar_info[0]
-        fractional_coordinates = poscar_info[-2]
+        lattice_matrix = poscar_info['lattice_matrix']
+        fractional_coordinates = poscar_info['coordinates']
         cartesian_coordinates = np.dot(fractional_coordinates, lattice_matrix)
-    element_types = poscar_info[1]
-    n_elements = poscar_info[2]
+    element_types = poscar_info['element_types']
+    n_elements = poscar_info['num_elements']
     dst_file = open(dst_file_name, 'a')
 
     # data group to specify geometry
