@@ -90,7 +90,7 @@ def frz_orbitals(orbital_indices, dst_file_name):
             end_index = start_index + num_orbitals_per_line
             num_unprinted_orbitals -= num_orbitals_per_line
         else:
-            end_index = num_orbitals - 1
+            end_index = num_orbitals
             num_unprinted_orbitals = 0
         orbital_index_list = ','.join(
                             [f'{orbital_indices[index]:>{orbital_index_width}}'
