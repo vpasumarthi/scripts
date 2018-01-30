@@ -40,8 +40,6 @@
 # Job description:
 # run vasp job followed by bader analysis; also prints the job run time to the output file
 
-export SCRATCH_DIR=$SLURM_SUBMIT_DIR
-echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
 ulimit -s unlimited
