@@ -1,0 +1,75 @@
+#!/bin/sh
+##
+##Frequently Modified Metadata
+##
+#SBATCH --job-name=BVO-VAB-V2-cluster01-v1-v2
+#SBATCH --output=job.out
+#SBATCH --error=job.err
+##
+##Dupuis Cluster
+##
+#SBATCH --partition=mdupuis2
+#SBATCH --clusters=chemistry
+#SBATCH --time=20-00:00:00
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --exclusive
+##
+##General Compute
+##
+##SBATCH --partition=general-compute
+##SBATCH --time=20:00:00
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=1
+##SBATCH --mem=48000
+##
+##Debug
+##
+##SBATCH --partition=debug
+##SBATCH --time=01:00:00
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=1
+##SBATCH --mem=48000
+##
+##Infrequently Modified Metadata
+##
+#SBATCH --mail-user=pasumart@buffalo.edu
+#SBATCH --mail-type=END
+#SBATCH --constraint=IB
+
+export OMP_NUM_THREADS=1
+export I_MPI_PIN=0
+ulimit -s unlimited
+export NNODES=`srun -l hostname | uniq | wc -l`
+export NPROCS=`srun -l hostname | wc -l`
+
+HOSTFILE=hosts.$SLURM_JOB_ID
+srun hostname -s | sort > $HOSTFILE
+
+source /etc/profile.d/modules.sh
+
+module load intel
+module load intel-mpi
+module list
+
+echo "The number of nodes is $SLURM_NNODES"
+echo "The number of processors per node $SLURM_NTASKS_PER_NODE"
+echo "The number of processors is $NPROCS"
+
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+
+SECONDS=0
+
+srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out
+
+duration=$SECONDS
+days=$((duration/60/60/24))
+hours=$((duration/60/60%24))
+minutes=$((duration/60%60))
+seconds=$((duration%60))
+printf 'Time elapsed: '
+(( $days > 0 )) && printf '%d days ' $days
+(( $hours > 0 )) && printf '%d hours ' $hours
+(( $minutes > 0 )) && printf '%d minutes ' $minutes
+(( $days > 0 || $hours > 0 || $minutes > 0 )) && printf 'and '
+printf '%d seconds\n' $seconds
