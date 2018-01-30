@@ -51,15 +51,6 @@ export NPROCS=`srun -l hostname | wc -l`
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
 
-cd $SLURM_SUBMIT_DIR
-sbcast $SLURM_SUBMIT_DIR/KPOINTS $SLURMTMPDIR/KPOINTS
-sbcast $SLURM_SUBMIT_DIR/POTCAR $SLURMTMPDIR/POTCAR
-sbcast $SLURM_SUBMIT_DIR/POSCAR $SLURMTMPDIR/POSCAR
-sbcast $SLURM_SUBMIT_DIR/INCAR $SLURMTMPDIR/INCAR
-#sbcast $SLURM_SUBMIT_DIR/WAVECAR $SLURMTMPDIR/WAVECAR
-
-cd $SLURMTMPDIR
-
 source /etc/profile.d/modules.sh
 
 module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
@@ -81,8 +72,6 @@ srun --propagate=STACK vasp
 /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
 /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
 #/projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
-
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 duration=$SECONDS
 days=$((duration/60/60/24))
