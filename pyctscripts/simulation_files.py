@@ -6,196 +6,214 @@ import numpy as np
 import yaml
 
 
-class simulationFiles(object):
+class simulation_files(object):
     """Class definition to generate simulation files"""
 
     # constants
     MIN2SEC = 60
     HR2SEC = 60 * MIN2SEC
 
-    def __init__(self, simParamFileName, varSpeciesTypeIndex,
-                 varSpeciesCountList, kmcPrec):
+    def __init__(self, sim_param_file_name, var_species_type_index,
+                 var_species_count_list, kmc_prec):
         # Load simulation parameters
-        with open(simParamFileName, 'r') as stream:
+        with open(sim_param_file_name, 'r') as stream:
             try:
                 params = yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
         for key, value in params.items():
             setattr(self, key, value)
-        self.varSpeciesTypeIndex = varSpeciesTypeIndex
-        self.nonVarSpeciesTypeIndex = int(not varSpeciesTypeIndex)
-        self.varSpeciesCountList = varSpeciesCountList
-        self.nRuns = len(varSpeciesCountList)
-        self.kmcPrec = kmcPrec
+        self.var_species_type_index = var_species_type_index
+        self.non_var_species_type_index = int(not var_species_type_index)
+        self.var_species_count_list = var_species_count_list
+        self.n_runs = len(var_species_count_list)
+        self.kmc_prec = kmc_prec
 
-    def generateFiles(self, genParamsFiles, genRunFiles, genMSDFiles,
-                      genSlurmFiles):
-        if genParamsFiles:
-            self.simulationParameterFiles()
-        if genRunFiles:
-            self.runFiles()
-        if genMSDFiles:
-            self.msdFiles()
-        if genSlurmFiles:
-            self.slurmFiles(self.kmcPrec)
+    def generate_files(self, gen_params_files, gen_run_files, gen_msd_files,
+                       gen_slurm_files):
+        if gen_params_files:
+            self.simulation_parameter_files()
+        if gen_run_files:
+            self.run_files()
+        if gen_msd_files:
+            self.msd_files()
+        if gen_slurm_files:
+            self.slurm_files(self.kmc_prec)
         return None
 
-    def dstPath(self, speciesCountList):
+    def dst_path(self, species_count_list):
         # determine destination path
-        childDir1 = 'SimulationFiles'
-        childDir2 = ('ionChargeType=' + self.system['ionChargeType']
-                     + ';speciesChargeType='
-                     + self.system['speciesChargeType'])
-        childDir3 = (
-                    str(speciesCountList[0])
-                    + ('electron' if speciesCountList[0] == 1 else 'electrons')
-                    + ',' + str(speciesCountList[1])
-                    + ('hole' if speciesCountList[1] == 1 else 'holes'))
-        childDir4 = str(self.system['Temp']) + 'K'
-        workDir = (('%1.2E' % self.run['tFinal']) + 'SEC,'
-                   + ('%1.2E' % self.run['timeInterval']) + 'TimeInterval,'
-                   + ('%1.2E' % self.run['nTraj']) + 'Traj')
-        systemDirectoryPath = Path.cwd()
-        workDirPath = (systemDirectoryPath / childDir1 / childDir2 / childDir3
-                       / childDir4 / workDir)
-        workDirDepth = len(workDirPath.parts) - len(systemDirectoryPath.parts)
-        return (workDirPath, workDirDepth)
+        child_dir1 = 'SimulationFiles'
+        # TODO: parent_dir2 to lower case with underscores
+        child_dir2 = ('ionChargeType=' + self.system['ion_charge_type']
+                      + ';speciesChargeType='
+                      + self.system['species_charge_type'])
+        child_dir3 = (
+                str(species_count_list[0])
+                + ('electron' if species_count_list[0] == 1 else 'electrons')
+                + ',' + str(species_count_list[1])
+                + ('hole' if species_count_list[1] == 1 else 'holes'))
+        child_dir4 = str(self.system['temp']) + 'K'
+        child_dir5 = (('%1.2E' % self.run['t_final']) + 'SEC,'
+                      + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
+                      + ('%1.2E' % self.run['n_traj']) + 'Traj')
+        # TODO: Modify mag string to '%1.2E'
+        field_tag = (
+            'ef_'
+            + str(
+                self.system['external_field']['electric']['dir']).replace(' ',
+                                                                          '')
+                + '_'
+                + ('%1.4f' % self.system['external_field']['electric']['mag']))
+        work_dir = (
+                field_tag
+                if self.system['external_field']['electric']['active'] else
+                'no_field')
+        system_directory_path = Path.cwd()
+        work_dir_path = (system_directory_path / child_dir1 / child_dir2
+                         / child_dir3 / child_dir4 / child_dir5 / work_dir)
+        work_dir_depth = (len(work_dir_path.parts)
+                          - len(system_directory_path.parts))
+        return (work_dir_path, work_dir_depth)
 
-    def simulationParameterFiles(self):
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
+    def simulation_parameter_files(self):
+        species_count_list = [0] * len(self.system['species_count'])
+        for i_run in range(self.n_runs):
+            species_count_list[self.non_var_species_type_index] = (
+                self.system['species_count'][self.non_var_species_type_index])
+            species_count_list[self.var_species_type_index] = (
+                                            self.var_species_count_list[i_run])
 
-            (workDirPath, workDirDepth) = self.dstPath(speciesCountList)
-            self.system['workDirDepth'] = workDirDepth
-            Path.mkdir(workDirPath, parents=True, exist_ok=True)
-            dstFilePath = workDirPath.joinpath(self.system['dstFileName'])
+            (work_dir_path, work_dir_depth) = self.dst_path(species_count_list)
+            self.system['work_dir_depth'] = work_dir_depth
+            Path.mkdir(work_dir_path, parents=True, exist_ok=True)
+            dst_file_path = work_dir_path.joinpath(self.system['dst_file_name']
+                                                   )
 
             # generate simulation parameter file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write('# System parameters:\n')
-                yaml.dump(self.system, dstFile)
-                dstFile.write('\n')
-                dstFile.write('# Run parameters:\n')
-                yaml.dump(self.run, dstFile, default_flow_style=False)
-                dstFile.write('\n')
-                dstFile.write('# MSD parameters:\n')
-                yaml.dump(self.msd, dstFile, default_flow_style=False)
+            with dst_file_path.open('w') as dst_file:
+                dst_file.write('# System parameters:\n')
+                yaml.dump(self.system, dst_file)
+                dst_file.write('\n')
+                dst_file.write('# Run parameters:\n')
+                yaml.dump(self.run, dst_file, default_flow_style=False)
+                dst_file.write('\n')
+                dst_file.write('# MSD parameters:\n')
+                yaml.dump(self.msd, dst_file, default_flow_style=False)
         return None
 
-    def runFiles(self):
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
-            (workDirPath, _) = self.dstPath(speciesCountList)
-            dstFilePath = workDirPath.joinpath(self.run['dstFileName'])
+    def run_files(self):
+        species_count_list = [0] * len(self.system['species_count'])
+        for i_run in range(self.n_runs):
+            species_count_list[self.non_var_species_type_index] = (
+                self.system['species_count'][self.non_var_species_type_index])
+            species_count_list[self.var_species_type_index] = (
+                                            self.var_species_count_list[i_run])
+            (work_dir_path, _) = self.dst_path(species_count_list)
+            dst_file_path = work_dir_path.joinpath(self.run['dst_file_name'])
 
             # generate simulation parameter file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write(
+            with dst_file_path.open('w') as dst_file:
+                dst_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
-                    "from PyCT.materialRun import materialRun\n\n"
-                    "dstPath = Path.cwd()\n"
-                    "materialRun(dstPath)\n")
+                    "from PyCT.material_run import material_run\n\n"
+                    "dst_path = Path.cwd()\n"
+                    "material_run(dst_path)\n")
         return None
 
-    def msdFiles(self):
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
-            (workDirPath, _) = self.dstPath(speciesCountList)
-            dstFilePath = workDirPath.joinpath(self.msd['dstFileName'])
+    def msd_files(self):
+        species_count_list = [0] * len(self.system['species_count'])
+        for i_run in range(self.n_runs):
+            species_count_list[self.non_var_species_type_index] = (
+                self.system['species_count'][self.non_var_species_type_index])
+            species_count_list[self.var_species_type_index] = (
+                                            self.var_species_count_list[i_run])
+            (work_dir_path, _) = self.dst_path(species_count_list)
+            dst_file_path = work_dir_path.joinpath(self.msd['dst_file_name'])
 
             # generate simulation parameter file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write(
+            with dst_file_path.open('w') as dst_file:
+                dst_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
-                    "from PyCT.materialMSD import materialMSD\n\n"
-                    "dstPath = Path.cwd()\n"
-                    "materialMSD(dstPath)\n")
+                    "from PyCT.material_m_s_d import material_m_s_d\n\n"
+                    "dst_path = Path.cwd()\n"
+                    "material_m_s_d(dst_path)\n")
         return None
 
-    def runTime(self, speciesCountList, kmcPrec):
-        kTotal = np.dot(self.kTotalPerSpecies, speciesCountList)
-        timeStep = 1 / kTotal
-        kmcSteps = int(np.ceil(self.run['tFinal'] / timeStep / kmcPrec)
-                       * kmcPrec)
-        numStatesPerStep = np.dot(self.numStatesPerSpecies,
-                                  speciesCountList)
-        totalStatesPerTraj = numStatesPerStep * kmcSteps
-        estRunTime = int(self.timePerState[self.varSpeciesTypeIndex]
-                         * self.run['nTraj'] * totalStatesPerTraj
-                         + (self.addOnTimeLimit * self.HR2SEC))
-        return estRunTime
+    def run_time(self, species_count_list, kmc_prec):
+        k_total = np.dot(self.k_total_per_species, species_count_list)
+        time_step = 1 / k_total
+        kmc_steps = int(np.ceil(self.run['t_final'] / time_step / kmc_prec)
+                        * kmc_prec)
+        num_states_per_step = np.dot(self.num_states_per_species,
+                                     species_count_list)
+        total_states_per_traj = num_states_per_step * kmc_steps
+        est_run_time = int(self.time_per_state[self.var_species_type_index]
+                           * self.run['n_traj'] * total_states_per_traj
+                           + (self.add_on_time_limit * self.HR2SEC))
+        return est_run_time
 
-    def slurmFiles(self, kmcPrec):
+    def slurm_files(self, kmc_prec):
         # keywords
-        jobNameKey = ('--job-name="' + self.system['material'] + '-'
+        job_name_key = ('--job-name="' + self.system['material'] + '-'
+                        + 'x'.join(str(element)
+                                   for element in self.system['system_size']))
+        output_key = ('--output=' + self.system['material'] + '-'
                       + 'x'.join(str(element)
-                                 for element in self.system['systemSize']))
-        outputKey = ('--output=' + self.system['material'] + '-'
-                     + 'x'.join(str(element)
-                                for element in self.system['systemSize']))
+                                 for element in self.system['system_size']))
 
-        chargeComb = (self.system['ionChargeType'][0]
-                      + self.system['speciesChargeType'][0])
-        speciesCountList = [0] * len(self.system['speciesCount'])
-        for iRun in range(self.nRuns):
+        charge_comb = (self.system['ion_charge_type'][0]
+                       + self.system['species_charge_type'][0])
+        species_count_list = [0] * len(self.system['species_count'])
+        for i_run in range(self.n_runs):
             # estimate simulation run time in sec
-            speciesCountList[self.nonVarSpeciesTypeIndex] = (
-                    self.system['speciesCount'][self.nonVarSpeciesTypeIndex])
-            speciesCountList[self.varSpeciesTypeIndex] = (
-                                                self.varSpeciesCountList[iRun])
-            (workDirPath, _) = self.dstPath(speciesCountList)
-            Path.mkdir(workDirPath, parents=True, exist_ok=True)
-            dstFilePath = workDirPath.joinpath(self.slurm['dstFileName'])
+            species_count_list[self.non_var_species_type_index] = (
+                self.system['species_count'][self.non_var_species_type_index])
+            species_count_list[self.var_species_type_index] = (
+                                            self.var_species_count_list[i_run])
+            (work_dir_path, _) = self.dst_path(species_count_list)
+            Path.mkdir(work_dir_path, parents=True, exist_ok=True)
+            dst_file_path = work_dir_path.joinpath(self.slurm['dst_file_name'])
 
             # generate slurm file
-            with dstFilePath.open('w') as dstFile:
-                dstFile.write('#!/bin/sh\n')
-                dstFile.write('#SBATCH ' + jobNameKey + '_' + chargeComb + '_'
-                              + str(self.varSpeciesCountList[iRun]) + '"\n')
-                dstFile.write('#SBATCH ' + outputKey + '_' + chargeComb + '_'
-                              + str(self.varSpeciesCountList[iRun]) + '.out\n')
-                dstFile.write(f"#SBATCH --partition={self.slurm['partitionValue']}\n")
-                if self.slurm['partitionValue'] == 'mdupuis2':
-                    dstFile.write('#SBATCH --clusters=chemistry\n')
-                numDays = numHours = numMins = numSec = 0
-                if self.slurm['partitionValue'] == 'debug':
-                    numHours = 1
-                elif self.slurm['partitionValue'] == 'mdupuis2':
-                    numDays = self.slurm['mdSlurmJobMaxTimeLimit']
+            with dst_file_path.open('w') as dst_file:
+                dst_file.write('#!/bin/sh\n')
+                dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
+                               + '_' + str(self.var_species_count_list[i_run])
+                               + '"\n')
+                dst_file.write('#SBATCH ' + output_key + '_' + charge_comb
+                               + '_' + str(self.var_species_count_list[i_run])
+                               + '.out\n')
+                dst_file.write(
+                    f"#SBATCH --partition={self.slurm['partition_value']}\n")
+                if self.slurm['partition_value'] == 'mdupuis2':
+                    dst_file.write('#SBATCH --clusters=chemistry\n')
+                num_days = num_hours = num_mins = num_sec = 0
+                if self.slurm['partition_value'] == 'debug':
+                    num_hours = 1
+                elif self.slurm['partition_value'] == 'mdupuis2':
+                    num_days = self.slurm['md_slurm_job_max_time_limit']
                 else:
-                    estRunTime = self.runTime(speciesCountList, kmcPrec)
-                    if estRunTime > self.gcSlurmJobMaxTimeLimit:
-                        numHours = self.gcSlurmJobMaxTimeLimit
+                    est_run_time = self.run_time(species_count_list, kmc_prec)
+                    if est_run_time > self.gc_slurm_job_max_time_limit:
+                        num_hours = self.gc_slurm_job_max_time_limit
                     else:
-                        numHours = estRunTime // self.HR2SEC
-                        numMins = (estRunTime // self.MIN2SEC) % self.MIN2SEC
-                timeLimit = f'{numDays:02d}-{numHours:02d}:{numMins:02d}:{numSec:02d}'
-                dstFile.write(f'#SBATCH --time={timeLimit}\n')
-                dstFile.write(f"#SBATCH --nodes={self.slurm['numNodes']}\n")
-                dstFile.write(f"#SBATCH --tasks-per-node={self.slurm['numTasksPerNode']}\n")
+                        num_hours = est_run_time // self.HR2SEC
+                        num_mins = (est_run_time // self.MIN2SEC) % self.MIN2SEC
+                time_limit = f'{num_days:02d}-{num_hours:02d}:{num_mins:02d}:{num_sec:02d}'
+                dst_file.write(f'#SBATCH --time={time_limit}\n')
+                dst_file.write(f"#SBATCH --nodes={self.slurm['num_nodes']}\n")
+                dst_file.write(f"#SBATCH --tasks-per-node={self.slurm['num_tasks_per_node']}\n")
                 if self.slurm['exclusive']:
-                    dstFile.write('#SBATCH --exclusive\n')
+                    dst_file.write('#SBATCH --exclusive\n')
                 if self.slurm['mem']:
-                    dstFile.write(f"#SBATCH --mem={self.slurm['mem']}\n\n")
+                    dst_file.write(f"#SBATCH --mem={self.slurm['mem']}\n\n")
                 if self.slurm['email']:
-                    dstFile.write(f"#SBATCH --mail-user={self.slurm['email']}\n")
-                    dstFile.write("#SBATCH --mail-type=END\n")
-                dstFile.write(
+                    dst_file.write(f"#SBATCH --mail-user={self.slurm['email']}\n")
+                    dst_file.write("#SBATCH --mail-type=END\n")
+                dst_file.write(
                     "#SBATCH --constraint=IB\n"
                     "\n# Job description:\n"
                     "# run KMC simulation followed by performing MSD analysis"
@@ -217,9 +235,9 @@ class simulationFiles(object):
                     "echo \"Launch mymodel with srun\"\n\n"
                     "#The PMI library is necessary for srun\n"
                     "export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so\n")
-                if self.slurm['submitRun']:
-                    dstFile.write("srun Run.py\n")
-                if self.slurm['submitMSD']:
-                    dstFile.write("srun MSD.py\n")
-                dstFile.write("\necho \"All Done!\"\n")
+                if self.slurm['submit_run']:
+                    dst_file.write("srun Run.py\n")
+                if self.slurm['submit_m_s_d']:
+                    dst_file.write("srun MSD.py\n")
+                dst_file.write("\necho \"All Done!\"\n")
         return None
