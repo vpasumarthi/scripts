@@ -116,6 +116,7 @@ class SimulationFiles(object):
                     "from PyCT.material_run import material_run\n\n"
                     "dst_path = Path.cwd()\n"
                     "material_run(dst_path)\n")
+            dst_file_path.chmod(0o755)
         return None
 
     def msd_files(self):
@@ -136,6 +137,7 @@ class SimulationFiles(object):
                     "from PyCT.material_msd import material_msd\n\n"
                     "dst_path = Path.cwd()\n"
                     "material_msd(dst_path)\n")
+            dst_file_path.chmod(0o755)
         return None
 
     def run_time(self, species_count_list, kmc_prec):
