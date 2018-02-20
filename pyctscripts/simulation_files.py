@@ -82,10 +82,10 @@ class SimulationFiles(object):
 
             (work_dir_path, work_dir_depth) = self.dst_path(species_count_list)
             self.system['work_dir_depth'] = work_dir_depth
+            self.system['species_count'] = species_count_list
             Path.mkdir(work_dir_path, parents=True, exist_ok=True)
             dst_file_path = work_dir_path.joinpath(self.system['dst_file_name']
                                                    )
-
             # generate simulation parameter file
             with dst_file_path.open('w') as dst_file:
                 dst_file.write('# System parameters:\n')
