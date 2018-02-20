@@ -163,6 +163,7 @@ class SimulationFiles(object):
         charge_comb = (self.system['ion_charge_type'][0]
                        + self.system['species_charge_type'][0])
         species_count_list = [0] * len(self.system['species_count'])
+        species_tag = 'e' if self.non_var_species_type_index == 0 else 'h'
         for i_run in range(self.n_runs):
             # estimate simulation run time in sec
             species_count_list[self.non_var_species_type_index] = (
@@ -177,10 +178,12 @@ class SimulationFiles(object):
             with dst_file_path.open('w') as dst_file:
                 dst_file.write('#!/bin/sh\n')
                 dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
-                               + '_' + str(self.var_species_count_list[i_run])
+                               + '_' + self.field_tag + '_' + species_tag
+                               + str(self.var_species_count_list[i_run])
                                + '"\n')
                 dst_file.write('#SBATCH ' + output_key + '_' + charge_comb
-                               + '_' + str(self.var_species_count_list[i_run])
+                               + '_' + self.field_tag + '_' + species_tag
+                               + str(self.var_species_count_list[i_run])
                                + '.out\n')
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition_value']}\n")
