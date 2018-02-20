@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 
 
-class simulation_files(object):
+class SimulationFiles(object):
     """Class definition to generate simulation files"""
 
     # constants
@@ -58,17 +58,13 @@ class simulation_files(object):
                       + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
                       + ('%1.2E' % self.run['n_traj']) + 'Traj')
         # TODO: Modify mag string to '%1.2E'
-        field_tag = (
-            'ef_'
-            + str(
-                self.system['external_field']['electric']['dir']).replace(' ',
-                                                                          '')
-                + '_'
-                + ('%1.4f' % self.system['external_field']['electric']['mag']))
-        work_dir = (
-                field_tag
-                if self.system['external_field']['electric']['active'] else
-                'no_field')
+        electric = self.system['external_field']['electric']
+        if electric['active']:
+            self.field_tag = ('ef_' + str(electric['dir']).replace(' ', '')
+                              + '_' + ('%1.4f' % electric['mag']))
+        else:
+            self.field_tag = 'no_field'
+        work_dir = self.field_tag
         system_directory_path = Path.cwd()
         work_dir_path = (system_directory_path / child_dir1 / child_dir2
                          / child_dir3 / child_dir4 / child_dir5 / work_dir)
@@ -137,9 +133,9 @@ class simulation_files(object):
                 dst_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
-                    "from PyCT.material_m_s_d import material_m_s_d\n\n"
+                    "from PyCT.material_msd import material_msd\n\n"
                     "dst_path = Path.cwd()\n"
-                    "material_m_s_d(dst_path)\n")
+                    "material_msd(dst_path)\n")
         return None
 
     def run_time(self, species_count_list, kmc_prec):
