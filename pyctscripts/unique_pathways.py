@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+from pathlib import Path
 
 import numpy as np
 
@@ -29,13 +29,14 @@ def generate_quantum_indices(system_size, system_element_index,
     return quantum_indices
 
 
-def unique_pathways(input_file_location, cutoff_dist_key, neighbor_cutoff,
-                   bridge_cutoff, outdir, pathway_prec, equivalency_prec,
-                   class_list=[], avoid_element_type='',
-                   round_lattice_parameters={}, print_pathway_list=0,
-                   print_equivalency=0, desired_coordinate_parameters={}):
+def unique_pathways(dst_path, input_coordinate_file_name, cutoff_dist_key,
+                    neighbor_cutoff, bridge_cutoff, pathway_prec,
+                    equivalency_prec, class_list=[], avoid_element_type='',
+                    round_lattice_parameters={}, print_pathway_list=0,
+                    print_equivalency=0, desired_coordinate_parameters={}):
     """ generate unique pathways for the given set of element types"""
     # define input parameters
+    input_file_location = dst_path / input_coordinate_file_name
     poscar_info = read_poscar(input_file_location)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -340,20 +341,18 @@ def unique_pathways(input_file_location, cutoff_dist_key, neighbor_cutoff,
             print(center_site_pathway_list)
 
     lattice_direction_list_file_name = (
-            'lattice_direction_list_' + center_element_type
-            + '-' + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff))
+        'lattice_direction_list_' + center_element_type + '-'
+        + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff) + '.npy')
     displacement_list_file_name = (
-                'displacement_list_' + center_element_type + '-'
-                + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff))
-    pathway_file_name = ('pathway_list_' + center_element_type + '-'
-                         + neighbor_element_type + '_cutoff='
-                         + str(neighbor_cutoff))
-    lattice_direction_list_file_path = (os.path.join(
-                                    outdir, lattice_direction_list_file_name)
-                                    + '.npy')
-    displacement_list_file_path = (
-                    os.path.join(outdir, displacement_list_file_name) + '.npy')
-    pathway_file_path = os.path.join(outdir, pathway_file_name) + '.npy'
+        'displacement_list_' + center_element_type + '-'
+        + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff) + '.npy')
+    pathway_file_name = (
+            'pathway_list_' + center_element_type + '-' + neighbor_element_type
+            + '_cutoff=' + str(neighbor_cutoff) + '.npy')
+    lattice_direction_list_file_path = (dst_path
+                                        / lattice_direction_list_file_name)
+    displacement_list_file_path = dst_path / displacement_list_file_name
+    pathway_file_path = dst_path / pathway_file_name
     np.save(lattice_direction_list_file_path, sorted_lattice_direction_list)
     np.save(displacement_list_file_path, sorted_displacement_list)
     np.save(pathway_file_path, pathway_list)
