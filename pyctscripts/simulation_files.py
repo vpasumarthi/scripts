@@ -56,13 +56,12 @@ class SimulationFiles(object):
         child_dir5 = (('%1.2E' % self.run['t_final']) + 'SEC,'
                       + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
                       + ('%1.2E' % self.run['n_traj']) + 'Traj')
-        # TODO: Modify mag string to '%1.2E'
         electric = self.system['external_field']['electric']
         if electric['active']:
             ld_tag = 'ld_' if electric['ld'] else ''
             self.field_tag = ('ef_' + ld_tag +
                               str(electric['dir']).replace(' ', '') + '_'
-                              + ('%1.4f' % electric['mag']))
+                              + ('%1.2E' % electric['mag']))
         else:
             self.field_tag = 'no_field'
         work_dir = self.field_tag
