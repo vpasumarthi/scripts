@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pathlib import Path
+from fractions import gcd
 
 import numpy as np
 
@@ -254,7 +254,6 @@ def unique_pathways(dst_path, input_coordinate_file_name, cutoff_dist_key,
             class_pair_list[center_site_index] = np.asarray(i_class_pair_list)
 
     # determine irreducible form of lattice directions
-    from fractions import gcd
     sorted_lattice_direction_list = np.empty(num_center_elements, dtype=object)
     sorted_displacement_list = np.empty(num_center_elements, dtype=object)
     if class_list:
