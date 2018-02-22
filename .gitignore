@@ -113,10 +113,6 @@ ENV/
 /pyctscripts/ellipsoid/**/*.png
 /pyctscripts/ellipsoid/**/*.dat
 
-# uniquePathway files
-/pyctscripts/uniquePathways/**/*CAR*
-/pyctscripts/uniquePathways/**/*.npy
-
 # IntelliJ
 /.idea
 
