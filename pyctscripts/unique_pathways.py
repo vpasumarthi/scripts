@@ -146,7 +146,8 @@ def unique_pathways(dst_path, input_coordinate_file_name, cutoff_dist_key,
                 if (bridge_cutoff_dist_limits[0] < displacement
                         <= bridge_cutoff_dist_limits[1]):
                     i_bridge_neighbor_list.append(neighbor_site_index)
-        bridge_neighbor_list[center_site_index] = np.asarray(i_bridge_neighbor_list)
+        bridge_neighbor_list[center_site_index] = np.asarray(
+                                                        i_bridge_neighbor_list)
 
     # initialize class pair list
     if class_list:
@@ -339,20 +340,9 @@ def unique_pathways(dst_path, input_coordinate_file_name, cutoff_dist_key,
             np.set_printoptions(suppress=True)
             print(center_site_pathway_list)
 
-    lattice_direction_list_file_name = (
-        'lattice_direction_list_' + center_element_type + '-'
-        + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff) + '.npy')
-    displacement_list_file_name = (
-        'displacement_list_' + center_element_type + '-'
-        + neighbor_element_type + '_cutoff=' + str(neighbor_cutoff) + '.npy')
     pathway_file_name = (
             'pathway_list_' + center_element_type + '-' + neighbor_element_type
             + '_cutoff=' + str(neighbor_cutoff) + '.npy')
-    lattice_direction_list_file_path = (dst_path
-                                        / lattice_direction_list_file_name)
-    displacement_list_file_path = dst_path / displacement_list_file_name
     pathway_file_path = dst_path / pathway_file_name
-    np.save(lattice_direction_list_file_path, sorted_lattice_direction_list)
-    np.save(displacement_list_file_path, sorted_displacement_list)
     np.save(pathway_file_path, pathway_list)
     return
