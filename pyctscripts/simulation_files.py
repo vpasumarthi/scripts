@@ -60,8 +60,10 @@ class SimulationFiles(object):
         # TODO: Modify mag string to '%1.2E'
         electric = self.system['external_field']['electric']
         if electric['active']:
-            self.field_tag = ('ef_' + str(electric['dir']).replace(' ', '')
-                              + '_' + ('%1.4f' % electric['mag']))
+            ld_tag = 'ld_' if electric['ld'] else ''
+            self.field_tag = ('ef_' + ld_tag +
+                              str(electric['dir']).replace(' ', '') + '_'
+                              + ('%1.4f' % electric['mag']))
         else:
             self.field_tag = 'no_field'
         work_dir = self.field_tag
