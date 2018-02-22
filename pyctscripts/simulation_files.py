@@ -44,9 +44,8 @@ class SimulationFiles(object):
     def dst_path(self, species_count_list):
         # determine destination path
         child_dir1 = 'SimulationFiles'
-        # TODO: parent_dir2 to lower case with underscores
-        child_dir2 = ('ionChargeType=' + self.system['ion_charge_type']
-                      + ';speciesChargeType='
+        child_dir2 = ('ion_charge_type=' + self.system['ion_charge_type']
+                      + ';species_charge_type='
                       + self.system['species_charge_type'])
         child_dir3 = (
                 str(species_count_list[0])
