@@ -29,11 +29,33 @@ def generate_quantum_indices(system_size, system_element_index,
     return quantum_indices
 
 
-def unique_pathways(input_coordinate_file_path, cutoff_dist_key,
-                    neighbor_cutoff, bridge_cutoff, pathway_prec,
-                    equivalency_prec, class_list=[], avoid_element_type='',
-                    round_lattice_parameters={}, print_pathway_list=0,
-                    print_equivalency=0, desired_coordinate_parameters={}):
+def generate_avoid_element_indices(avoid_element_type, element_types,
+                                   n_elements_per_unit_cell,
+                                   total_elements_per_unit_cell, num_cells,
+                                   center_site_element_type_index):
+    if avoid_element_type:
+        avoid_element_type_index = element_types.index(avoid_element_type)
+        system_element_index_offset_array = np.repeat(
+                            np.arange(0,
+                                      total_elements_per_unit_cell * num_cells,
+                                      total_elements_per_unit_cell),
+                            n_elements_per_unit_cell[
+                                            center_site_element_type_index])
+        avoid_element_indices = (
+            np.tile(n_elements_per_unit_cell[:avoid_element_type_index].sum()
+                    + np.arange(
+                        0, n_elements_per_unit_cell[avoid_element_type_index]),
+                    num_cells)
+            + system_element_index_offset_array)
+    else:
+        avoid_element_indices = []
+    return avoid_element_indices
+
+
+def unique_pathways(input_coordinate_file_path, cutoff_dist_key, class_list,
+                    cutoff, avoid_element_type, precision_parameters,
+                    print_parameters, desired_coordinate_parameters):
+
     """ generate unique pathways for the given set of element types"""
     # define input parameters
     dst_path = input_coordinate_file_path.parent
@@ -43,13 +65,23 @@ def unique_pathways(input_coordinate_file_path, cutoff_dist_key,
     n_elements_per_unit_cell = poscar_info['num_elements']
     coordinate_type = poscar_info['coordinate_type']
     unit_cell_coords = poscar_info['coordinates']
-
     if coordinate_type == 'Direct':
         fractional_unit_cell_coords = unit_cell_coords
     elif coordinate_type == 'Cartesian':
         fractional_unit_cell_coords = np.dot(
                     unit_cell_coords, np.linalg.inv(lattice_matrix))
 
+    neighbor_cutoff = cutoff['neighbor']
+    bridge_cutoff = cutoff['bridge']
+
+    round_lattice_parameters = precision_parameters['round_lattice_parameters']
+    equivalency_prec = precision_parameters['equivalency']
+    pathway_prec = precision_parameters['pathway']
+
+    print_equivalency = print_parameters['equivalency']
+    print_pathway_list = print_parameters['pathway_list']
+
+    # logic
     n_element_types = len(element_types)
     total_elements_per_unit_cell = n_elements_per_unit_cell.sum()
     element_type_index_list = np.repeat(np.arange(n_element_types),
@@ -90,22 +122,10 @@ def unique_pathways(input_coordinate_file_path, cutoff_dist_key,
                 index += 1
 
     # generate list of element indices to avoid during bridge calculations
-    if avoid_element_type:
-        avoid_element_type_index = element_types.index(avoid_element_type)
-        system_element_index_offset_array = np.repeat(
-                            np.arange(0,
-                                      total_elements_per_unit_cell * num_cells,
-                                      total_elements_per_unit_cell),
-                            n_elements_per_unit_cell[
-                                            center_site_element_type_index])
-        avoid_element_indices = (
-            np.tile(n_elements_per_unit_cell[:avoid_element_type_index].sum()
-                    + np.arange(
-                        0, n_elements_per_unit_cell[avoid_element_type_index]),
-                    num_cells)
-            + system_element_index_offset_array)
-    else:
-        avoid_element_indices = []
+    avoid_element_indices = generate_avoid_element_indices(
+            avoid_element_type, element_types, n_elements_per_unit_cell,
+            total_elements_per_unit_cell, num_cells,
+            center_site_element_type_index)
 
     # extract center site fractional coordinates
     num_center_elements = n_elements_per_unit_cell[
