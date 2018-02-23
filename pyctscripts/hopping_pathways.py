@@ -10,8 +10,9 @@ from PyCT.io import read_poscar
 class HoppingPathways(object):
     """Class definition to generate charge transfer pathways"""
 
-    def __init__(self, input_coordinate_file_path):
+    def __init__(self, input_coordinate_file_path, class_list):
         self.dst_path = input_coordinate_file_path.parent
+        self.class_list = class_list
         poscar_info = read_poscar(input_coordinate_file_path)
         self.lattice_matrix = poscar_info['lattice_matrix']
         self.element_types = poscar_info['element_types']
@@ -149,49 +150,24 @@ class HoppingPathways(object):
                                 system_fract_coords)
         return site_coordinate_info
 
-    def generate_pathway_list(self, cutoff_dist_key, class_list, cutoff,
-                              avoid_element_type, precision_parameters,
-                              print_parameters, desired_coordinate_parameters):
-        """ generate pathway list for the given set of element types"""
-        # define input parameters
-        neighbor_cutoff = cutoff['neighbor']
-        bridge_cutoff = cutoff['bridge']
-        round_lattice_parameters = precision_parameters['round_lattice_parameters']
-        equivalency_prec = precision_parameters['equivalency']
-        pathway_prec = precision_parameters['pathway']
-        print_equivalency = print_parameters['equivalency']
-        print_pathway_list = print_parameters['pathway_list']
-    
-        # define derived parameters
-        [center_element_type, _] = cutoff_dist_key.split(':')
-        center_site_element_type_index = self.element_types.index(center_element_type)
-        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
-        bridge_cutoff_dist_limits = [0, bridge_cutoff]
+    def populate_pathway_data(
+                    self, site_coordinate_info, bridge_neighbor_list,
+                    bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
+                    round_lattice_parameters, desired_coordinate_parameters):
+        (system_size, num_cells, num_center_elements, center_site_fract_coords,
+         neighbor_site_fract_coords, system_fract_coords) = site_coordinate_info
+
         if round_lattice_parameters:
             base = round_lattice_parameters['base']
             prec = round_lattice_parameters['prec']
-    
-        site_coordinate_info = self.generate_site_coordinates(
-                                                center_site_element_type_index)
-        (system_size, num_cells, num_center_elements, center_site_fract_coords,
-         neighbor_site_fract_coords, system_fract_coords) = site_coordinate_info
-    
-        # generate list of element indices to avoid during bridge calculations
-        avoid_element_indices = self.generate_avoid_element_indices(
-                avoid_element_type, num_cells, center_site_element_type_index)
 
-        # generate bridge neighbor list
-        bridge_neighbor_list = self.generate_bridge_neighbor_list(
-                                num_center_elements, center_site_fract_coords,
-                                system_fract_coords, avoid_element_indices,
-                                bridge_cutoff_dist_limits)
-    
         # initialize class pair list
-        if class_list:
-            center_site_class_list = class_list[0]
-            neighbor_site_class_list = np.tile(class_list[1], num_cells)
+        if self.class_list:
+            center_site_class_list = self.class_list[0]
+            neighbor_site_class_list = np.tile(self.class_list[1], num_cells)
             class_pair_list = np.empty(num_center_elements, dtype=object)
-    
+
+
         displacement_vector_list = np.empty(num_center_elements, dtype=object)
         lattice_direction_list = np.empty(num_center_elements, dtype=object)
         displacement_list = np.empty(num_center_elements, dtype=object)
@@ -203,7 +179,7 @@ class HoppingPathways(object):
             i_lattice_direction_list = []
             i_displacements = []
             i_bridge_list = []
-            if class_list:
+            if self.class_list:
                 i_class_pair_list = []
             for neighbor_site_index, neighbor_site_fract_coord in enumerate(
                                                 neighbor_site_fract_coords):
@@ -247,7 +223,7 @@ class HoppingPathways(object):
                                                      desired_system_size), 3))
     
                     # determine class pair list
-                    if class_list:
+                    if self.class_list:
                         i_class_pair_list.append(
                                 str(center_site_class_list[center_site_index])
                                 + ':' + str(neighbor_site_class_list[
@@ -290,15 +266,62 @@ class HoppingPathways(object):
             lattice_direction_list[center_site_index] = np.asarray(
                                                     i_lattice_direction_list)
             displacement_list[center_site_index] = np.asarray(i_displacements)
-            if class_list:
+            if self.class_list:
                 class_pair_list[center_site_index] = np.asarray(
                                                             i_class_pair_list)
+        pathway_data = (displacement_list, bridge_list, lattice_direction_list,
+                        num_neighbors, class_pair_list, center_site_class_list)
+        return pathway_data
+
+    def generate_pathway_list(self, cutoff_dist_key, cutoff,
+                              avoid_element_type, precision_parameters,
+                              print_parameters, desired_coordinate_parameters):
+        """ generate pathway list for the given set of element types"""
+        # define input parameters
+        neighbor_cutoff = cutoff['neighbor']
+        bridge_cutoff = cutoff['bridge']
+        round_lattice_parameters = precision_parameters['round_lattice_parameters']
+        equivalency_prec = precision_parameters['equivalency']
+        pathway_prec = precision_parameters['pathway']
+        print_equivalency = print_parameters['equivalency']
+        print_pathway_list = print_parameters['pathway_list']
     
+        # define derived parameters
+        [center_element_type, _] = cutoff_dist_key.split(':')
+        center_site_element_type_index = self.element_types.index(center_element_type)
+        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
+        bridge_cutoff_dist_limits = [0, bridge_cutoff]
+        if round_lattice_parameters:
+            base = round_lattice_parameters['base']
+    
+        site_coordinate_info = self.generate_site_coordinates(
+                                                center_site_element_type_index)
+        (_, num_cells, num_center_elements, center_site_fract_coords, _,
+         system_fract_coords) = site_coordinate_info
+    
+        # generate list of element indices to avoid during bridge calculations
+        avoid_element_indices = self.generate_avoid_element_indices(
+                avoid_element_type, num_cells, center_site_element_type_index)
+
+        # generate bridge neighbor list
+        bridge_neighbor_list = self.generate_bridge_neighbor_list(
+                                num_center_elements, center_site_fract_coords,
+                                system_fract_coords, avoid_element_indices,
+                                bridge_cutoff_dist_limits)
+
+        # generate pathway data
+        pathway_data = self.populate_pathway_data(
+                    site_coordinate_info, bridge_neighbor_list,
+                    bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
+                    round_lattice_parameters, desired_coordinate_parameters)
+        (displacement_list, bridge_list, lattice_direction_list,
+         num_neighbors, class_pair_list, center_site_class_list) = pathway_data
+
         # determine irreducible form of lattice directions
         sorted_lattice_direction_list = np.empty(num_center_elements,
                                                  dtype=object)
         sorted_displacement_list = np.empty(num_center_elements, dtype=object)
-        if class_list:
+        if self.class_list:
             sorted_class_pair_list = np.empty(num_center_elements,
                                               dtype=object)
         sorted_bridge_list = np.empty(num_center_elements, dtype=object)
@@ -310,7 +333,7 @@ class HoppingPathways(object):
             sorted_bridge_list[i_center_element_index] = (
                     bridge_list[i_center_element_index][
                         displacement_list[i_center_element_index].argsort()])
-            if class_list:
+            if self.class_list:
                 sorted_class_pair_list[i_center_element_index] = (
                     class_pair_list[i_center_element_index][
                         displacement_list[i_center_element_index].argsort()])
@@ -346,7 +369,7 @@ class HoppingPathways(object):
             # print equivalency of all center sites with their
             # respective class reference site
             if print_equivalency:
-                if class_list:
+                if self.class_list:
                     ref_index = (np.argmax(center_site_class_list
                                            == center_site_class_list[
                                                i_center_element_index]))
@@ -359,7 +382,7 @@ class HoppingPathways(object):
                                        equivalency_prec)))
     
             # generate center site pathway list
-            if class_list:
+            if self.class_list:
                 center_site_pathway_list = np.hstack((
                         np.round(sorted_lattice_direction_list[
                                                         i_center_element_index],
