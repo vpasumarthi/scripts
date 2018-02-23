@@ -150,7 +150,7 @@ class HoppingPathways(object):
                                 system_fract_coords)
         return site_coordinate_info
 
-    def populate_pathway_data(
+    def generate_raw_pathway_data(
                     self, site_coordinate_info, bridge_neighbor_list,
                     bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
                     round_lattice_parameters, desired_coordinate_parameters):
@@ -310,7 +310,7 @@ class HoppingPathways(object):
                                 bridge_cutoff_dist_limits)
 
         # generate pathway data
-        pathway_data = self.populate_pathway_data(
+        pathway_data = self.generate_raw_pathway_data(
                     site_coordinate_info, bridge_neighbor_list,
                     bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
                     round_lattice_parameters, desired_coordinate_parameters)
