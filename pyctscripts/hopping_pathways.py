@@ -273,49 +273,18 @@ class HoppingPathways(object):
                         num_neighbors, class_pair_list, center_site_class_list)
         return pathway_data
 
-    def generate_pathway_list(self, cutoff_dist_key, cutoff,
-                              avoid_element_type, precision_parameters,
-                              print_parameters, desired_coordinate_parameters):
-        """ generate pathway list for the given set of element types"""
-        # define input parameters
-        neighbor_cutoff = cutoff['neighbor']
-        bridge_cutoff = cutoff['bridge']
-        round_lattice_parameters = precision_parameters['round_lattice_parameters']
+    def generate_reduced_pathway_data(self, pathway_data, num_center_elements,
+                                      round_lattice_parameters,
+                                      precision_parameters, print_parameters):
+        (displacement_list, bridge_list, lattice_direction_list,
+         num_neighbors, class_pair_list, center_site_class_list) = pathway_data
+        if round_lattice_parameters:
+            base = round_lattice_parameters['base']
         equivalency_prec = precision_parameters['equivalency']
         pathway_prec = precision_parameters['pathway']
         print_equivalency = print_parameters['equivalency']
         print_pathway_list = print_parameters['pathway_list']
-    
-        # define derived parameters
-        [center_element_type, _] = cutoff_dist_key.split(':')
-        center_site_element_type_index = self.element_types.index(center_element_type)
-        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
-        bridge_cutoff_dist_limits = [0, bridge_cutoff]
-        if round_lattice_parameters:
-            base = round_lattice_parameters['base']
-    
-        site_coordinate_info = self.generate_site_coordinates(
-                                                center_site_element_type_index)
-        (_, num_cells, num_center_elements, center_site_fract_coords, _,
-         system_fract_coords) = site_coordinate_info
-    
-        # generate list of element indices to avoid during bridge calculations
-        avoid_element_indices = self.generate_avoid_element_indices(
-                avoid_element_type, num_cells, center_site_element_type_index)
 
-        # generate bridge neighbor list
-        bridge_neighbor_list = self.generate_bridge_neighbor_list(
-                                num_center_elements, center_site_fract_coords,
-                                system_fract_coords, avoid_element_indices,
-                                bridge_cutoff_dist_limits)
-
-        # generate pathway data
-        pathway_data = self.generate_raw_pathway_data(
-                    site_coordinate_info, bridge_neighbor_list,
-                    bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
-                    round_lattice_parameters, desired_coordinate_parameters)
-        (displacement_list, bridge_list, lattice_direction_list,
-         num_neighbors, class_pair_list, center_site_class_list) = pathway_data
 
         # determine irreducible form of lattice directions
         sorted_lattice_direction_list = np.empty(num_center_elements,
@@ -403,6 +372,48 @@ class HoppingPathways(object):
             if print_pathway_list:
                 np.set_printoptions(suppress=True)
                 print(center_site_pathway_list)
+
+        return pathway_list
+
+    def generate_pathway_list(self, cutoff_dist_key, cutoff,
+                              avoid_element_type, precision_parameters,
+                              print_parameters, desired_coordinate_parameters):
+        """ generate pathway list for the given set of element types"""
+        # define input parameters
+        neighbor_cutoff = cutoff['neighbor']
+        bridge_cutoff = cutoff['bridge']
+        round_lattice_parameters = precision_parameters['round_lattice_parameters']
+    
+        # define derived parameters
+        [center_element_type, _] = cutoff_dist_key.split(':')
+        center_site_element_type_index = self.element_types.index(center_element_type)
+        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
+        bridge_cutoff_dist_limits = [0, bridge_cutoff]
+    
+        site_coordinate_info = self.generate_site_coordinates(
+                                                center_site_element_type_index)
+        (_, num_cells, num_center_elements, center_site_fract_coords, _,
+         system_fract_coords) = site_coordinate_info
+    
+        # generate list of element indices to avoid during bridge calculations
+        avoid_element_indices = self.generate_avoid_element_indices(
+                avoid_element_type, num_cells, center_site_element_type_index)
+
+        # generate bridge neighbor list
+        bridge_neighbor_list = self.generate_bridge_neighbor_list(
+                                num_center_elements, center_site_fract_coords,
+                                system_fract_coords, avoid_element_indices,
+                                bridge_cutoff_dist_limits)
+
+        # generate pathway data
+        pathway_data = self.generate_raw_pathway_data(
+                    site_coordinate_info, bridge_neighbor_list,
+                    bridge_cutoff_dist_limits, neighbor_cutoff_dist_limits,
+                    round_lattice_parameters, desired_coordinate_parameters)
+
+        pathway_list = self.generate_reduced_pathway_data(
+                pathway_data, num_center_elements, round_lattice_parameters,
+                precision_parameters, print_parameters)
     
         pathway_file_name = ('pathway_list_' + cutoff_dist_key.replace(':','-')
                              + '_cutoff=' + str(neighbor_cutoff) + '.npy')
