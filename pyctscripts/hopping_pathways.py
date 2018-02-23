@@ -62,8 +62,7 @@ class HoppingPathways(object):
             n_filled_unit_cells -= (quantum_indices[index]
                                     * system_size[index+1:].prod())
         return quantum_indices
-    
-    
+
     def generate_avoid_element_indices(self, avoid_element_type, num_cells,
                                        center_site_element_type_index):
         if avoid_element_type:
@@ -80,34 +79,8 @@ class HoppingPathways(object):
         else:
             avoid_element_indices = []
         return avoid_element_indices
-    
-    
-    def generate_pathway_list(self,
-                              cutoff_dist_key, class_list, cutoff,
-                              avoid_element_type, precision_parameters,
-                              print_parameters, desired_coordinate_parameters):
-    
-        """ generate unique pathways for the given set of element types"""
-        # define input parameters
-        neighbor_cutoff = cutoff['neighbor']
-        bridge_cutoff = cutoff['bridge']
-        round_lattice_parameters = precision_parameters[
-                                                    'round_lattice_parameters']
-        equivalency_prec = precision_parameters['equivalency']
-        pathway_prec = precision_parameters['pathway']
-        print_equivalency = print_parameters['equivalency']
-        print_pathway_list = print_parameters['pathway_list']
-    
-        # define derived parameters
-        [center_element_type, neighbor_element_type] = cutoff_dist_key.split(':')
-        center_site_element_type_index = self.element_types.index(
-                                                        center_element_type)
-        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
-        bridge_cutoff_dist_limits = [0, bridge_cutoff]
-        if round_lattice_parameters:
-            base = round_lattice_parameters['base']
-            prec = round_lattice_parameters['prec']
-    
+
+    def generate_site_coordinates(self, center_site_element_type_index):
         # generate array of unit cell translational coordinates
         pbc = np.ones(3, int)
         num_cells = 3**sum(pbc)
@@ -120,14 +93,10 @@ class HoppingPathways(object):
         for x_offset in x_range:
             for y_offset in y_range:
                 for z_offset in z_range:
-                    unitcell_translational_coords[index] = np.array([x_offset,
-                                                                     y_offset,
-                                                                     z_offset])
+                    unitcell_translational_coords[index] = np.array(
+                                                [x_offset, y_offset, z_offset])
                     index += 1
-    
-        # generate list of element indices to avoid during bridge calculations
-        avoid_element_indices = self.generate_avoid_element_indices(
-                avoid_element_type, num_cells, center_site_element_type_index)
+
         # extract center site fractional coordinates
         num_center_elements = self.n_elements_per_unit_cell[
                                                 center_site_element_type_index]
@@ -151,7 +120,43 @@ class HoppingPathways(object):
                                     (i_cell + 1) * self.total_elements_per_unit_cell)] \
                                         = (self.fractional_unit_cell_coords
                                            + unitcell_translational_coords[i_cell])
+        site_coordinate_info = (system_size, num_cells, num_center_elements,
+                                center_site_fract_coords,
+                                neighbor_site_fract_coords,
+                                system_fract_coords)
+        return site_coordinate_info
+
+    def generate_pathway_list(self, cutoff_dist_key, class_list, cutoff,
+                              avoid_element_type, precision_parameters,
+                              print_parameters, desired_coordinate_parameters):
+        """ generate pathway list for the given set of element types"""
+        # define input parameters
+        neighbor_cutoff = cutoff['neighbor']
+        bridge_cutoff = cutoff['bridge']
+        round_lattice_parameters = precision_parameters['round_lattice_parameters']
+        equivalency_prec = precision_parameters['equivalency']
+        pathway_prec = precision_parameters['pathway']
+        print_equivalency = print_parameters['equivalency']
+        print_pathway_list = print_parameters['pathway_list']
     
+        # define derived parameters
+        [center_element_type, _] = cutoff_dist_key.split(':')
+        center_site_element_type_index = self.element_types.index(center_element_type)
+        neighbor_cutoff_dist_limits = [0, neighbor_cutoff]
+        bridge_cutoff_dist_limits = [0, bridge_cutoff]
+        if round_lattice_parameters:
+            base = round_lattice_parameters['base']
+            prec = round_lattice_parameters['prec']
+    
+        site_coordinate_info = self.generate_site_coordinates(
+                                                center_site_element_type_index)
+        (system_size, num_cells, num_center_elements, center_site_fract_coords,
+         neighbor_site_fract_coords, system_fract_coords) = site_coordinate_info
+    
+        # generate list of element indices to avoid during bridge calculations
+        avoid_element_indices = self.generate_avoid_element_indices(
+                avoid_element_type, num_cells, center_site_element_type_index)
+
         # generate bridge neighbor list
         bridge_neighbor_list = np.empty(num_center_elements, dtype=object)
         for center_site_index, center_site_fract_coord in enumerate(
@@ -366,9 +371,8 @@ class HoppingPathways(object):
                 np.set_printoptions(suppress=True)
                 print(center_site_pathway_list)
     
-        pathway_file_name = (
-                'pathway_list_' + center_element_type + '-' + neighbor_element_type
-                + '_cutoff=' + str(neighbor_cutoff) + '.npy')
+        pathway_file_name = ('pathway_list_' + cutoff_dist_key.replace(':','-')
+                             + '_cutoff=' + str(neighbor_cutoff) + '.npy')
         pathway_file_path = self.dst_path / pathway_file_name
         np.save(pathway_file_path, pathway_list)
         return
