@@ -80,6 +80,29 @@ class HoppingPathways(object):
             avoid_element_indices = []
         return avoid_element_indices
 
+    def generate_bridge_neighbor_list(self, num_center_elements,
+                                      center_site_fract_coords,
+                                      system_fract_coords, avoid_element_indices,
+                                      bridge_cutoff_dist_limits):
+        bridge_neighbor_list = np.empty(num_center_elements, dtype=object)
+        for center_site_index, center_site_fract_coord in enumerate(
+                                                    center_site_fract_coords):
+            i_bridge_neighbor_list = []
+            for neighbor_site_index, neighbor_site_fract_coord in enumerate(
+                                                        system_fract_coords):
+                if neighbor_site_index not in avoid_element_indices:
+                    lattice_direction = (neighbor_site_fract_coord
+                                         - center_site_fract_coord)
+                    neighbor_displacement_vector = np.dot(
+                            lattice_direction[None, :], self.lattice_matrix)
+                    displacement = np.linalg.norm(neighbor_displacement_vector)
+                    if (bridge_cutoff_dist_limits[0] < displacement
+                            <= bridge_cutoff_dist_limits[1]):
+                        i_bridge_neighbor_list.append(neighbor_site_index)
+            bridge_neighbor_list[center_site_index] = np.asarray(
+                                                        i_bridge_neighbor_list)
+        return bridge_neighbor_list
+    
     def generate_site_coordinates(self, center_site_element_type_index):
         # generate array of unit cell translational coordinates
         pbc = np.ones(3, int)
@@ -158,23 +181,10 @@ class HoppingPathways(object):
                 avoid_element_type, num_cells, center_site_element_type_index)
 
         # generate bridge neighbor list
-        bridge_neighbor_list = np.empty(num_center_elements, dtype=object)
-        for center_site_index, center_site_fract_coord in enumerate(
-                                                    center_site_fract_coords):
-            i_bridge_neighbor_list = []
-            for neighbor_site_index, neighbor_site_fract_coord in enumerate(
-                                                        system_fract_coords):
-                if neighbor_site_index not in avoid_element_indices:
-                    lattice_direction = (neighbor_site_fract_coord
-                                         - center_site_fract_coord)
-                    neighbor_displacement_vector = np.dot(
-                            lattice_direction[None, :], self.lattice_matrix)
-                    displacement = np.linalg.norm(neighbor_displacement_vector)
-                    if (bridge_cutoff_dist_limits[0] < displacement
-                            <= bridge_cutoff_dist_limits[1]):
-                        i_bridge_neighbor_list.append(neighbor_site_index)
-            bridge_neighbor_list[center_site_index] = np.asarray(
-                                                        i_bridge_neighbor_list)
+        bridge_neighbor_list = self.generate_bridge_neighbor_list(
+                                num_center_elements, center_site_fract_coords,
+                                system_fract_coords, avoid_element_indices,
+                                bridge_cutoff_dist_limits)
     
         # initialize class pair list
         if class_list:
