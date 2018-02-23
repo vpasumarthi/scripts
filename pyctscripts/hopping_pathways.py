@@ -58,10 +58,10 @@ class HoppingPathways(object):
         return avoid_element_indices
     
     
-    def unique_pathways(self, input_coordinate_file_path, cutoff_dist_key,
-                        class_list, cutoff, avoid_element_type,
-                        precision_parameters, print_parameters,
-                        desired_coordinate_parameters):
+    def generate_pathway_list(self, input_coordinate_file_path,
+                              cutoff_dist_key, class_list, cutoff,
+                              avoid_element_type, precision_parameters,
+                              print_parameters, desired_coordinate_parameters):
     
         """ generate unique pathways for the given set of element types"""
         # define input parameters
