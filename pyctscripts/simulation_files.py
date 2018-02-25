@@ -238,7 +238,7 @@ class SimulationFiles(object):
                     "export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so\n")
                 if self.slurm['submit_run']:
                     dst_file.write("srun Run.py\n")
-                if self.slurm['submit_m_s_d']:
+                if self.slurm['submit_msd']:
                     dst_file.write("srun MSD.py\n")
                 dst_file.write("\necho \"All Done!\"\n")
         return None
