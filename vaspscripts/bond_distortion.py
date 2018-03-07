@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from PyCT.io import read_poscar
+
 
 def readPOSCAR(srcFilePath, fileFormatIndex):
     # fileFormatIndex: 0=VASP; 1=VESTA
@@ -43,9 +45,18 @@ def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
                      localizedSiteNumber, neighborElementTypeList,
                      neighborCutoffList, stretchPercentList):
     coordStartLineNumber = 8 + fileFormatIndex
-    [latticeMatrix, elementTypes, nElements, fractionalCoords] = readPOSCAR(
-                                                        srcFilePath,
-                                                        fileFormatIndex)
+    poscar_info = read_poscar(srcFilePath)
+    latticeMatrix = poscar_info['lattice_matrix']
+    elementTypes = poscar_info['element_types']
+    nElements = poscar_info['num_elements']
+    coordinate_type = poscar_info['coordinate_type']
+    unit_cell_coords = poscar_info['coordinates']
+    if coordinate_type == 'Direct':
+        fractionalCoords = unit_cell_coords
+    elif coordinate_type == 'Cartesian':
+        fractionalCoords = np.dot(unit_cell_coords,
+                                  np.linalg.inv(latticeMatrix))
+
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
     numUniqueElementTypes = len(uniqueElementTypes)
