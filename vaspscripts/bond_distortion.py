@@ -5,9 +5,9 @@ import numpy as np
 from PyCT.io import read_poscar, write_poscar
 
 
-def chargeDistortion(srcFilePath, localizedElementType, localizedSiteNumber,
-                     neighborElementTypeList, neighborCutoffList,
-                     stretchPercentList):
+def bond_distortion(srcFilePath, localizedElementType, localizedSiteNumber,
+                    neighborElementTypeList, neighborCutoffList,
+                    stretchPercentList):
     poscar_info = read_poscar(srcFilePath)
     latticeMatrix = poscar_info['lattice_matrix']
     elementTypes = poscar_info['element_types']
