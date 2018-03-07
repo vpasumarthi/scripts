@@ -5,105 +5,100 @@ import numpy as np
 from PyCT.io import read_poscar, write_poscar
 
 
-def bond_distortion(srcFilePath, localizedElementType, localizedSiteNumber,
-                    neighborElementTypeList, neighborCutoffList,
-                    stretchPercentList):
-    poscar_info = read_poscar(srcFilePath)
-    latticeMatrix = poscar_info['lattice_matrix']
-    elementTypes = poscar_info['element_types']
-    nElements = poscar_info['num_elements']
+def bond_distortion(src_file_path, localized_element_type,
+                    localized_site_number, neighbor_element_type_list,
+                    neighbor_cutoff_list, stretch_percent_list):
+    poscar_info = read_poscar(src_file_path)
+    lattice_matrix = poscar_info['lattice_matrix']
+    element_types = poscar_info['element_types']
+    n_elements = poscar_info['num_elements']
     coordinate_type = poscar_info['coordinate_type']
     unit_cell_coords = poscar_info['coordinates']
     if coordinate_type == 'Direct':
-        fractionalCoords = unit_cell_coords
+        fractional_coords = unit_cell_coords
     elif coordinate_type == 'Cartesian':
-        fractionalCoords = np.dot(unit_cell_coords,
-                                  np.linalg.inv(latticeMatrix))
+        fractional_coords = np.dot(unit_cell_coords,
+                                  np.linalg.inv(lattice_matrix))
     file_format = poscar_info['file_format']
 
-    elementTypes_consolidated = []
-    uniqueElementTypes = set(elementTypes)
-    numUniqueElementTypes = len(uniqueElementTypes)
-    nElements_consolidated = np.zeros(numUniqueElementTypes, int)
-    uniqueElementTypeIndex = -1
-    for elementTypeIndex, elementType in enumerate(elementTypes):
-        if elementType not in elementTypes_consolidated:
-            uniqueElementTypeIndex += 1
-            elementTypes_consolidated.append(elementType)
-        nElements_consolidated[uniqueElementTypeIndex] += nElements[
-                                                            elementTypeIndex]
-    localizedElementTypeIndex = elementTypes_consolidated.index(
-                                                        localizedElementType)
-    localizedSiteCoords = (
-        fractionalCoords[nElements_consolidated[
-                                            :localizedElementTypeIndex].sum()
-                         + localizedSiteNumber - 1])
+    element_types_consolidated = []
+    unique_element_types = set(element_types)
+    num_unique_element_types = len(unique_element_types)
+    n_elements_consolidated = np.zeros(num_unique_element_types, int)
+    unique_element_type_index = -1
+    for element_type_index, element_type in enumerate(element_types):
+        if element_type not in element_types_consolidated:
+            unique_element_type_index += 1
+            element_types_consolidated.append(element_type)
+        n_elements_consolidated[unique_element_type_index] += n_elements[
+                                                            element_type_index]
+    localized_element_type_index = element_types_consolidated.index(
+                                                        localized_element_type)
+    localized_site_coords = (
+        fractional_coords[n_elements_consolidated[
+                                        :localized_element_type_index].sum()
+                          + localized_site_number - 1])
 
     # generate array of unit cell translational coordinates
     pbc = np.ones(3, int)
-    numCells = 3**sum(pbc)
-    xRange = range(-1, 2) if pbc[0] == 1 else [0]
-    yRange = range(-1, 2) if pbc[1] == 1 else [0]
-    zRange = range(-1, 2) if pbc[2] == 1 else [0]
-    cellTranslationalCoords = np.zeros((numCells, 3))  # Initialization
+    num_cells = 3**sum(pbc)
+    x_range = range(-1, 2) if pbc[0] == 1 else [0]
+    y_range = range(-1, 2) if pbc[1] == 1 else [0]
+    z_range = range(-1, 2) if pbc[2] == 1 else [0]
+    cell_translational_coords = np.zeros((num_cells, 3))  # Initialization
     index = 0
-    for xOffset in xRange:
-        for yOffset in yRange:
-            for zOffset in zRange:
-                cellTranslationalCoords[index] = np.array([xOffset,
-                                                           yOffset,
-                                                           zOffset])
+    for x_offset in x_range:
+        for y_offset in y_range:
+            for z_offset in z_range:
+                cell_translational_coords[index] = np.array(
+                                                [x_offset, y_offset, z_offset])
                 index += 1
-    localizedSiteCoords_imageconsolidated = (localizedSiteCoords
-                                             + cellTranslationalCoords)
-    for distortElementTypeIndex, distortElementType in enumerate(
-                                                    neighborElementTypeList):
-        neighborElementTypeIndex = elementTypes_consolidated.index(
-                                                            distortElementType)
-        neighborSiteCoords = fractionalCoords[
-                    nElements_consolidated[:neighborElementTypeIndex].sum()
-                    + range(nElements_consolidated[neighborElementTypeIndex])]
-        neighborCutoffDistLimits = [
-                                0,
-                                neighborCutoffList[distortElementTypeIndex]]
+    localized_site_coords_imageconsolidated = (localized_site_coords
+                                               + cell_translational_coords)
+    for distort_element_type_index, distort_element_type in enumerate(
+                                                neighbor_element_type_list):
+        neighbor_element_type_index = element_types_consolidated.index(
+                                                        distort_element_type)
+        neighbor_site_coords = fractional_coords[
+                n_elements_consolidated[:neighbor_element_type_index].sum()
+                + range(n_elements_consolidated[neighbor_element_type_index])]
+        neighbor_cutoff_dist_limits = [
+                        0, neighbor_cutoff_list[distort_element_type_index]]
 
         # generate neighbor list
-        neighborList = []
-        centerSiteCoordList = []
-        for neighborSiteIndex, neighborSiteCoord in enumerate(
-                                                        neighborSiteCoords):
-            latticeDirections = (localizedSiteCoords_imageconsolidated
-                                 - neighborSiteCoord)
-            minDisp = np.linalg.norm(np.sum(latticeMatrix, axis=0))
-            for iCell in range(numCells):
-                displacement = np.linalg.norm(np.dot(latticeDirections[iCell],
-                                                     latticeMatrix))
-                if displacement < minDisp:
-                    minDisp = displacement
-                    centerSiteCoords = localizedSiteCoords_imageconsolidated[
-                                                                        iCell]
-            if (neighborCutoffDistLimits[0] < minDisp
-                    <= neighborCutoffDistLimits[1]):
-                neighborList.append(neighborSiteIndex)
-                centerSiteCoordList.append(centerSiteCoords)
+        neighbor_list = []
+        center_site_coord_list = []
+        for neighbor_site_index, neighbor_site_coord in enumerate(
+                                                        neighbor_site_coords):
+            lattice_directions = (localized_site_coords_imageconsolidated
+                                  - neighbor_site_coord)
+            min_disp = np.linalg.norm(np.sum(lattice_matrix, axis=0))
+            for i_cell in range(num_cells):
+                displacement = np.linalg.norm(
+                            np.dot(lattice_directions[i_cell], lattice_matrix))
+                if displacement < min_disp:
+                    min_disp = displacement
+                    center_site_coords = localized_site_coords_imageconsolidated[i_cell]
+            if (neighbor_cutoff_dist_limits[0] < min_disp
+                    <= neighbor_cutoff_dist_limits[1]):
+                neighbor_list.append(neighbor_site_index)
+                center_site_coord_list.append(center_site_coords)
 
         # generate distortion
-        numNeighbors = len(neighborList)
-        headStart = nElements_consolidated[:neighborElementTypeIndex].sum()
-        for iNeighbor in range(numNeighbors):
-            latticeDirection = (neighborSiteCoords[neighborList[iNeighbor]]
-                                - centerSiteCoordList[iNeighbor])
-            displacement = np.linalg.norm(np.dot(latticeDirection,
-                                                 latticeMatrix))
-            unitVector = latticeDirection / displacement
-            index = headStart + neighborList[iNeighbor]
-            newCoordinate = (
-                centerSiteCoordList[iNeighbor] + unitVector
-                * (displacement
-                   * (1 + stretchPercentList[distortElementTypeIndex] / 100)))
-            fractionalCoords[index] = newCoordinate
-    dstFilePath = srcFilePath + '.out'
-    write_poscar(srcFilePath, dstFilePath, file_format,
-                 elementTypes, nElements, coordinate_type,
-                 fractionalCoords)
+        num_neighbors = len(neighbor_list)
+        head_start = n_elements_consolidated[:neighbor_element_type_index].sum()
+        for i_neighbor in range(num_neighbors):
+            lattice_direction = (neighbor_site_coords[neighbor_list[i_neighbor]]
+                                - center_site_coord_list[i_neighbor])
+            displacement = np.linalg.norm(np.dot(lattice_direction,
+                                                 lattice_matrix))
+            unit_vector = lattice_direction / displacement
+            index = head_start + neighbor_list[i_neighbor]
+            new_coordinate = (
+                center_site_coord_list[i_neighbor] + unit_vector
+                * (displacement * (1 + stretch_percent_list[distort_element_type_index] / 100)))
+            fractional_coords[index] = new_coordinate
+    dst_file_path = src_file_path + '.out'
+    write_poscar(src_file_path, dst_file_path, file_format, element_types,
+                 n_elements, coordinate_type, fractional_coords)
     return None
