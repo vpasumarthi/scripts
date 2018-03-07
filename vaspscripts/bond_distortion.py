@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from PyCT.io import read_poscar
+from PyCT.io import read_poscar, write_poscar
 
 
 def readPOSCAR(srcFilePath, fileFormatIndex):
@@ -44,7 +44,6 @@ def readPOSCAR(srcFilePath, fileFormatIndex):
 def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
                      localizedSiteNumber, neighborElementTypeList,
                      neighborCutoffList, stretchPercentList):
-    coordStartLineNumber = 8 + fileFormatIndex
     poscar_info = read_poscar(srcFilePath)
     latticeMatrix = poscar_info['lattice_matrix']
     elementTypes = poscar_info['element_types']
@@ -56,6 +55,7 @@ def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
     elif coordinate_type == 'Cartesian':
         fractionalCoords = np.dot(unit_cell_coords,
                                   np.linalg.inv(latticeMatrix))
+    file_format = poscar_info['file_format']
 
     elementTypes_consolidated = []
     uniqueElementTypes = set(elementTypes)
@@ -92,8 +92,6 @@ def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
                 index += 1
     localizedSiteCoords_imageconsolidated = (localizedSiteCoords
                                              + cellTranslationalCoords)
-    lineIndices = []
-    newCoordinateList = []
     for distortElementTypeIndex, distortElementType in enumerate(
                                                     neighborElementTypeList):
         neighborElementTypeIndex = elementTypes_consolidated.index(
@@ -127,22 +125,24 @@ def chargeDistortion(srcFilePath, fileFormatIndex, localizedElementType,
 
         # generate distortion
         numNeighbors = len(neighborList)
-        headStart = (coordStartLineNumber - 1
-                     + nElements_consolidated[:neighborElementTypeIndex].sum())
+        headStart = nElements_consolidated[:neighborElementTypeIndex].sum()
         for iNeighbor in range(numNeighbors):
             latticeDirection = (neighborSiteCoords[neighborList[iNeighbor]]
                                 - centerSiteCoordList[iNeighbor])
             displacement = np.linalg.norm(np.dot(latticeDirection,
                                                  latticeMatrix))
             unitVector = latticeDirection / displacement
-            lineIndices.append(headStart + neighborList[iNeighbor])
-            newCoordinateList.append(
+            index = headStart + neighborList[iNeighbor]
+            newCoordinate = (
                 centerSiteCoordList[iNeighbor] + unitVector
                 * (displacement
                    * (1 + stretchPercentList[distortElementTypeIndex] / 100)))
-    newCoordinateList = np.asarray(newCoordinateList)
-    writePOSCAR(srcFilePath, fileFormatIndex, lineIndices, newCoordinateList)
-    return
+            fractionalCoords[index] = newCoordinate
+    dstFilePath = srcFilePath + '.out'
+    write_poscar(srcFilePath, dstFilePath, file_format,
+                 elementTypes, nElements, coordinate_type,
+                 fractionalCoords)
+    return None
 
 
 def writePOSCAR(srcFilePath, fileFormatIndex, lineIndices, newCoordinateList):
