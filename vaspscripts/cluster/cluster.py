@@ -8,13 +8,20 @@ from PyCT.io import read_poscar, write_poscar
 def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
                     terminating_element_type, terminating_bond_distance,
                     oxidation_list, bridge_search_depth, charge_neutral, prec):
-    [lattice_matrix, element_types, n_elements, total_elements,
-     coordinate_type, coordinates, file_format] = read_poscar(src_file_path)
+    poscar_info = read_poscar(src_file_path)
+    lattice_matrix = poscar_info['lattice_matrix']
+    element_types = poscar_info['element_types']
+    n_elements = poscar_info['num_elements']
+    total_elements = poscar_info['total_elements']
+    coordinate_type = poscar_info['coordinate_type']
+    unit_cell_coords = poscar_info['coordinates']
     if coordinate_type == 'Direct':
-        fractional_coords = coordinates
+        fractional_coords = unit_cell_coords
     elif coordinate_type == 'Cartesian':
-        fractional_coords = np.dot(coordinates, np.linalg.inv(lattice_matrix))
-     
+        fractional_coords = np.dot(unit_cell_coords,
+                                             np.linalg.inv(lattice_matrix))
+    file_format = poscar_info['file_format']
+
     num_sites = len(site_index_list)
     element_types_consolidated = []
     unique_element_types = set(element_types)
@@ -197,7 +204,9 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
         element_types_cluster.append(terminating_element_type)
         n_elements_cluster.append(num_h_sites)
         coordinates_cluster.extend(h_coordinates_list)
-
+    print(element_types_cluster)
+    print(n_elements_cluster)
+    import pdb; pdb.set_trace()
     write_poscar(src_file_path, dst_file_path, file_format,
                  element_types_cluster, n_elements_cluster, coordinate_type,
                  coordinates_cluster)
