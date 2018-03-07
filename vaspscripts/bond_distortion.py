@@ -98,7 +98,9 @@ def bond_distortion(src_file_path, localized_element_type,
                 center_site_coord_list[i_neighbor] + unit_vector
                 * (displacement * (1 + stretch_percent_list[distort_element_type_index] / 100)))
             fractional_coords[index] = new_coordinate
-    dst_file_path = src_file_path + '.out'
+    dst_path = src_file_path.parent
+    dst_file_name = src_file_path.name + '.out'
+    dst_file_path = dst_path / dst_file_name
     write_poscar(src_file_path, dst_file_path, file_format, element_types,
                  n_elements, coordinate_type, fractional_coords)
     return None
