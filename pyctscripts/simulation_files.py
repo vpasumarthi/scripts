@@ -224,8 +224,9 @@ class SimulationFiles(object):
                     "echo \"SLURM_NNODES\"=$SLURM_NNODES\n"
                     "echo \"SLURMTMPDIR=\"$SLURMTMPDIR\n\n"
                     "echo \"working directory = \"$SLURM_SUBMIT_DIR\n\n"
-                    "module load python\n"
-                    "source activate py36\n"
+                    "module load python\n")
+                dst_file.write(f"source activate {self.slurm['conda_env']}\n")
+                dst_file.write(
                     "module list\n"
                     "ulimit -s unlimited\n\n"
                     "# The initial srun will trigger the SLURM prologue on"
