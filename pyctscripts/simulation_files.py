@@ -224,6 +224,8 @@ class SimulationFiles(object):
                     "echo \"SLURM_NNODES\"=$SLURM_NNODES\n"
                     "echo \"SLURMTMPDIR=\"$SLURMTMPDIR\n\n"
                     "echo \"working directory = \"$SLURM_SUBMIT_DIR\n\n"
+                    "HOSTFILE=hosts.$SLURM_JOB_ID\n"
+                    "srun hostname -s | sort > $HOSTFILE\n"
                     "module load python\n")
                 dst_file.write(f"source activate {self.slurm['conda_env']}\n")
                 dst_file.write(
