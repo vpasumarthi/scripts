@@ -82,19 +82,18 @@ class SimulationFiles(object):
         return (work_dir_path, work_dir_depth)
 
     def simulation_parameter_files(self):
-        species_count_list = [0] * len(self.system['species_count'])
-        for i_run in range(self.n_runs):
-            species_count_list[self.non_var_species_type_index] = (
-                self.system['species_count'][self.non_var_species_type_index])
-            species_count_list[self.var_species_type_index] = (
-                                            self.var_species_count_list[i_run])
+        for i_run in range(self.num_runs):
+            if self.variable_quantity_type_index == 1:
+                self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+            else:
+                self.run['doping']['num_dopants'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
 
+            species_count_list = self.system['species_count']
             (work_dir_path, work_dir_depth) = self.dst_path(species_count_list)
             self.system['work_dir_depth'] = work_dir_depth
-            self.system['species_count'] = species_count_list
             Path.mkdir(work_dir_path, parents=True, exist_ok=True)
-            dst_file_path = work_dir_path.joinpath(self.system['dst_file_name']
-                                                   )
+            dst_file_path = work_dir_path.joinpath(self.system['dst_file_name'])
+
             # generate simulation parameter file
             with dst_file_path.open('w') as dst_file:
                 dst_file.write('# System parameters:\n')
@@ -108,12 +107,13 @@ class SimulationFiles(object):
         return None
 
     def run_files(self):
-        species_count_list = [0] * len(self.system['species_count'])
-        for i_run in range(self.n_runs):
-            species_count_list[self.non_var_species_type_index] = (
-                self.system['species_count'][self.non_var_species_type_index])
-            species_count_list[self.var_species_type_index] = (
-                                            self.var_species_count_list[i_run])
+        for i_run in range(self.num_runs):
+            if self.variable_quantity_type_index == 1:
+                self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+            else:
+                self.run['doping']['num_dopants'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+
+            species_count_list = self.system['species_count']
             (work_dir_path, _) = self.dst_path(species_count_list)
             dst_file_path = work_dir_path.joinpath(self.run['dst_file_name'])
 
@@ -129,12 +129,13 @@ class SimulationFiles(object):
         return None
 
     def msd_files(self):
-        species_count_list = [0] * len(self.system['species_count'])
-        for i_run in range(self.n_runs):
-            species_count_list[self.non_var_species_type_index] = (
-                self.system['species_count'][self.non_var_species_type_index])
-            species_count_list[self.var_species_type_index] = (
-                                            self.var_species_count_list[i_run])
+        for i_run in range(self.num_runs):
+            if self.variable_quantity_type_index == 1:
+                self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+            else:
+                self.run['doping']['num_dopants'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+
+            species_count_list = self.system['species_count']
             (work_dir_path, _) = self.dst_path(species_count_list)
             dst_file_path = work_dir_path.joinpath(self.msd['dst_file_name'])
 
@@ -173,14 +174,14 @@ class SimulationFiles(object):
 
         charge_comb = (self.system['ion_charge_type'][0]
                        + self.system['species_charge_type'][0])
-        species_count_list = [0] * len(self.system['species_count'])
-        species_tag = 'e' if self.var_species_type_index == 0 else 'h'
-        for i_run in range(self.n_runs):
-            # estimate simulation run time in sec
-            species_count_list[self.non_var_species_type_index] = (
-                self.system['species_count'][self.non_var_species_type_index])
-            species_count_list[self.var_species_type_index] = (
-                                            self.var_species_count_list[i_run])
+        species_tag = 'e' if self.variable_quantity_type_index == 0 else 'h'
+        for i_run in range(self.num_runs):
+            if self.variable_quantity_type_index == 1:
+                self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+            else:
+                self.run['doping']['num_dopants'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
+
+            species_count_list = self.system['species_count']
             (work_dir_path, _) = self.dst_path(species_count_list)
             Path.mkdir(work_dir_path, parents=True, exist_ok=True)
             dst_file_path = work_dir_path.joinpath(self.slurm['dst_file_name'])
@@ -189,12 +190,14 @@ class SimulationFiles(object):
             with dst_file_path.open('w') as dst_file:
                 dst_file.write('#!/bin/sh\n')
                 dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
-                               + '_' + self.field_tag + '_' + species_tag
-                               + str(self.var_species_count_list[i_run])
+                               + '_' + self.field_tag.replace(' ', '_')
+                               + '_' + species_tag
+                               + str(self.variable_quantity_list[i_run])
                                + '"\n')
                 dst_file.write('#SBATCH ' + output_key + '_' + charge_comb
-                               + '_' + self.field_tag + '_' + species_tag
-                               + str(self.var_species_count_list[i_run])
+                               + '_' + self.field_tag.replace(' ', '_')
+                               + '_' + species_tag
+                               + str(self.variable_quantity_list[i_run])
                                + '.out\n')
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition_value']}\n")
@@ -207,8 +210,8 @@ class SimulationFiles(object):
                     num_days = self.slurm['md_slurm_job_max_time_limit']
                 else:
                     est_run_time = self.run_time(species_count_list, kmc_prec)
-                    if est_run_time > self.gc_slurm_job_max_time_limit:
-                        num_hours = self.gc_slurm_job_max_time_limit
+                    if est_run_time > self.slurm['gc_slurm_job_max_time_limit']:
+                        num_hours = self.slurm['gc_slurm_job_max_time_limit']
                     else:
                         num_hours = est_run_time // self.HR2SEC
                         num_mins = (est_run_time // self.MIN2SEC) % self.MIN2SEC
