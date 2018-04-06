@@ -151,16 +151,24 @@ class SimulationFiles(object):
         return None
 
     def run_time(self, species_count_list, kmc_prec):
-        k_total = np.dot(self.k_total_per_species, species_count_list)
+        k_total = np.dot(self.slurm['k_total_per_species'], species_count_list)
         time_step = 1 / k_total
         kmc_steps = int(np.ceil(self.run['t_final'] / time_step / kmc_prec)
                         * kmc_prec)
-        num_states_per_step = np.dot(self.num_states_per_species,
+        num_states_per_step = np.dot(self.slurm['num_states_per_species'],
                                      species_count_list)
         total_states_per_traj = num_states_per_step * kmc_steps
-        est_run_time = int(self.time_per_state[self.var_species_type_index]
+        if self.variable_quantity_type_index == 1:
+            time_per_state = self.slurm['time_per_state'][self.variable_quantity_type_index]
+        else:
+            if 0 in species_count_list:
+                zero_species_index = species_count_list.index(0)
+                non_zero_species_index = int(not zero_species_index)
+                time_per_state = self.slurm['time_per_state'][non_zero_species_index]
+            time_per_state = max(self.slurm['time_per_state'])
+        est_run_time = int(time_per_state
                            * self.run['n_traj'] * total_states_per_traj
-                           + (self.add_on_time_limit * self.HR2SEC))
+                           + (self.slurm['add_on_time_limit'] * self.HR2SEC))
         return est_run_time
 
     def slurm_files(self, kmc_prec):
