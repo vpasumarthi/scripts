@@ -199,13 +199,13 @@ class SimulationFiles(object):
                 dst_file.write('#!/bin/sh\n')
                 dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
                                + '_' + self.field_tag.replace(' ', '_')
-                               + '_' + species_tag
-                               + str(self.variable_quantity_list[i_run])
+                               + '_' + 'e' + str(species_count_list[0])
+                               + 'h' + str(species_count_list[1])
                                + '"\n')
                 dst_file.write('#SBATCH ' + output_key + '_' + charge_comb
                                + '_' + self.field_tag.replace(' ', '_')
-                               + '_' + species_tag
-                               + str(self.variable_quantity_list[i_run])
+                               + '_' + 'e' + str(species_count_list[0])
+                               + 'h' + str(species_count_list[1])
                                + '.out\n')
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition_value']}\n")
