@@ -176,9 +176,6 @@ class SimulationFiles(object):
         job_name_key = ('--job-name="' + self.system['material'] + '-'
                         + 'x'.join(str(element)
                                    for element in self.system['system_size']))
-        output_key = ('--output=' + self.system['material'] + '-'
-                      + 'x'.join(str(element)
-                                 for element in self.system['system_size']))
 
         charge_comb = (self.system['ion_charge_type'][0]
                        + self.system['species_charge_type'][0])
@@ -201,11 +198,7 @@ class SimulationFiles(object):
                                + '_' + 'e' + str(species_count_list[0])
                                + 'h' + str(species_count_list[1])
                                + '"\n')
-                dst_file.write('#SBATCH ' + output_key + '_' + charge_comb
-                               + '_' + self.field_tag.replace(' ', '_')
-                               + '_' + 'e' + str(species_count_list[0])
-                               + 'h' + str(species_count_list[1])
-                               + '.out\n')
+                dst_file.write('#SBATCH --output=job.out\n')
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition_value']}\n")
                 if self.slurm['partition_value'] == 'mdupuis2':
