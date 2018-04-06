@@ -13,20 +13,20 @@ class SimulationFiles(object):
     MIN2SEC = 60
     HR2SEC = 60 * MIN2SEC
 
-    def __init__(self, sim_param_file_name, var_species_type_index,
-                 var_species_count_list, kmc_prec):
+    def __init__(self, master_sim_param_file_name, variable_quantity_type_index,
+                 variable_quantity_index, variable_quantity_list, kmc_prec):
         # Load simulation parameters
-        with open(sim_param_file_name, 'r') as stream:
+        with open(master_sim_param_file_name, 'r') as stream:
             try:
                 params = yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
         for key, value in params.items():
             setattr(self, key, value)
-        self.var_species_type_index = var_species_type_index
-        self.non_var_species_type_index = int(not var_species_type_index)
-        self.var_species_count_list = var_species_count_list
-        self.n_runs = len(var_species_count_list)
+        self.variable_quantity_type_index = variable_quantity_type_index
+        self.variable_quantity_index = variable_quantity_index
+        self.variable_quantity_list = variable_quantity_list
+        self.num_runs = len(variable_quantity_list)
         self.kmc_prec = kmc_prec
 
     def generate_files(self, gen_params_files, gen_run_files, gen_msd_files,
