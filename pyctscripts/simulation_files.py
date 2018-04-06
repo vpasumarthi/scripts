@@ -182,7 +182,6 @@ class SimulationFiles(object):
 
         charge_comb = (self.system['ion_charge_type'][0]
                        + self.system['species_charge_type'][0])
-        species_tag = 'e' if self.variable_quantity_type_index == 0 else 'h'
         for i_run in range(self.num_runs):
             if self.variable_quantity_type_index == 1:
                 self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
