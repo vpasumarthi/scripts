@@ -56,7 +56,7 @@ class SimulationFiles(object):
         child_dir5 = (('%1.2E' % self.run['t_final']) + 'SEC,'
                       + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
                       + ('%1.2E' % self.run['n_traj']) + 'Traj')
-        electric = self.system['external_field']['electric']
+        electric = self.run['external_field']['electric']
         if electric['active']:
             ld_tag = 'ld_' if electric['ld'] else ''
             self.field_tag = ('ef_' + ld_tag +
@@ -92,7 +92,7 @@ class SimulationFiles(object):
                 yaml.dump(self.system, dst_file)
                 dst_file.write('\n')
                 dst_file.write('# Run parameters:\n')
-                yaml.dump(self.run, dst_file, default_flow_style=False)
+                yaml.dump(self.run, dst_file)
                 dst_file.write('\n')
                 dst_file.write('# MSD parameters:\n')
                 yaml.dump(self.msd, dst_file, default_flow_style=False)
