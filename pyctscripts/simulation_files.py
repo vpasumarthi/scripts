@@ -70,9 +70,9 @@ class SimulationFiles(object):
                 [_, dopant_element_type] = i_doping_element_map.split(':')
                 num_dopants = doping['num_dopants'][map_index]
                 if num_dopants:
-                    self.field_tag = ';'.join([self.field_tag, f' {dopant_element_type}{num_dopants}'])
+                    self.field_tag = ';'.join([self.field_tag, f'{dopant_element_type}{num_dopants}'])
         else:
-            self.field_tag = ';'.join([self.field_tag, ' undoped'])
+            self.field_tag = ';'.join([self.field_tag, 'undoped'])
         work_dir = self.field_tag
         system_directory_path = Path.cwd()
         work_dir_path = (system_directory_path / child_dir1 / child_dir2
