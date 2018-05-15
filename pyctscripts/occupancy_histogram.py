@@ -10,14 +10,11 @@ import matplotlib.gridspec as gridspec
 class Occupancy(object):
     """Class definition to generate occupancy histogram files"""
 
-    def __init__(self, site_indices_file_path, occupancy_file_path,
-                 src_path, color_list):
+    def __init__(self, src_path, color_list):
         # Load occupancy parameters
         self.color_list = color_list
         self.num_colors = len(self.color_list)
         self.src_path = src_path
-        self.site_indices_file_path = site_indices_file_path
-        self.occupancy_file_path = occupancy_file_path
         return None
 
     def generate_occupancy_histogram(self, shell_wise, site_wise):
@@ -32,8 +29,14 @@ class Occupancy(object):
         return None
 
     def read_trajectory_data(self):
+        site_indices_dir_name = 'site_indices_data'
+        site_indices_file_name = 'site_indices_1.csv'
+        site_indices_file_path = self.src_path / site_indices_dir_name / site_indices_file_name
+        occupancy_dir_name = 'occupancy_data'
+        occupancy_file_name = 'occupancy_1.dat'
+        occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         shell_indices_dict = {}
-        with self.site_indices_file_path.open('r') as site_indices_file:
+        with site_indices_file_path.open('r') as site_indices_file:
             for line in site_indices_file:
                 split_elements = re.split(',|\n', line)
                 shell_index = int(split_elements[3])
@@ -58,7 +61,7 @@ class Occupancy(object):
             site_population_list.append(
                                     [0] * len(probe_indices[shell_index]))
 
-        with self.occupancy_file_path.open('r') as occupancy_file:
+        with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 site_index = int(line.split('\n')[0])
                 for shell_index in range(num_shells+1):
