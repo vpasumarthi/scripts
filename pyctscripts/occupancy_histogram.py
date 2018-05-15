@@ -55,7 +55,7 @@ class Occupancy(object):
         num_cols = 2
         num_rows = num_sub_plots // num_cols + num_sub_plots % num_cols
         num_data = 0
-        gs = gridspec.GridSpec(num_rows, num_cols)
+        gs = gridspec.GridSpec(num_rows, num_cols, hspace=0.4)
         for shell_index in range(num_sub_plots):
             row_index = shell_index // num_cols
             col_index = shell_index % num_cols
@@ -67,9 +67,7 @@ class Occupancy(object):
             ax.bar(range(num_data, num_data+length),
                    self.site_population_list[shell_index],
                    color=self.color_list[shell_index % self.num_colors])
-            ax.set_ylabel(f'{shell_index}', rotation=0)
-            if shell_index % num_cols:
-                ax.yaxis.set_label_position('right')
+            ax.set_ylabel(f'{shell_index}')
             ax.set_xticks([])
             ax.set_yticks([])
             num_data += length
