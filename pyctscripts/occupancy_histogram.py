@@ -11,6 +11,7 @@ class Occupancy(object):
                  occupancy_file_path):
         # Load occupancy parameters
         self.color_list = color_list
+        self.num_colors = len(self.color_list)
         self.dst_path = dst_path
         self.shell_index_file_path = shell_index_file_path
         self.occupancy_file_path = occupancy_file_path
