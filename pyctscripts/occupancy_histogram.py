@@ -65,7 +65,6 @@ class Occupancy(object):
             ax.set_ylabel('Site occupancy')
         figure_name = 'site-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
-        plt.tight_layout()
         plt.savefig(str(figure_path))
         return None
 
