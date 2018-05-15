@@ -17,8 +17,12 @@ class Occupancy(object):
         self.src_path = src_path
         return None
 
-    def generate_occupancy_histogram(self, shell_wise, site_wise):
-        (num_shells, probe_indices, site_population_list) = self.read_trajectory_data()
+    def generate_occupancy_histogram(self, shell_wise, site_wise, n_traj):
+        for traj_index in range(n_traj):
+            traj_number = traj_index + 1
+            (num_shells,
+             probe_indices,
+             site_population_list) = self.read_trajectory_data(traj_number)
         if shell_wise:
             self.generate_shell_wise_occupancy(num_shells,
                                                site_population_list)
@@ -28,12 +32,12 @@ class Occupancy(object):
                                              site_population_list)
         return None
 
-    def read_trajectory_data(self):
+    def read_trajectory_data(self, traj_number):
         site_indices_dir_name = 'site_indices_data'
-        site_indices_file_name = 'site_indices_1.csv'
+        site_indices_file_name = f'site_indices_{traj_number}.csv'
         site_indices_file_path = self.src_path / site_indices_dir_name / site_indices_file_name
         occupancy_dir_name = 'occupancy_data'
-        occupancy_file_name = 'occupancy_1.dat'
+        occupancy_file_name = f'occupancy_{traj_number}.dat'
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         shell_indices_dict = {}
         with site_indices_file_path.open('r') as site_indices_file:
