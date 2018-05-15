@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 
 class Occupancy(object):
@@ -54,15 +55,24 @@ class Occupancy(object):
         num_cols = 2
         num_rows = num_sub_plots // num_cols + num_sub_plots % num_cols
         num_data = 0
+        gs = gridspec.GridSpec(num_rows, num_cols)
         for shell_index in range(num_sub_plots):
-            ax = fig.add_subplot(num_rows, num_cols, shell_index+1)
+            row_index = shell_index // num_cols
+            col_index = shell_index % num_cols
+            if shell_index == num_sub_plots - 1 and num_sub_plots % num_cols:
+                ax = plt.subplot(gs[row_index, :])
+            else:
+                ax = plt.subplot(gs[row_index, col_index])
             length = len(self.probe_indices[shell_index])
             ax.bar(range(num_data, num_data+length),
                    self.site_population_list[shell_index],
                    color=self.color_list[shell_index % self.num_colors])
+            ax.set_ylabel(f'{shell_index}', rotation=0)
+            if shell_index % num_cols:
+                ax.yaxis.set_label_position('right')
+            ax.set_xticks([])
+            ax.set_yticks([])
             num_data += length
-            ax.set_xlabel(f'Shell {shell_index}')
-            ax.set_ylabel('Site occupancy')
         figure_name = 'site-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
         plt.savefig(str(figure_path))
