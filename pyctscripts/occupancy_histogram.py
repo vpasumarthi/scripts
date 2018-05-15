@@ -11,11 +11,11 @@ class Occupancy(object):
     """Class definition to generate occupancy histogram files"""
 
     def __init__(self, site_indices_file_path, occupancy_file_path,
-                 dst_path, color_list):
+                 src_path, color_list):
         # Load occupancy parameters
         self.color_list = color_list
         self.num_colors = len(self.color_list)
-        self.dst_path = dst_path
+        self.src_path = src_path
         self.site_indices_file_path = site_indices_file_path
         self.occupancy_file_path = occupancy_file_path
         return None
@@ -95,7 +95,7 @@ class Occupancy(object):
             ax.set_yticks([])
             num_data += length
         figure_name = 'site-wise_occupancy.png'
-        figure_path = self.dst_path / figure_name
+        figure_path = self.src_path / figure_name
         plt.savefig(str(figure_path))
         return None
 
@@ -115,7 +115,7 @@ class Occupancy(object):
         xticks_list = [str(index) for index in range(num_shells+1)]
         plt.xticks(range(num_shells+1), xticks_list)
         figure_name = 'shell-wise_occupancy.png'
-        figure_path = self.dst_path / figure_name
+        figure_path = self.src_path / figure_name
         plt.tight_layout()
         plt.savefig(str(figure_path))
         return None
