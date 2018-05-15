@@ -61,7 +61,7 @@ class Occupancy(object):
                    self.site_population_list[shell_index],
                    color=self.color_list[shell_index % self.num_colors])
             num_data += length
-            ax.set_xlabel(f'Shell {shell_index+1}')
+            ax.set_xlabel(f'Shell {shell_index}')
             ax.set_ylabel('Site occupancy')
         figure_name = 'site-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
@@ -80,7 +80,7 @@ class Occupancy(object):
                    color=self.color_list[shell_index % self.num_colors])
             ax.text(shell_index, 1.01 * mean_value, str(mean_value),
                     color='black', horizontalalignment='center')
-        ax.set_xlabel(f'Shell Number')
+        ax.set_xlabel('Shell Number')
         ax.set_ylabel('Average shell occupancy')
         xticks_list = [str(index) for index in range(self.num_shells+1)]
         plt.xticks(range(self.num_shells+1), xticks_list)
