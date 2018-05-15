@@ -11,7 +11,7 @@ class Occupancy(object):
     """Class definition to generate occupancy histogram files"""
 
     def __init__(self, site_indices_file_path, occupancy_file_path,
-                 dst_path, color_list):
+                 dst_path, color_list, shell_wise, site_wise):
         # Load occupancy parameters
         self.color_list = color_list
         self.num_colors = len(self.color_list)
@@ -52,7 +52,10 @@ class Occupancy(object):
                         list_index = self.probe_indices[shell_index].index(site_index)
                         self.site_population_list[shell_index][list_index] += 1
                         break
-
+        if shell_wise:
+            self.generate_shell_wise_occupancy()
+        if site_wise:
+            self.generate_site_wise_occpancy()
 
     def generate_site_wise_occpancy(self):
         plt.switch_backend('Agg')
