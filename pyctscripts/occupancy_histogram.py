@@ -21,6 +21,17 @@ class Occupancy(object):
         return None
 
     def generate_occupancy_histogram(self, shell_wise, site_wise):
+        (num_shells, probe_indices, site_population_list) = self.read_trajectory_data()
+        if shell_wise:
+            self.generate_shell_wise_occupancy(num_shells,
+                                               site_population_list)
+        if site_wise:
+            self.generate_site_wise_occpancy(num_shells,
+                                             probe_indices,
+                                             site_population_list)
+        return None
+
+    def read_trajectory_data(self):
         shell_indices_dict = {}
         with self.site_indices_file_path.open('r') as site_indices_file:
             for line in site_indices_file:
@@ -55,14 +66,7 @@ class Occupancy(object):
                         list_index = probe_indices[shell_index].index(site_index)
                         site_population_list[shell_index][list_index] += 1
                         break
-        if shell_wise:
-            self.generate_shell_wise_occupancy(num_shells,
-                                               site_population_list)
-        if site_wise:
-            self.generate_site_wise_occpancy(num_shells,
-                                             probe_indices,
-                                             site_population_list)
-        return None
+        return (num_shells, probe_indices, site_population_list)
 
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
                                     site_population_list):
