@@ -59,7 +59,7 @@ class Occupancy(object):
             length = len(self.probe_indices[shell_index])
             ax.bar(range(num_data, num_data+length),
                    self.site_population_list[shell_index],
-                   color=self.color_list[shell_index])
+                   color=self.color_list[shell_index % self.num_colors])
             num_data += length
             ax.set_xlabel(f'Shell {shell_index+1}')
             ax.set_ylabel('Site occupancy')
@@ -82,7 +82,8 @@ class Occupancy(object):
         ax = fig.add_subplot(111)
         for shell_index in range(self.num_shells+1):
             mean_value = int(np.mean(self.site_population_list[shell_index]))
-            ax.bar(shell_index, mean_value, color=self.color_list[shell_index])
+            ax.bar(shell_index, mean_value,
+                   color=self.color_list[shell_index % self.num_colors])
             ax.text(shell_index, 1.01 * mean_value, str(mean_value),
                     color='black', horizontalalignment='center')
         ax.set_xlabel(f'Shell Number')
