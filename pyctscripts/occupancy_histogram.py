@@ -18,55 +18,59 @@ class Occupancy(object):
         self.dst_path = dst_path
         self.site_indices_file_path = site_indices_file_path
         self.occupancy_file_path = occupancy_file_path
-        self.shell_indices_dict = {}
+        return None
+
+    def generate_occupancy_histogram(self, shell_wise, site_wise):
+        shell_indices_dict = {}
         with self.site_indices_file_path.open('r') as site_indices_file:
             for line in site_indices_file:
                 split_elements = re.split(',|\n', line)
                 shell_index = int(split_elements[3])
                 site_index = int(split_elements[0])
-                if shell_index in self.shell_indices_dict:
-                    self.shell_indices_dict[shell_index].append(site_index)
+                if shell_index in shell_indices_dict:
+                    shell_indices_dict[shell_index].append(site_index)
                 else:
-                    self.shell_indices_dict[shell_index] = [site_index]
+                    shell_indices_dict[shell_index] = [site_index]
                 
-        self.num_shells = len(self.shell_indices_dict) - 1
-        self.probe_indices = []
-        self.site_population_list = []
-        for shell_index in range(self.num_shells+1):
-            if shell_index == self.num_shells + 1:
-                self.probe_indices.append(sorted(
+        num_shells = len(shell_indices_dict) - 1
+        probe_indices = []
+        site_population_list = []
+        for shell_index in range(num_shells+1):
+            if shell_index == num_shells + 1:
+                probe_indices.append(sorted(
                     [item
-                     for sublist in self.shell_indices_dict[self.num_shells+1:]
+                     for sublist in shell_indices_dict[num_shells+1:]
                      for item in sublist]))
             else:
-                self.probe_indices.append(sorted(
-                    [item for item in self.shell_indices_dict[shell_index]]))
-            self.site_population_list.append(
-                                    [0] * len(self.probe_indices[shell_index]))
+                probe_indices.append(sorted(
+                    [item for item in shell_indices_dict[shell_index]]))
+            site_population_list.append(
+                                    [0] * len(probe_indices[shell_index]))
 
         with self.occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 site_index = int(line.split('\n')[0])
-                for shell_index in range(self.num_shells+1):
-                    if site_index in self.probe_indices[shell_index]:
-                        list_index = self.probe_indices[shell_index].index(site_index)
-                        self.site_population_list[shell_index][list_index] += 1
+                for shell_index in range(num_shells+1):
+                    if site_index in probe_indices[shell_index]:
+                        list_index = probe_indices[shell_index].index(site_index)
+                        site_population_list[shell_index][list_index] += 1
                         break
-        return None
-
-    def generate_occupancy_histogram(self, shell_wise, site_wise):
         if shell_wise:
-            self.generate_shell_wise_occupancy()
+            self.generate_shell_wise_occupancy(num_shells,
+                                               site_population_list)
         if site_wise:
-            self.generate_site_wise_occpancy()
+            self.generate_site_wise_occpancy(num_shells,
+                                             probe_indices,
+                                             site_population_list)
         return None
 
-    def generate_site_wise_occpancy(self):
+    def generate_site_wise_occpancy(self, num_shells, probe_indices,
+                                    site_population_list):
         plt.switch_backend('Agg')
         fig = plt.figure()
         plt.title('Site-wise occupancy')
         plt.axis('off')
-        num_sub_plots = self.num_shells + 1
+        num_sub_plots = num_shells + 1
         num_cols = 2
         num_rows = num_sub_plots // num_cols + num_sub_plots % num_cols
         num_data = 0
@@ -78,9 +82,9 @@ class Occupancy(object):
                 ax = plt.subplot(gs[row_index, :])
             else:
                 ax = plt.subplot(gs[row_index, col_index])
-            length = len(self.probe_indices[shell_index])
+            length = len(probe_indices[shell_index])
             ax.bar(range(num_data, num_data+length),
-                   self.site_population_list[shell_index],
+                   site_population_list[shell_index],
                    color=self.color_list[shell_index % self.num_colors])
             ax.set_ylabel(f'{shell_index}')
             ax.set_xticks([])
@@ -91,21 +95,21 @@ class Occupancy(object):
         plt.savefig(str(figure_path))
         return None
 
-    def generate_shell_wise_occupancy(self):
+    def generate_shell_wise_occupancy(self, num_shells, site_population_list):
         plt.switch_backend('Agg')
         fig = plt.figure()
         plt.title('Shell-wise occupancy')
         ax = fig.add_subplot(111)
-        for shell_index in range(self.num_shells+1):
-            mean_value = int(np.mean(self.site_population_list[shell_index]))
+        for shell_index in range(num_shells+1):
+            mean_value = int(np.mean(site_population_list[shell_index]))
             ax.bar(shell_index, mean_value,
                    color=self.color_list[shell_index % self.num_colors])
             ax.text(shell_index, 1.01 * mean_value, str(mean_value),
                     color='black', horizontalalignment='center')
         ax.set_xlabel('Shell Number')
         ax.set_ylabel('Average shell occupancy')
-        xticks_list = [str(index) for index in range(self.num_shells+1)]
-        plt.xticks(range(self.num_shells+1), xticks_list)
+        xticks_list = [str(index) for index in range(num_shells+1)]
+        plt.xticks(range(num_shells+1), xticks_list)
         figure_name = 'shell-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
         plt.tight_layout()
