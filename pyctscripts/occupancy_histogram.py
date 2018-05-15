@@ -49,10 +49,12 @@ class Occupancy(object):
         fig = plt.figure()
         plt.title('Site-wise occupancy')
         plt.axis('off')
-        num_sub_plots = self.num_probe_shells + 2
+        num_sub_plots = self.num_shells + 1
+        num_cols = 2
+        num_rows = num_sub_plots // num_cols + num_sub_plots % num_cols
         num_data = 0
         for shell_index in range(num_sub_plots):
-            ax = fig.add_subplot(num_sub_plots // 2, 2, shell_index+1)
+            ax = fig.add_subplot(num_rows, num_cols, shell_index+1)
             length = len(self.probe_indices[shell_index])
             ax.bar(range(num_data, num_data+length),
                    self.site_population_list[shell_index],
