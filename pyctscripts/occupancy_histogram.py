@@ -63,12 +63,6 @@ class Occupancy(object):
             num_data += length
             ax.set_xlabel(f'Shell {shell_index+1}')
             ax.set_ylabel('Site occupancy')
-        ax = fig.add_subplot(111)
-        ax.set_xlabel(f'Site Number')
-        ax.set_ylabel('Site occupancy')
-        xticks_list = [str(index) for index in range(self.num_probe_shells+2)]
-        xticks_list[-1] += '+'
-        plt.xticks(range(self.num_probe_shells+2), xticks_list)
         figure_name = 'site-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
         plt.tight_layout()
@@ -89,7 +83,6 @@ class Occupancy(object):
         ax.set_xlabel(f'Shell Number')
         ax.set_ylabel('Average shell occupancy')
         xticks_list = [str(index) for index in range(self.num_shells+1)]
-        xticks_list[-1] += '+'
         plt.xticks(range(self.num_shells+1), xticks_list)
         figure_name = 'shell-wise_occupancy.png'
         figure_path = self.dst_path / figure_name
