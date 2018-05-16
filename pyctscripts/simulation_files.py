@@ -66,10 +66,11 @@ class SimulationFiles(object):
         doping = self.run['doping']
         if np.any(doping['num_dopants']):
             for map_index, i_doping_element_map in enumerate(doping['doping_element_map']):
-                [_, dopant_element_type] = i_doping_element_map.split(':')
+                [substitution_element_type, dopant_element_type] = i_doping_element_map.split(':')
                 num_dopants = doping['num_dopants'][map_index]
                 if num_dopants:
-                    self.field_tag = '_'.join([self.field_tag, f'{dopant_element_type}{num_dopants}'])
+                    num_shells = len(self.run['relative_energies']['doping'][substitution_element_type][map_index]) - 1
+                    self.field_tag = '_'.join([self.field_tag, f'{dopant_element_type}{num_dopants}_{num_shells}shells'])
         else:
             self.field_tag = '_'.join([self.field_tag, 'undoped'])
         work_dir = self.field_tag
