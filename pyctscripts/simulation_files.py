@@ -203,9 +203,9 @@ class SimulationFiles(object):
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition']}\n")
                 num_days = num_hours = num_mins = num_sec = 0
-                if self.slurm['partition_value'] == 'debug':
+                if self.slurm['partition'] == 'debug':
                     num_hours = 1
-                elif self.slurm['partition_value'] == 'mdupuis2':
+                elif self.slurm['partition'] == 'mdupuis2':
                     num_days = self.slurm['md_slurm_job_max_time_limit']
                 else:
                     est_run_time = self.run_time(species_count_list, kmc_prec)
