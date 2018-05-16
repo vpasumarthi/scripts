@@ -23,22 +23,20 @@ class Occupancy(object):
             (num_shells,
              probe_indices,
              site_population_list) = self.read_trajectory_data(traj_number)
+            if site_wise:
+                self.generate_site_wise_occpancy(num_shells,
+                                                 probe_indices,
+                                                 site_population_list,
+                                                 traj_number)
         if shell_wise:
             self.generate_shell_wise_occupancy(num_shells,
                                                site_population_list)
-        if site_wise:
-            self.generate_site_wise_occpancy(num_shells,
-                                             probe_indices,
-                                             site_population_list)
         return None
 
     def read_trajectory_data(self, traj_number):
         site_indices_dir_name = 'site_indices_data'
         site_indices_file_name = f'site_indices_{traj_number}.csv'
         site_indices_file_path = self.src_path / site_indices_dir_name / site_indices_file_name
-        occupancy_dir_name = 'occupancy_data'
-        occupancy_file_name = f'occupancy_{traj_number}.dat'
-        occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         shell_indices_dict = {}
         with site_indices_file_path.open('r') as site_indices_file:
             for line in site_indices_file:
@@ -65,6 +63,9 @@ class Occupancy(object):
             site_population_list.append(
                                     [0] * len(probe_indices[shell_index]))
 
+        occupancy_dir_name = 'occupancy_data'
+        occupancy_file_name = f'occupancy_{traj_number}.dat'
+        occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 site_index = int(line.split('\n')[0])
@@ -76,7 +77,7 @@ class Occupancy(object):
         return (num_shells, probe_indices, site_population_list)
 
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
-                                    site_population_list):
+                                    site_population_list, traj_number):
         plt.switch_backend('Agg')
         fig = plt.figure()
         plt.title('Site-wise occupancy')
@@ -101,7 +102,7 @@ class Occupancy(object):
             ax.set_xticks([])
             ax.set_yticks([])
             num_data += length
-        figure_name = 'site-wise_occupancy.png'
+        figure_name = f'site-wise_occupancy_{traj_number}.png'
         figure_path = self.src_path / figure_name
         plt.savefig(str(figure_path))
         return None
