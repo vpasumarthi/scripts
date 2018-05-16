@@ -28,23 +28,25 @@ class Occupancy(object):
                                                  probe_indices,
                                                  site_population_list,
                                                  traj_number)
-        if shell_wise:
-            if traj_number == 1:
-                avg_site_population_list = [[site_population
-                                             for site_population in shell_population]
-                                            for shell_population in site_population_list]
-            else:
-                avg_site_population_list = [
-                    [site_population + avg_site_population_list[shell_index][site_index]
-                     for site_index, site_population in enumerate(shell_population)]
-                    for shell_index, shell_population in enumerate(site_population_list)]
-            if traj_number == n_traj:
-                avg_site_population_list = [[site_population / n_traj
-                                             for site_population in shell_population]
-                                            for shell_population in avg_site_population_list]
-                self.generate_shell_wise_occupancy(num_shells,
-                                                   avg_site_population_list,
-                                                   n_traj)
+            if shell_wise:
+                if traj_number == 1:
+                    avg_site_population_list = [
+                                [site_population
+                                 for site_population in shell_population]
+                                for shell_population in site_population_list]
+                else:
+                    avg_site_population_list = [
+                        [site_population + avg_site_population_list[shell_index][site_index]
+                         for site_index, site_population in enumerate(shell_population)]
+                        for shell_index, shell_population in enumerate(site_population_list)]
+                if traj_number == n_traj:
+                    avg_site_population_list = [
+                        [site_population / n_traj
+                         for site_population in shell_population]
+                        for shell_population in avg_site_population_list]
+                    self.generate_shell_wise_occupancy(num_shells,
+                                                       avg_site_population_list,
+                                                       n_traj)
         return None
 
     def read_trajectory_data(self, traj_number):
