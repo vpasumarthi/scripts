@@ -199,9 +199,9 @@ class SimulationFiles(object):
                                + '"\n')
                 dst_file.write('#SBATCH --output=job.out\n')
                 dst_file.write(
-                    f"#SBATCH --partition={self.slurm['partition_value']}\n")
-                if self.slurm['partition_value'] == 'mdupuis2':
-                    dst_file.write('#SBATCH --clusters=chemistry\n')
+                    f"#SBATCH --clusters={self.slurm['clusters']}\n")
+                dst_file.write(
+                    f"#SBATCH --partition={self.slurm['partition']}\n")
                 num_days = num_hours = num_mins = num_sec = 0
                 if self.slurm['partition_value'] == 'debug':
                     num_hours = 1
