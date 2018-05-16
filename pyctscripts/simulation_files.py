@@ -226,7 +226,8 @@ class SimulationFiles(object):
                     dst_file.write(f"#SBATCH --mail-user={self.slurm['email']}\n")
                     dst_file.write("#SBATCH --mail-type=END\n")
                 dst_file.write(
-                    "#SBATCH --constraint=IB\n"
+                    f"#SBATCH --constraint={self.slurm['constraint']}\n")
+                dst_file.write(
                     "\n# Job description:\n"
                     "# run KMC simulation followed by performing MSD analysis"
                     " of the output trajectories\n\n"
