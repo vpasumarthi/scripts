@@ -17,12 +17,14 @@ class Occupancy(object):
         self.src_path = src_path
         return None
 
-    def generate_occupancy_histogram(self, shell_wise, site_wise, n_traj):
+    def generate_occupancy_histogram(self, shell_wise, res_time, site_wise,
+                                     barrier_shell_index, n_traj):
         for traj_index in range(n_traj):
             traj_number = traj_index + 1
-            (num_shells,
-             probe_indices,
-             site_population_list) = self.read_trajectory_data(traj_number)
+            (num_shells, probe_indices, site_population_list,
+             traj_res_time_pool) = self.read_trajectory_data(traj_number,
+                                                             res_time,
+                                                             barrier_shell_index)
             if site_wise:
                 self.generate_site_wise_occpancy(num_shells,
                                                  probe_indices,
@@ -49,7 +51,7 @@ class Occupancy(object):
                                                        n_traj)
         return None
 
-    def read_trajectory_data(self, traj_number):
+    def read_trajectory_data(self, traj_number, res_time, barrier_shell_index):
         site_indices_dir_name = 'site_indices_data'
         site_indices_file_name = f'site_indices_{traj_number}.csv'
         site_indices_file_path = self.src_path / site_indices_dir_name / site_indices_file_name
@@ -81,18 +83,29 @@ class Occupancy(object):
             site_population_list.append(
                                     [0] * len(probe_indices[shell_index]))
 
+        traj_res_time_pool = []
+        res_count = 0
         occupancy_dir_name = 'occupancy_data'
         occupancy_file_name = f'occupancy_{traj_number}.dat'
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 site_index = int(line.split('\n')[0])
+                if res_time:
+                    shell_index = site_indices_dict[site_index]
+                    if shell_index <= barrier_shell_index:
+                        res_count += 1
+                    else:
+                        if res_count != 0:
+                            traj_res_time_pool.append(res_count)
+                            res_count = 0
                 for shell_index in range(num_shells+1):
                     if site_index in probe_indices[shell_index]:
                         list_index = probe_indices[shell_index].index(site_index)
                         site_population_list[shell_index][list_index] += 1
                         break
-        return (num_shells, probe_indices, site_population_list)
+        return (num_shells, probe_indices, site_population_list,
+                traj_res_time_pool)
 
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
                                     site_population_list, traj_number):
