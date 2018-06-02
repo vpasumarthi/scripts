@@ -49,6 +49,12 @@ class Occupancy(object):
                     self.generate_shell_wise_occupancy(num_shells,
                                                        avg_site_population_list,
                                                        n_traj)
+            if res_time:
+                if traj_number == 1:
+                    res_time_pool = []
+                res_time_pool.append(traj_res_time_pool)
+                if traj_number == n_traj:
+                    self.generate_res_time_distribution(res_time_pool, n_traj)
         return None
 
     def read_trajectory_data(self, traj_number, res_time, barrier_shell_index):
