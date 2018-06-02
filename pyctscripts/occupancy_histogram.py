@@ -54,11 +54,13 @@ class Occupancy(object):
         site_indices_file_name = f'site_indices_{traj_number}.csv'
         site_indices_file_path = self.src_path / site_indices_dir_name / site_indices_file_name
         shell_indices_dict = {}
+        site_indices_dict = {}
         with site_indices_file_path.open('r') as site_indices_file:
             for line in site_indices_file:
                 split_elements = re.split(',|\n', line)
                 shell_index = int(split_elements[3])
                 site_index = int(split_elements[0])
+                site_indices_dict[site_index] = shell_index
                 if shell_index in shell_indices_dict:
                     shell_indices_dict[shell_index].append(site_index)
                 else:
