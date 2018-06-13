@@ -100,14 +100,14 @@ do
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR_mag.\n"
 			fi
+            printf "Initiating process to copy files from remote to local:\n"
+            cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+            printf "Finished process to copy files from remote to local.\n"
 		fi
         BREAKFLAG=1
         break
     fi
 done
-
-
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 duration=$SECONDS
 days=$((duration/60/60/24))
