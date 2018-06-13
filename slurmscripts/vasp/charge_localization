@@ -17,6 +17,7 @@
 # Job description:
 # run vasp job followed by bader analysis; also prints the job run time to the output file
 
+echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
 ulimit -s unlimited
@@ -26,7 +27,12 @@ export NPROCS=`srun -l hostname | wc -l`
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
 
-source /etc/profile.d/modules.sh
+cd $SLURM_SUBMIT_DIR
+sbcast $SLURM_SUBMIT_DIR/KPOINTS $SLURMTMPDIR/KPOINTS
+sbcast $SLURM_SUBMIT_DIR/POTCAR $SLURMTMPDIR/POTCAR
+sbcast $SLURM_SUBMIT_DIR/POSCAR $SLURMTMPDIR/POSCAR
+sbcast $SLURM_SUBMIT_DIR/INCAR $SLURMTMPDIR/INCAR
+cd $SLURMTMPDIR
 
 module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
 module load vasp5.4.4
@@ -42,6 +48,7 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 SECONDS=0
 
 srun --propagate=STACK vasp
+cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
 /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
