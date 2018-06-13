@@ -13,7 +13,12 @@
 #SBATCH --mail-user=pasumart@buffalo.edu
 #SBATCH --mail-type=END
 #SBATCH --constraint=IB
+
 COPYFREQ=3600
+generate_chgsum=1
+generate_chgmag=1
+bader=0
+bader_mag=1
 
 # Job description:
 # run vasp job followed by bader analysis; also prints the job run time to the output file
@@ -57,11 +62,6 @@ fi
 printf "TimeLimitHr: %d\n" $TimeLimitHr
 
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
-
-generate_chgsum=1
-generate_chgmag=1
-bader=0
-bader_mag=1
 
 SECONDS=0
 
