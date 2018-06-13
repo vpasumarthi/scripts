@@ -57,14 +57,35 @@ printf "TimeLimitHr: %d\n" $TimeLimitHr
 
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
+generate_chgsum=1
+generate_chgmag=1
+bader=0
+bader_mag=1
+
 SECONDS=0
 
 srun --propagate=STACK vasp
 
-/projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
-/projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
-/projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
-#/projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
+if [ $generate_chgsum -ne 0 ]; then
+    printf "Generating CHGCAR_sum:\n"
+    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
+    printf "Finished generating CHGCAR_sum.\n"
+fi
+if [ $generate_chgmag -ne 0 ]; then
+    printf "Generating CHGCAR_mag:\n"
+    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
+    printf "Finished generating CHGCAR_mag.\n"
+fi
+if [ $bader -ne 0 ]; then
+    printf "Initiating Bader analysis on CHGCAR:\n"
+    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
+    printf "Finished Bader analysis on CHGCAR.\n"
+fi
+if [ $bader_mag -ne 0 ]; then
+    printf "Initiating Bader analysis on CHGCAR_mag:\n"
+    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
+    printf "Finished Bader analysis on CHGCAR_mag.\n"
+fi
 
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
