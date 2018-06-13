@@ -65,36 +65,44 @@ bader_mag=1
 
 SECONDS=0
 
-srun --propagate=STACK vasp
+srun --propagate=STACK vasp &
+PID=$!
+printf "PID: %d\n" $PID
+CID=$$
+printf "CID: %d\n" $CID
 
 for (( iHr=1; iHr<$TimeLimitHr; iHr++ ))
 do
     sleep $COPYFREQ
     cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+    kill -0 $PID
+    if [ $? -ne 0 ]; then
+        printf "PID is terminated.\n"
+		if [ 0 -ne `grep "switches" OUTCAR -c` ]; then
+			if [ $generate_chgsum -ne 0 ]; then
+			    printf "Generating CHGCAR_sum:\n"
+			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
+			    printf "Finished generating CHGCAR_sum.\n"
+			fi
+			if [ $generate_chgmag -ne 0 ]; then
+			    printf "Generating CHGCAR_mag:\n"
+			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
+			    printf "Finished generating CHGCAR_mag.\n"
+			fi
+			if [ $bader -ne 0 ]; then
+			    printf "Initiating Bader analysis on CHGCAR:\n"
+			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
+			    printf "Finished Bader analysis on CHGCAR.\n"
+			fi
+			if [ $bader_mag -ne 0 ]; then
+			    printf "Initiating Bader analysis on CHGCAR_mag:\n"
+			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
+			    printf "Finished Bader analysis on CHGCAR_mag.\n"
+			fi
+		fi
+    fi
 done
 
-if [ 0 -ne `grep "switches" OUTCAR -c` ]; then
-	if [ $generate_chgsum -ne 0 ]; then
-	    printf "Generating CHGCAR_sum:\n"
-	    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
-	    printf "Finished generating CHGCAR_sum.\n"
-	fi
-	if [ $generate_chgmag -ne 0 ]; then
-	    printf "Generating CHGCAR_mag:\n"
-	    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
-	    printf "Finished generating CHGCAR_mag.\n"
-	fi
-	if [ $bader -ne 0 ]; then
-	    printf "Initiating Bader analysis on CHGCAR:\n"
-	    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
-	    printf "Finished Bader analysis on CHGCAR.\n"
-	fi
-	if [ $bader_mag -ne 0 ]; then
-	    printf "Initiating Bader analysis on CHGCAR_mag:\n"
-	    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
-	    printf "Finished Bader analysis on CHGCAR_mag.\n"
-	fi
-fi
 
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
