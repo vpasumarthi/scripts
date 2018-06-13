@@ -71,6 +71,7 @@ printf "PID: %d\n" $PID
 CID=$$
 printf "CID: %d\n" $CID
 
+BREAKFLAG=0
 for (( iHr=1; iHr<$TimeLimitHr; iHr++ ))
 do
     sleep $COPYFREQ
@@ -100,6 +101,8 @@ do
 			    printf "Finished Bader analysis on CHGCAR_mag.\n"
 			fi
 		fi
+        BREAKFLAG=1
+        break
     fi
 done
 
