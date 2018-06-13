@@ -203,6 +203,8 @@ class SimulationFiles(object):
                     f"#SBATCH --clusters={self.slurm['clusters']}\n")
                 dst_file.write(
                     f"#SBATCH --partition={self.slurm['partition']}\n")
+                dst_file.write(
+                    f"#SBATCH --qos={self.slurm['qos']}\n")
                 num_days = num_hours = num_mins = num_sec = 0
                 if self.slurm['partition'] == 'debug':
                     num_hours = 1
