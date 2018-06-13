@@ -109,6 +109,13 @@ do
     fi
 done
 
+if [ $BREAKFLAG ]; then
+	kill -0 $PID
+	if [ $? -ne 1 ]; then
+		kill $PID
+	fi
+fi
+
 duration=$SECONDS
 days=$((duration/60/60/24))
 hours=$((duration/60/60%24))
