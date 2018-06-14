@@ -65,15 +65,14 @@ echo "The number of processors per node $SLURM_NTASKS_PER_NODE"
 echo "The number of processors is $NPROCS"
 
 TimeLimit=`sacct -j ${SLURM_JOB_ID} -o TimeLimit -n`
-TimeLimit=`printf "%s" "${TimeLimit:0:10}"`
-TimeLimitSubString=${TimeLimit:0:4}
-TimeLimitDays=${TimeLimit:0:1}
-if [ $TimeLimitDays ]; then
-    TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:2:2}))
+TimeLimitStrLen=`echo -n $TimeLimit | wc -m`
+if [ $TimeLimitStrLen -gt 8 ]; then
+    DayStringLen=$(($TimeLimitStrLen-9))
+    TimeLimitDays=${TimeLimit:0:$DayStringLen}
 else
-    TimeLimitHr=${TimeLimit:2:2}
+    TimeLimitDays=0
 fi
-
+TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:2:2}))
 printf "TimeLimitHr: %d\n" $TimeLimitHr
 
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
