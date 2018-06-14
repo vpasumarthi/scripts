@@ -22,6 +22,7 @@ generate_chgsum=1
 generate_chgmag=1
 bader=0
 bader_mag=1
+WAVECARLOC='WAVECAR'
 
 echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
@@ -38,6 +39,20 @@ sbcast $SLURM_SUBMIT_DIR/KPOINTS $SLURMTMPDIR/KPOINTS
 sbcast $SLURM_SUBMIT_DIR/POTCAR $SLURMTMPDIR/POTCAR
 sbcast $SLURM_SUBMIT_DIR/POSCAR $SLURMTMPDIR/POSCAR
 sbcast $SLURM_SUBMIT_DIR/INCAR $SLURMTMPDIR/INCAR
+
+if [ -f $WAVECARLOC ]
+then
+	echo "WAVECAR found."
+	if [ -s $WAVECARLOC ]
+	then
+		sbcast $SLURM_SUBMIT_DIR/$WAVECARLOC $SLURMTMPDIR/WAVECAR
+	else
+		echo "WAVECAR is empty."
+	fi		
+else
+	echo "WAVECAR not found."
+fi
+
 cd $SLURMTMPDIR
 
 module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
