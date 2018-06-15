@@ -124,6 +124,7 @@ done
 if [ $BREAKFLAG ]; then
 	kill -0 $PID
 	if [ $? -ne 1 ]; then
+		printf "Exceeded wall-time requested. Terminating PID.\n" 1>&2
 		kill $PID
 	fi
 fi
