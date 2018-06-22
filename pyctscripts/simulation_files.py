@@ -192,7 +192,7 @@ class SimulationFiles(object):
 
             # generate slurm file
             with dst_file_path.open('w') as dst_file:
-                dst_file.write('#!/bin/sh\n')
+                dst_file.write('#!/bin/sh\n\n')
                 dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
                                + '_' + self.field_tag.replace(' ', '_')
                                + '_' + 'e' + str(species_count_list[0])
