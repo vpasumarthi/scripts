@@ -224,7 +224,7 @@ class SimulationFiles(object):
                 if self.slurm['exclusive']:
                     dst_file.write('#SBATCH --exclusive\n')
                 if self.slurm['mem']:
-                    dst_file.write(f"#SBATCH --mem={self.slurm['mem']}\n\n")
+                    dst_file.write(f"#SBATCH --mem={self.slurm['mem']}\n")
                 if self.slurm['email']:
                     dst_file.write(f"#SBATCH --mail-user={self.slurm['email']}\n")
                     dst_file.write("#SBATCH --mail-type=END\n")
