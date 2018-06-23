@@ -205,20 +205,23 @@ class SimulationFiles(object):
                     f"#SBATCH --partition={self.slurm['partition']}\n")
                 dst_file.write(
                     f"#SBATCH --qos={self.slurm['qos']}\n")
-                num_days = num_hours = num_mins = num_sec = 0
-                if self.slurm['partition'] == 'debug':
-                    num_hours = 1
-                elif self.slurm['partition'] == 'mdupuis2':
-                    num_days = self.slurm['md_slurm_job_max_time_limit']
+                if self.slurm['time']:
+                    dst_file.write(f"#SBATCH --time={self.slurm['time']}\n")
                 else:
-                    est_run_time = self.run_time(species_count_list, kmc_prec)
-                    if est_run_time > self.slurm['gc_slurm_job_max_time_limit']:
-                        num_hours = self.slurm['gc_slurm_job_max_time_limit']
+                    num_days = num_hours = num_mins = num_sec = 0
+                    if self.slurm['partition'] == 'debug':
+                        num_hours = 1
+                    elif self.slurm['partition'] == 'mdupuis2':
+                        num_days = self.slurm['md_slurm_job_max_time_limit']
                     else:
-                        num_hours = est_run_time // self.HR2SEC
-                        num_mins = (est_run_time // self.MIN2SEC) % self.MIN2SEC
-                time_limit = f'{num_days:02d}-{num_hours:02d}:{num_mins:02d}:{num_sec:02d}'
-                dst_file.write(f'#SBATCH --time={time_limit}\n')
+                        est_run_time = self.run_time(species_count_list, kmc_prec)
+                        if est_run_time > self.slurm['gc_slurm_job_max_time_limit']:
+                            num_hours = self.slurm['gc_slurm_job_max_time_limit']
+                        else:
+                            num_hours = est_run_time // self.HR2SEC
+                            num_mins = (est_run_time // self.MIN2SEC) % self.MIN2SEC
+                    time_limit = f'{num_days:02d}-{num_hours:02d}:{num_mins:02d}:{num_sec:02d}'
+                    dst_file.write(f'#SBATCH --time={time_limit}\n')
                 dst_file.write(f"#SBATCH --nodes={self.slurm['num_nodes']}\n")
                 dst_file.write(f"#SBATCH --tasks-per-node={self.slurm['num_tasks_per_node']}\n")
                 if self.slurm['exclusive']:
