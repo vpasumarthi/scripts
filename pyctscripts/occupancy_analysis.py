@@ -293,4 +293,13 @@ class Occupancy(object):
                 site_step_index = sum(step_limits < cell_indices[ld]) - 1
                 traj_step_res_count[site_step_index] += 1
             step_res_count[traj_number-1] = traj_step_res_count
+        mean_step_res_count = np.mean(step_res_count, axis=0)
+        std_step_res_count = np.std(step_res_count, axis=0)
+        stat_width = 10
+        stat_decimals = 3
+        print(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
+        print(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
+        step_res_time_data_file_name = 'stepwise_residence_occupany.txt'
+        step_res_time_data_file_path = self.src_path / step_res_time_data_file_name
+        np.savetxt(step_res_time_data_file_path, step_res_count)
         return None
