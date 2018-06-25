@@ -283,9 +283,14 @@ class Occupancy(object):
             step_limits.append(old_index + step_system_size[ld])
             old_index += step_system_size[ld]
         step_limits = np.asarray(step_limits)
+        step_res_count = np.zeros((n_traj, num_steps))
         for traj_number in range(1, n_traj+1):
+            traj_step_res_count = np.zeros(num_steps)
             occupancy_data = self.read_occupancy_data(traj_number)
             for site_index in occupancy_data:
                 cell_indices = self.get_cell_indices(system_size, site_index,
                                                      num_elements_per_unit_cell)
+                site_step_index = sum(step_limits < cell_indices[ld]) - 1
+                traj_step_res_count[site_step_index] += 1
+            step_res_count[traj_number-1] = traj_step_res_count
         return None
