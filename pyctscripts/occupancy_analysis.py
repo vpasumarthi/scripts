@@ -263,10 +263,12 @@ class Occupancy(object):
         sum_step_length_ratio = sum(step_length_ratio)
         num_steps = len(step_length_ratio)
         step_system_size_master_list = []
+        step_limits = [0]
         old_index = 0
         for step_index in range(num_steps):
             step_system_size = np.copy(system_size)
             step_system_size[ld] *= step_length_ratio[step_index] / sum_step_length_ratio
             step_system_size_master_list.append(step_system_size)
+            step_limits.append(old_index + step_system_size[ld])
             old_index += step_system_size[ld]
         return None
