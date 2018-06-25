@@ -115,6 +115,14 @@ class Occupancy(object):
                 traj_res_time_pool)
 
     def read_occupancy_data(self, traj_number):
+        occupancy_dir_name = 'occupancy_data'
+        occupancy_file_name = f'occupancy_{traj_number}.dat'
+        occupancy_data = []
+        occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
+        with occupancy_file_path.open('r') as occupancy_file:
+            for line in occupancy_file:
+                site_index = int(line.split('\n')[0])
+                occupancy_data.append(site_index)
         return occupancy_data
 
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
