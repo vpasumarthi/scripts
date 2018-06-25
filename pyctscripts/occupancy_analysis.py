@@ -260,4 +260,13 @@ class Occupancy(object):
 
     def stepwise_res_time(self, system_size, ld, step_length_ratio,
                           num_elements_per_unit_cell):
+        sum_step_length_ratio = sum(step_length_ratio)
+        num_steps = len(step_length_ratio)
+        step_system_size_master_list = []
+        old_index = 0
+        for step_index in range(num_steps):
+            step_system_size = np.copy(system_size)
+            step_system_size[ld] *= step_length_ratio[step_index] / sum_step_length_ratio
+            step_system_size_master_list.append(step_system_size)
+            old_index += step_system_size[ld]
         return None
