@@ -114,6 +114,9 @@ class Occupancy(object):
         return (num_shells, probe_indices, site_population_list,
                 traj_res_time_pool)
 
+    def read_occupancy_data(self, traj_number):
+        return occupancy_data
+
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
                                     site_population_list, traj_number):
         plt.switch_backend('Agg')
