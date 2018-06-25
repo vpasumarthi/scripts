@@ -257,3 +257,7 @@ class Occupancy(object):
             n_filled_unit_cells -= (cell_indices[index]
                                     * system_size[index+1:].prod())
         return cell_indices
+
+    def stepwise_res_time(self, system_size, ld, step_length_ratio,
+                          num_elements_per_unit_cell):
+        return None
