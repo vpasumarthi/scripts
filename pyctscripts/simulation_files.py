@@ -44,15 +44,13 @@ class SimulationFiles(object):
     def dst_path(self, species_count_list):
         # determine destination path
         child_dir1 = 'SimulationFiles'
-        child_dir2 = ('ICT=' + self.system['ion_charge_type']
-                      + ';SCT=' + self.system['species_charge_type'])
-        child_dir3 = (
+        child_dir2 = (
                 str(species_count_list[0])
                 + ('electron' if species_count_list[0] == 1 else 'electrons')
                 + ',' + str(species_count_list[1])
                 + ('hole' if species_count_list[1] == 1 else 'holes'))
-        child_dir4 = str(self.system['temp']) + 'K'
-        child_dir5 = (('%1.2E' % self.run['t_final']) + 'SEC,'
+        child_dir3 = str(self.system['temp']) + 'K'
+        child_dir4 = (('%1.2E' % self.run['t_final']) + 'SEC,'
                       + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
                       + ('%1.2E' % self.run['n_traj']) + 'Traj')
         electric = self.run['external_field']['electric']
@@ -76,7 +74,7 @@ class SimulationFiles(object):
         work_dir = self.field_tag
         system_directory_path = Path.cwd()
         work_dir_path = (system_directory_path / child_dir1 / child_dir2
-                         / child_dir3 / child_dir4 / child_dir5 / work_dir)
+                         / child_dir3 / child_dir4 / work_dir)
         work_dir_depth = (len(work_dir_path.parts)
                           - len(system_directory_path.parts))
         return (work_dir_path, work_dir_depth)
@@ -177,8 +175,6 @@ class SimulationFiles(object):
                         + 'x'.join(str(element)
                                    for element in self.system['system_size']))
 
-        charge_comb = (self.system['ion_charge_type'][0]
-                       + self.system['species_charge_type'][0])
         for i_run in range(self.num_runs):
             if self.variable_quantity_type_index == 1:
                 self.system['species_count'][self.variable_quantity_index] = self.variable_quantity_list[i_run]
@@ -193,7 +189,7 @@ class SimulationFiles(object):
             # generate slurm file
             with dst_file_path.open('w') as dst_file:
                 dst_file.write('#!/bin/sh\n\n')
-                dst_file.write('#SBATCH ' + job_name_key + '_' + charge_comb
+                dst_file.write('#SBATCH ' + job_name_key
                                + '_' + self.field_tag.replace(' ', '_')
                                + '_' + 'e' + str(species_count_list[0])
                                + 'h' + str(species_count_list[1])
