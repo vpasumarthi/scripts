@@ -282,6 +282,7 @@ class Occupancy(object):
             step_system_size_master_list.append(step_system_size)
             step_limits.append(old_index + step_system_size[ld])
             old_index += step_system_size[ld]
+        step_limits = np.asarray(step_limits)
         for traj_number in range(1, n_traj+1):
             occupancy_data = self.read_occupancy_data(traj_number)
             for site_index in occupancy_data:
