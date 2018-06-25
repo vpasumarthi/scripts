@@ -49,8 +49,7 @@ class SimulationFiles(object):
                 + ('electron' if species_count_list[0] == 1 else 'electrons')
                 + ',' + str(species_count_list[1])
                 + ('hole' if species_count_list[1] == 1 else 'holes'))
-        child_dir3 = str(self.system['temp']) + 'K'
-        child_dir4 = (('%1.2E' % self.run['t_final']) + 'SEC,'
+        child_dir3 = (('%1.2E' % self.run['t_final']) + 'SEC,'
                       + ('%1.2E' % self.run['time_interval']) + 'TimeInterval,'
                       + ('%1.2E' % self.run['n_traj']) + 'Traj')
         electric = self.run['external_field']['electric']
@@ -74,7 +73,7 @@ class SimulationFiles(object):
         work_dir = self.field_tag
         system_directory_path = Path.cwd()
         work_dir_path = (system_directory_path / child_dir1 / child_dir2
-                         / child_dir3 / child_dir4 / work_dir)
+                         / child_dir3 / work_dir)
         work_dir_depth = (len(work_dir_path.parts)
                           - len(system_directory_path.parts))
         return (work_dir_path, work_dir_depth)
