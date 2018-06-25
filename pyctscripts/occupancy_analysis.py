@@ -244,3 +244,16 @@ class Occupancy(object):
         res_time_data_file_name = f'Residence length distribution_{n_traj}traj.dat'
         np.savetxt(res_time_data_file_name, res_time_data)
         return None
+
+    def get_cell_indices(self, system_size, system_element_index,
+                         num_elements_per_unit_cell):
+        cell_indices = np.zeros(3, dtype=int)
+        unit_cell_element_index = system_element_index % num_elements_per_unit_cell
+        n_filled_unit_cells = ((system_element_index - unit_cell_element_index)
+                               / num_elements_per_unit_cell)
+        for index in range(3):
+            cell_indices[index] = (n_filled_unit_cells
+                                      / system_size[index+1:].prod())
+            n_filled_unit_cells -= (cell_indices[index]
+                                    * system_size[index+1:].prod())
+        return cell_indices
