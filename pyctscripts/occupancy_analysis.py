@@ -284,4 +284,7 @@ class Occupancy(object):
             old_index += step_system_size[ld]
         for traj_number in range(1, n_traj+1):
             occupancy_data = self.read_occupancy_data(traj_number)
+            for site_index in occupancy_data:
+                cell_indices = self.get_cell_indices(system_size, site_index,
+                                                     num_elements_per_unit_cell)
         return None
