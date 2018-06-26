@@ -353,11 +353,12 @@ class Occupancy(object):
         else:
             log_report.append(f'Mean values of transition record: [' + "".join(f'{val} ' for val in mean_transition_record) + ']')
             log_report.append(f'Standard deviation values of transition record: [' + "".join(f'{val} ' for val in std_transition_record) + ']')
-        step_res_time_data_file_name = 'stepwise_residence_occupany'
-        step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
+        step_res_time_data_file_name = 'stepwise_residence_occupancy'
+        step_res_time_data_file_path = self.src_path / (step_res_time_data_file_name + '.txt')
         np.savetxt(step_res_time_data_file_path, step_res_count)
-        step_res_time_log_file_path = self.src_path / step_res_time_data_file_name + '.log'
+        step_res_time_log_file_path = self.src_path / (step_res_time_data_file_name + '.log')
         report = open(step_res_time_log_file_path, 'w')
-        report.write(log_report)
+        log_content = ''.join(log_report)
+        report.write(log_content)
         report.close()
         return None
