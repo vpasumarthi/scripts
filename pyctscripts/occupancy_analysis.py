@@ -297,10 +297,10 @@ class Occupancy(object):
             occupancy_data = self.read_occupancy_data(traj_number)
             old_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
             if num_steps > 2:
-                up_transition_record = np.zeros(num_steps, int)
-                down_transition_record = np.zeros(num_steps, int)
+                trajwise_up_transition_record = np.zeros(num_steps, int)
+                trajwise_down_transition_record = np.zeros(num_steps, int)
             else:
-                transition_record = np.zeros(1, int)
+                trajwise_transition_record = np.zeros(1, int)
             for kmc_step_index, kmc_stepwise_occupancy_data in enumerate(occupancy_data):
                 new_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
                 for site_index in kmc_stepwise_occupancy_data:
@@ -314,11 +314,11 @@ class Occupancy(object):
                         initial_step_index = np.where(step_transition == -1)[0][0]
                         final_step_index = np.where(step_transition == 1)[0][0]
                         if final_step_index == initial_step_index + 1 or final_step_index == initial_step_index - num_steps + 1:
-                            up_transition_record[initial_step_index] += 1
+                            trajwise_up_transition_record[initial_step_index] += 1
                         else:
-                            down_transition_record[initial_step_index] += 1
+                            trajwise_down_transition_record[initial_step_index] += 1
                     else:
-                        transition_record += 1
+                        trajwise_transition_record += 1
                 old_kmc_stepwise_step_res_count = np.copy(new_kmc_stepwise_step_res_count) 
                 traj_step_res_count += new_kmc_stepwise_step_res_count
             step_res_count[traj_number-1] = traj_step_res_count
@@ -330,10 +330,10 @@ class Occupancy(object):
         log_report.append(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
         log_report.append(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
         if num_steps > 2:
-            log_report.append(f'Up transition record: [' + "".join(f'{val} ' for val in up_transition_record) + ']')
-            log_report.append(f'Down transition record: [' + "".join(f'{val} ' for val in down_transition_record) + ']')
+            log_report.append(f'Up transition record: [' + "".join(f'{val} ' for val in trajwise_up_transition_record) + ']')
+            log_report.append(f'Down transition record: [' + "".join(f'{val} ' for val in trajwise_down_transition_record) + ']')
         else:
-            log_report.append(f'Transition record: [' + "".join(f'{val} ' for val in transition_record) + ']')
+            log_report.append(f'Transition record: [' + "".join(f'{val} ' for val in trajwise_transition_record) + ']')
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
