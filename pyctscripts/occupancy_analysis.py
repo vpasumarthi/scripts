@@ -328,7 +328,7 @@ class Occupancy(object):
         log_report = []
         log_report.append(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
         log_report.append(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
-        step_res_time_data_file_name = 'stepwise_residence_occupany.txt'
-        step_res_time_data_file_path = self.src_path / step_res_time_data_file_name
+        step_res_time_data_file_name = 'stepwise_residence_occupany'
+        step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
         return None
