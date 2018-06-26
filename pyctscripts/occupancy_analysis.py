@@ -127,9 +127,9 @@ class Occupancy(object):
                     num_kmc_steps += 1
         occupancy_data = np.zeros((num_kmc_steps, num_carriers))
         with occupancy_file_path.open('r') as occupancy_file:
-            for line in occupancy_file:
+            for index, line in enumerate(occupancy_file):
                 str_site_indices = line.split('\n')[0].split()
-                occupancy_data.extend([int(str_site_index) for str_site_index in str_site_indices])
+                occupancy_data[index, :] = [int(str_site_index) for str_site_index in str_site_indices]
         return occupancy_data
 
     def generate_site_wise_occpancy(self, num_shells, probe_indices,
