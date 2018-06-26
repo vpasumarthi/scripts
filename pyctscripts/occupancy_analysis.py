@@ -128,7 +128,7 @@ class Occupancy(object):
         occupancy_data = np.zeros((num_kmc_steps, num_carriers), int)
         with occupancy_file_path.open('r') as occupancy_file:
             for index, line in enumerate(occupancy_file):
-                str_site_indices = line.split('\n')[0].split()
+                str_site_indices = line.strip().split()
                 occupancy_data[index, :] = [int(str_site_index) for str_site_index in str_site_indices]
         return occupancy_data
 
