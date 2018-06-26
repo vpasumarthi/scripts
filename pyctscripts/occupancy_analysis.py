@@ -297,15 +297,9 @@ class Occupancy(object):
         else:
             transition_record = np.zeros((n_traj), int)
         for traj_number in range(1, n_traj+1):
-            print(traj_number)
             traj_step_res_count = np.zeros(num_steps, int)
             occupancy_data = self.read_occupancy_data(traj_number)
             old_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
-            if num_steps > 2:
-                trajwise_up_transition_record = np.zeros(num_steps, int)
-                trajwise_down_transition_record = np.zeros(num_steps, int)
-            else:
-                trajwise_transition_record = np.zeros(1, int)
             for kmc_step_index, kmc_stepwise_occupancy_data in enumerate(occupancy_data):
                 new_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
                 for site_index in kmc_stepwise_occupancy_data:
@@ -319,11 +313,11 @@ class Occupancy(object):
                         initial_step_index = np.where(step_transition == -1)[0][0]
                         final_step_index = np.where(step_transition == 1)[0][0]
                         if final_step_index == initial_step_index + 1 or final_step_index == initial_step_index - num_steps + 1:
-                            trajwise_up_transition_record[initial_step_index] += 1
+                            up_transition_record[traj_number-1][initial_step_index] += 1
                         else:
-                            trajwise_down_transition_record[initial_step_index] += 1
+                            down_transition_record[traj_number-1][initial_step_index] += 1
                     else:
-                        trajwise_transition_record += 1
+                        transition_record[traj_number-1] += 1
                 old_kmc_stepwise_step_res_count = np.copy(new_kmc_stepwise_step_res_count) 
                 traj_step_res_count += new_kmc_stepwise_step_res_count
             step_res_count[traj_number-1] = traj_step_res_count
