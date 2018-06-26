@@ -331,4 +331,9 @@ class Occupancy(object):
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
+        
+        step_res_time_log_file_path = self.src_path / step_res_time_data_file_name + '.log'
+        report = open(step_res_time_log_file_path, 'w')
+        report.write(log_report)
+        report.close()
         return None
