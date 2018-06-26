@@ -328,9 +328,18 @@ class Occupancy(object):
             mean_down_transition_record = np.mean(down_transition_record, axis=0)
             std_up_transition_record = np.std(up_transition_record, axis=0)
             std_down_transition_record = np.std(down_transition_record, axis=0)
+            up_transition_record_file_name = 'stepwise_up_transition_record.txt'
+            down_transition_record_file_name = 'stepwise_down_transition_record.txt'
+            up_transition_record_file_path = self.src_path / up_transition_record_file_name
+            down_transition_record_file_path = self.src_path / down_transition_record_file_name
+            np.savetxt(up_transition_record_file_path, up_transition_record)
+            np.savetxt(down_transition_record_file_path, down_transition_record)
         else:
             mean_transition_record = np.mean(transition_record, axis=0)
             std_transition_record = np.std(transition_record, axis=0)
+            transition_record_file_name = 'stepwise_transition_record.txt'
+            transition_record_file_path = self.src_path / transition_record_file_name
+            np.savetxt(transition_record_file_path, transition_record)
         stat_width = 10
         stat_decimals = 3
         log_report = []
@@ -347,7 +356,6 @@ class Occupancy(object):
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
-        
         step_res_time_log_file_path = self.src_path / step_res_time_data_file_name + '.log'
         report = open(step_res_time_log_file_path, 'w')
         report.write(log_report)
