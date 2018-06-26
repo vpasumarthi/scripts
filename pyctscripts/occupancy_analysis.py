@@ -291,6 +291,11 @@ class Occupancy(object):
             old_index += step_system_size[ld]
         step_limits = np.asarray(step_limits)
         step_res_count = np.zeros((n_traj, num_steps), int)
+        if num_steps > 2:
+            up_transition_record = np.zeros((n_traj, num_steps), int)
+            down_transition_record = np.zeros((n_traj, num_steps), int)
+        else:
+            transition_record = np.zeros((n_traj, num_steps), int)
         for traj_number in range(1, n_traj+1):
             print(traj_number)
             traj_step_res_count = np.zeros(num_steps, int)
