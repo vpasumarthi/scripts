@@ -292,6 +292,7 @@ class Occupancy(object):
         step_limits = np.asarray(step_limits)
         step_res_count = np.zeros((n_traj, num_steps), int)
         for traj_number in range(1, n_traj+1):
+            print(traj_number)
             traj_step_res_count = np.zeros(num_steps, int)
             occupancy_data = self.read_occupancy_data(traj_number)
             old_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
@@ -329,10 +330,10 @@ class Occupancy(object):
         log_report.append(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
         log_report.append(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
         if num_steps > 2:
-            log_report.append(f'Up transition record: [' + "".join(f'{valf} ' for val in up_transition_record) + ']')
-            log_report.append(f'Down transition record: [' + "".join(f'{valf} ' for val in down_transition_record) + ']')
+            log_report.append(f'Up transition record: [' + "".join(f'{val} ' for val in up_transition_record) + ']')
+            log_report.append(f'Down transition record: [' + "".join(f'{val} ' for val in down_transition_record) + ']')
         else:
-            log_report.append(f'Transition record: [' + "".join(f'{valf} ' for val in transition_record) + ']')
+            log_report.append(f'Transition record: [' + "".join(f'{val} ' for val in transition_record) + ']')
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
