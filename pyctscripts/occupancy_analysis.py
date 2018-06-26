@@ -117,7 +117,6 @@ class Occupancy(object):
     def read_occupancy_data(self, traj_number):
         occupancy_dir_name = 'occupancy_data'
         occupancy_file_name = f'occupancy_{traj_number}.dat'
-        occupancy_data = []
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         num_kmc_steps = 0
         with occupancy_file_path.open('r') as occupancy_file:
@@ -126,6 +125,7 @@ class Occupancy(object):
                     if index == 0:
                         num_carriers = len(line.strip().split())
                     num_kmc_steps += 1
+        occupancy_data = np.zeros((num_kmc_steps, num_carriers))
         with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 str_site_indices = line.split('\n')[0].split()
