@@ -294,14 +294,16 @@ class Occupancy(object):
         for traj_number in range(1, n_traj+1):
             traj_step_res_count = np.zeros(num_steps, int)
             occupancy_data = self.read_occupancy_data(traj_number)
+            old_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
             for kmc_stepwise_occupancy_data in occupancy_data:
-                kmc_stepwise_step_res_count = np.zeros(num_steps, int)
+                new_kmc_stepwise_step_res_count = np.zeros(num_steps, int)
                 for site_index in kmc_stepwise_occupancy_data:
                     cell_indices = self.get_cell_indices(system_size, site_index,
                                                          num_elements_per_unit_cell)
                     site_step_index = sum(step_limits < cell_indices[ld]) - 1
-                    kmc_stepwise_step_res_count[site_step_index] += 1 
-                traj_step_res_count += kmc_stepwise_step_res_count
+                    new_kmc_stepwise_step_res_count[site_step_index] += 1
+                old_kmc_stepwise_step_res_count = np.copy(new_kmc_stepwise_step_res_count) 
+                traj_step_res_count += new_kmc_stepwise_step_res_count
             step_res_count[traj_number-1] = traj_step_res_count
         mean_step_res_count = np.mean(step_res_count, axis=0)
         std_step_res_count = np.std(step_res_count, axis=0)
