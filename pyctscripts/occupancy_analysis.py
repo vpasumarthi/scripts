@@ -309,7 +309,9 @@ class Occupancy(object):
                     new_kmc_stepwise_step_res_count[site_step_index] += 1
                 if kmc_step_index != 0 and not np.array_equal(old_kmc_stepwise_step_res_count, new_kmc_stepwise_step_res_count):
                     if num_steps > 2:
-                        return
+                        step_transition = new_kmc_stepwise_step_res_count - old_kmc_stepwise_step_res_count
+                        initial_step_index = np.where(step_transition == -1)[0][0]
+                        final_step_index = np.where(step_transition == 1)[0][0]
                     else:
                         transition_record += 1
                 old_kmc_stepwise_step_res_count = np.copy(new_kmc_stepwise_step_res_count) 
