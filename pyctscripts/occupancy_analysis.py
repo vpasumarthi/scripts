@@ -290,12 +290,12 @@ class Occupancy(object):
             step_limits.append(old_index + step_system_size[ld])
             old_index += step_system_size[ld]
         step_limits = np.asarray(step_limits)
-        step_res_count = np.zeros((n_traj, num_steps))
+        step_res_count = np.zeros((n_traj, num_steps), int)
         for traj_number in range(1, n_traj+1):
-            traj_step_res_count = np.zeros(num_steps)
+            traj_step_res_count = np.zeros(num_steps, int)
             occupancy_data = self.read_occupancy_data(traj_number)
             for kmc_stepwise_occupancy_data in occupancy_data:
-                kmc_stepwise_step_res_count = np.zeros(num_steps)
+                kmc_stepwise_step_res_count = np.zeros(num_steps, int)
                 for site_index in kmc_stepwise_occupancy_data:
                     cell_indices = self.get_cell_indices(system_size, site_index,
                                                          num_elements_per_unit_cell)
