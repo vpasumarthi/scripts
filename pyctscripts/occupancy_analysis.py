@@ -119,6 +119,11 @@ class Occupancy(object):
         occupancy_file_name = f'occupancy_{traj_number}.dat'
         occupancy_data = []
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
+        num_kmc_steps = 0
+        with occupancy_file_path.open('r') as occupancy_file:
+            for line in occupancy_file:
+                if line.strip():
+                    num_kmc_steps += 1
         with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
                 str_site_indices = line.split('\n')[0].split()
