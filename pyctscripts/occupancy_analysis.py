@@ -328,6 +328,11 @@ class Occupancy(object):
         log_report = []
         log_report.append(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
         log_report.append(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
+        if num_steps > 2:
+            log_report.append(f'Up transition record: [' + "".join(f'{valf} ' for val in up_transition_record) + ']')
+            log_report.append(f'Down transition record: [' + "".join(f'{valf} ' for val in down_transition_record) + ']')
+        else:
+            log_report.append(f'Transition record: [' + "".join(f'{valf} ' for val in transition_record) + ']')
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
