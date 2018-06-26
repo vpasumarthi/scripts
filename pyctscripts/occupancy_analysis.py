@@ -121,8 +121,10 @@ class Occupancy(object):
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         num_kmc_steps = 0
         with occupancy_file_path.open('r') as occupancy_file:
-            for line in occupancy_file:
+            for index, line in enumerate(occupancy_file):
                 if line.strip():
+                    if index == 0:
+                        num_carriers = len(line.strip().split())
                     num_kmc_steps += 1
         with occupancy_file_path.open('r') as occupancy_file:
             for line in occupancy_file:
