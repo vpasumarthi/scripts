@@ -323,16 +323,27 @@ class Occupancy(object):
             step_res_count[traj_number-1] = traj_step_res_count
         mean_step_res_count = np.mean(step_res_count, axis=0)
         std_step_res_count = np.std(step_res_count, axis=0)
+        if num_steps > 2:
+            mean_up_transition_record = np.mean(up_transition_record, axis=0)
+            mean_down_transition_record = np.mean(down_transition_record, axis=0)
+            std_up_transition_record = np.std(up_transition_record, axis=0)
+            std_down_transition_record = np.std(down_transition_record, axis=0)
+        else:
+            mean_transition_record = np.mean(transition_record, axis=0)
+            std_transition_record = np.std(transition_record, axis=0)
         stat_width = 10
         stat_decimals = 3
         log_report = []
         log_report.append(f'Stepwise mean occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in mean_step_res_count) + ']')
         log_report.append(f'Stepwise standard deviation in occupancy of electrons is: [' + "".join(f'{val:{stat_width}.{stat_decimals}f}' for val in std_step_res_count) + ']')
         if num_steps > 2:
-            log_report.append(f'Up transition record: [' + "".join(f'{val} ' for val in trajwise_up_transition_record) + ']')
-            log_report.append(f'Down transition record: [' + "".join(f'{val} ' for val in trajwise_down_transition_record) + ']')
+            log_report.append(f'Mean values of up-transition record: [' + "".join(f'{val} ' for val in mean_up_transition_record) + ']')
+            log_report.append(f'Mean values of down-transition record: [' + "".join(f'{val} ' for val in mean_down_transition_record) + ']')
+            log_report.append(f'Standard deviation values of up-transition record: [' + "".join(f'{val} ' for val in std_up_transition_record) + ']')
+            log_report.append(f'Standard deviation values of down-transition record: [' + "".join(f'{val} ' for val in std_down_transition_record) + ']')
         else:
-            log_report.append(f'Transition record: [' + "".join(f'{val} ' for val in trajwise_transition_record) + ']')
+            log_report.append(f'Mean values of transition record: [' + "".join(f'{val} ' for val in mean_transition_record) + ']')
+            log_report.append(f'Standard deviation values of transition record: [' + "".join(f'{val} ' for val in std_transition_record) + ']')
         step_res_time_data_file_name = 'stepwise_residence_occupany'
         step_res_time_data_file_path = self.src_path / step_res_time_data_file_name + '.txt'
         np.savetxt(step_res_time_data_file_path, step_res_count)
