@@ -183,6 +183,26 @@ class Occupancy(object):
         figure_path = self.src_path / figure_name
         plt.tight_layout()
         plt.savefig(str(figure_path))
+
+        plt.switch_backend('Agg')
+        fig = plt.figure()
+        plt.title('Shell-wise residence time distribution')
+        ax = fig.add_subplot(111)
+        total_population = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
+        for shell_index in range(num_shells+1):
+            fraction_value = sum(site_population_list[shell_index]) / total_population
+            ax.bar(shell_index, fraction_value,
+                   color=self.color_list[shell_index % self.num_colors])
+            ax.text(shell_index, 1.01 * fraction_value, f'{fraction_value:.2f}',
+                    color='black', horizontalalignment='center')
+        ax.set_xlabel('Shell Number')
+        ax.set_ylabel('Average % residence')
+        xticks_list = [str(index) for index in range(num_shells+1)]
+        plt.xticks(range(num_shells+1), xticks_list)
+        figure_name = f'avg_shell-wise_residence_{n_traj}.png'
+        figure_path = self.src_path / figure_name
+        plt.tight_layout()
+        plt.savefig(str(figure_path))
         return None
 
     def generate_res_time_distribution(self, res_time_pool, n_traj):
