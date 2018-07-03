@@ -190,13 +190,13 @@ class Occupancy(object):
         ax = fig.add_subplot(111)
         total_population = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
         for shell_index in range(num_shells+1):
-            fraction_value = sum(site_population_list[shell_index]) / total_population
-            ax.bar(shell_index, fraction_value,
+            percent_value = sum(site_population_list[shell_index]) / total_population * 100
+            ax.bar(shell_index, percent_value,
                    color=self.color_list[shell_index % self.num_colors])
-            ax.text(shell_index, 1.01 * fraction_value, f'{fraction_value:.2f}',
+            ax.text(shell_index, 1.01 * percent_value, f'{percent_value:.2f}',
                     color='black', horizontalalignment='center')
         ax.set_xlabel('Shell Number')
-        ax.set_ylabel('Average % residence')
+        ax.set_ylabel('% of trajectory length')
         xticks_list = [str(index) for index in range(num_shells+1)]
         plt.xticks(range(num_shells+1), xticks_list)
         figure_name = f'avg_shell-wise_residence_{n_traj}.png'
