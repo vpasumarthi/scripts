@@ -53,8 +53,13 @@ fi
 
 cd $SLURMTMPDIR
 
-module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
-module load vasp5.4.4
+if [ 0 -eq `grep "Gamma" KPOINTS -c` ]; then
+	module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
+	module load vasp5.4.4
+else
+	module use /projects/academic/mdupuis2/software/modules/vasp_gam
+	module load vasp_gam
+fi		
 module list
 which vasp
 
