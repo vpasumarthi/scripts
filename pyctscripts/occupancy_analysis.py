@@ -169,12 +169,11 @@ class Occupancy(object):
         fig = plt.figure()
         plt.title('Shell-wise occupancy')
         ax = fig.add_subplot(111)
+        num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
         for shell_index in range(num_shells+1):
-            mean_value = int(np.mean(site_population_list[shell_index]))
-            ax.bar(shell_index, mean_value,
+            fraction_value = np.mean(site_population_list[shell_index]) / num_steps_sampled
+            ax.bar(shell_index, fraction_value,
                    color=self.color_list[shell_index % self.num_colors])
-            ax.text(shell_index, 1.01 * mean_value, str(mean_value),
-                    color='black', horizontalalignment='center')
         ax.set_xlabel('Shell Number')
         ax.set_ylabel('Average shell occupancy')
         xticks_list = [str(index) for index in range(num_shells+1)]
@@ -188,9 +187,8 @@ class Occupancy(object):
         fig = plt.figure()
         plt.title('Shell-wise residence time distribution')
         ax = fig.add_subplot(111)
-        total_population = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
         for shell_index in range(num_shells+1):
-            percent_value = sum(site_population_list[shell_index]) / total_population * 100
+            percent_value = sum(site_population_list[shell_index]) / num_steps_sampled * 100
             ax.bar(shell_index, percent_value,
                    color=self.color_list[shell_index % self.num_colors])
             ax.text(shell_index, 1.01 * percent_value, f'{percent_value:.2f}',
