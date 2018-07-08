@@ -184,37 +184,6 @@ class Occupancy(object):
         plt.savefig(str(figure_path))
         datafile_name = f'shell-wise_fractional_occupancy_{n_traj}.txt'
         np.savetxt(datafile_name, fraction_value_array)
-
-        plt.switch_backend('Agg')
-        fig = plt.figure()
-        plt.title('Shell-wise residence distribution')
-        ax = fig.add_subplot(111)
-        percent_value_list = np.zeros((n_traj, num_shells+1))
-        for traj_index, site_population_list in enumerate(site_population_repo):
-            num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
-            for shell_index in range(num_shells+1):
-                percent_value = sum(site_population_list[shell_index]) / num_steps_sampled * 100
-                percent_value_list[traj_index, shell_index] = percent_value
-
-        percent_value_array = np.zeros((num_shells+1, 2))
-        for shell_index in range(num_shells+1):
-            mean_percent_value = np.mean(percent_value_list[:, shell_index])
-            percent_value_array[shell_index, 0] = mean_percent_value
-            std_percent_value = np.std(percent_value_list[:, shell_index])
-            percent_value_array[shell_index, 1] = std_percent_value
-            ax.bar(shell_index, mean_percent_value, color='#607c8e')
-            ax.errorbar(shell_index, mean_percent_value, color='black',
-                        yerr=std_percent_value, capsize=3)
-        ax.set_xlabel('Shell Number')
-        ax.set_ylabel('% of trajectory length')
-        xticks_list = [str(index) for index in range(num_shells+1)]
-        plt.xticks(range(num_shells+1), xticks_list)
-        figure_name = f'shell-wise_residence_{n_traj}.png'
-        figure_path = self.src_path / figure_name
-        plt.tight_layout()
-        plt.savefig(str(figure_path))
-        datafile_name = f'shell-wise_residence_{n_traj}.txt'
-        np.savetxt(datafile_name, percent_value_array)
         return None
 
     def generate_res_time_distribution(self, res_time_pool, n_traj):
