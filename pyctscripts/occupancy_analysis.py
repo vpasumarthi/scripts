@@ -152,17 +152,26 @@ class Occupancy(object):
         plt.savefig(str(figure_path))
         return None
 
-    def generate_shell_wise_occupancy(self, num_shells, site_population_list,
+    def generate_shell_wise_occupancy(self, num_shells, site_population_repo,
                                       n_traj):
         plt.switch_backend('Agg')
         fig = plt.figure()
         plt.title('Shell-wise fractional occupancy')
         ax = fig.add_subplot(111)
-        num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
+        fractional_occupancy_list = np.zeros((n_traj, num_shells+1))
+        for traj_index, site_population_list in enumerate(site_population_repo):
+            num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
+            for shell_index in range(num_shells+1):
+                fraction_value = np.mean(site_population_list[shell_index]) / num_steps_sampled
+                fractional_occupancy_list[traj_index, shell_index] = fraction_value
+        
         for shell_index in range(num_shells+1):
-            fraction_value = np.mean(site_population_list[shell_index]) / num_steps_sampled
-            ax.bar(shell_index, fraction_value,
+            mean_fraction_value = np.mean(fractional_occupancy_list[:, shell_index])
+            std_fraction_value = np.std(fractional_occupancy_list[:, shell_index])
+            ax.bar(shell_index, mean_fraction_value,
                    color=self.color_list[shell_index % self.num_colors])
+            ax.errorbar(shell_index, mean_fraction_value, color='black',
+                        yerr=std_fraction_value, capsize=3)
         ax.set_xlabel('Shell Number')
         ax.set_ylabel('Fractional occupancy')
         xticks_list = [str(index) for index in range(num_shells+1)]
@@ -176,12 +185,20 @@ class Occupancy(object):
         fig = plt.figure()
         plt.title('Shell-wise residence distribution')
         ax = fig.add_subplot(111)
+        percent_value_list = np.zeros((n_traj, num_shells+1))
+        for traj_index, site_population_list in enumerate(site_population_repo):
+            num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
+            for shell_index in range(num_shells+1):
+                percent_value = sum(site_population_list[shell_index]) / num_steps_sampled * 100
+                percent_value_list[traj_index, shell_index] = percent_value
+        
         for shell_index in range(num_shells+1):
-            percent_value = sum(site_population_list[shell_index]) / num_steps_sampled * 100
-            ax.bar(shell_index, percent_value,
+            mean_percent_value = np.mean(percent_value_list[:, shell_index])
+            std_percent_value = np.std(percent_value_list[:, shell_index])
+            ax.bar(shell_index, mean_percent_value,
                    color=self.color_list[shell_index % self.num_colors])
-            ax.text(shell_index, 1.01 * percent_value, f'{percent_value:.2f}',
-                    color='black', horizontalalignment='center')
+            ax.errorbar(shell_index, mean_percent_value, color='black',
+                        yerr=std_percent_value, capsize=3)
         ax.set_xlabel('Shell Number')
         ax.set_ylabel('% of trajectory length')
         xticks_list = [str(index) for index in range(num_shells+1)]
