@@ -165,9 +165,12 @@ class Occupancy(object):
                 fraction_value = np.mean(site_population_list[shell_index]) / num_steps_sampled
                 fractional_occupancy_list[traj_index, shell_index] = fraction_value
         
+        fraction_value_array = np.zeros((num_shells+1, 2))
         for shell_index in range(num_shells+1):
             mean_fraction_value = np.mean(fractional_occupancy_list[:, shell_index])
+            fraction_value_array[shell_index, 0] = mean_fraction_value
             std_fraction_value = np.std(fractional_occupancy_list[:, shell_index])
+            fraction_value_array[shell_index, 1] = std_fraction_value
             ax.bar(shell_index, mean_fraction_value,
                    color=self.color_list[shell_index % self.num_colors])
             ax.errorbar(shell_index, mean_fraction_value, color='black',
@@ -180,6 +183,8 @@ class Occupancy(object):
         figure_path = self.src_path / figure_name
         plt.tight_layout()
         plt.savefig(str(figure_path))
+        datafile_name = f'shell-wise_fractional_occupancy_{n_traj}.txt'
+        np.savetxt(datafile_name, fraction_value_array)
 
         plt.switch_backend('Agg')
         fig = plt.figure()
@@ -191,10 +196,13 @@ class Occupancy(object):
             for shell_index in range(num_shells+1):
                 percent_value = sum(site_population_list[shell_index]) / num_steps_sampled * 100
                 percent_value_list[traj_index, shell_index] = percent_value
-        
+
+        percent_value_array = np.zeros((num_shells+1, 2))
         for shell_index in range(num_shells+1):
             mean_percent_value = np.mean(percent_value_list[:, shell_index])
+            percent_value_array[shell_index, 0] = mean_percent_value
             std_percent_value = np.std(percent_value_list[:, shell_index])
+            percent_value_array[shell_index, 1] = std_percent_value
             ax.bar(shell_index, mean_percent_value,
                    color=self.color_list[shell_index % self.num_colors])
             ax.errorbar(shell_index, mean_percent_value, color='black',
@@ -207,6 +215,8 @@ class Occupancy(object):
         figure_path = self.src_path / figure_name
         plt.tight_layout()
         plt.savefig(str(figure_path))
+        datafile_name = f'shell-wise_residence_{n_traj}.txt'
+        np.savetxt(datafile_name, percent_value_array)
         return None
 
     def generate_res_time_distribution(self, res_time_pool, n_traj):
