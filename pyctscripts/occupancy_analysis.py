@@ -162,9 +162,9 @@ class Occupancy(object):
         for traj_index, site_population_list in enumerate(site_population_repo):
             num_steps_sampled = sum([sum(site_population_list[shell_index]) for shell_index in range(len(site_population_list))])
             for shell_index in range(num_shells+1):
-                fraction_value = np.mean(site_population_list[shell_index]) / num_steps_sampled
+                fraction_value = np.sum(site_population_list[shell_index]) / num_steps_sampled
                 fractional_occupancy_list[traj_index, shell_index] = fraction_value
-        
+
         fraction_value_array = np.zeros((num_shells+1, 2))
         for shell_index in range(num_shells+1):
             mean_fraction_value = np.mean(fractional_occupancy_list[:, shell_index])
