@@ -171,8 +171,7 @@ class Occupancy(object):
             fraction_value_array[shell_index, 0] = mean_fraction_value
             std_fraction_value = np.std(fractional_occupancy_list[:, shell_index])
             fraction_value_array[shell_index, 1] = std_fraction_value
-            ax.bar(shell_index, mean_fraction_value,
-                   color=self.color_list[shell_index % self.num_colors])
+            ax.bar(shell_index, mean_fraction_value, color='#607c8e')
             ax.errorbar(shell_index, mean_fraction_value, color='black',
                         yerr=std_fraction_value, capsize=3)
         ax.set_xlabel('Shell Number')
@@ -203,8 +202,7 @@ class Occupancy(object):
             percent_value_array[shell_index, 0] = mean_percent_value
             std_percent_value = np.std(percent_value_list[:, shell_index])
             percent_value_array[shell_index, 1] = std_percent_value
-            ax.bar(shell_index, mean_percent_value,
-                   color=self.color_list[shell_index % self.num_colors])
+            ax.bar(shell_index, mean_percent_value, color='#607c8e')
             ax.errorbar(shell_index, mean_percent_value, color='black',
                         yerr=std_percent_value, capsize=3)
         ax.set_xlabel('Shell Number')
