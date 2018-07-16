@@ -80,21 +80,24 @@ class Occupancy(object):
                                     [0] * len(probe_indices[shell_index]))
 
         traj_res_time_pool = []
-        res_count = 0
         occupancy_dir_name = 'occupancy_data'
         occupancy_file_name = f'occupancy_{traj_number}.dat'
         occupancy_file_path = self.src_path / occupancy_dir_name / occupancy_file_name
         with occupancy_file_path.open('r') as occupancy_file:
-            for line in occupancy_file:
-                site_index = int(line.split('\n')[0])
+            for line_index, line in enumerate(occupancy_file):
+                site_indices = [int(site_index) for site_index in line.strip().split()]
+                if line_index == 0:
+                    num_species = len(site_indices)
+                    species_wise_res_count = [0] * num_species
                 if res_time:
-                    shell_index = site_indices_dict[site_index]
-                    if shell_index <= barrier_shell_index:
-                        res_count += 1
-                    else:
-                        if res_count != 0:
-                            traj_res_time_pool.append(res_count)
-                            res_count = 0
+                    for species_index, site_index in enumerate(site_indices):
+                        shell_index = site_indices_dict[site_index]
+                        if shell_index <= barrier_shell_index:
+                            species_wise_res_count[species_index] += 1
+                        else:
+                            if species_wise_res_count[species_index] != 0:
+                                traj_res_time_pool.append(species_wise_res_count[species_index])
+                                species_wise_res_count[species_index] = 0
                 for shell_index in range(num_shells+1):
                     if site_index in probe_indices[shell_index]:
                         list_index = probe_indices[shell_index].index(site_index)
