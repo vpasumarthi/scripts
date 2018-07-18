@@ -206,7 +206,6 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
         coordinates_cluster.extend(h_coordinates_list)
     print(element_types_cluster)
     print(n_elements_cluster)
-    import pdb; pdb.set_trace()
     write_poscar(src_file_path, dst_file_path, file_format,
                  element_types_cluster, n_elements_cluster, coordinate_type,
                  coordinates_cluster)
