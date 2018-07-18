@@ -7,8 +7,8 @@ from PyCT.io import read_poscar, write_poscar
 
 def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
                     terminating_element_type, terminating_bond_distance,
-                    oxidation_list, bridge_search_depth, cluster_levels,
-                    charge_neutral, prec):
+                    oxidation_list, bridge_search_depth, cluster_size,
+                    avoid_elements_in_cluster_build, charge_neutral, prec):
     poscar_info = read_poscar(src_file_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -101,12 +101,15 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
 
     # Build up to specified cluster size
     cluster_current_level = 0
-    while cluster_current_level < cluster_levels:
+    while cluster_current_level < cluster_size:
         for site_index, search_index_list in enumerate(search_index_lists):
             for search_index in search_index_list:
-                search_index_lists[site_index] = np.append(
-                                search_index_lists[site_index],
-                                bonding_neighbor_list_indices[search_index])
+                for neighbor_site_index in bonding_neighbor_list_indices[search_index]:
+                    element_type = element_type_list[neighbor_site_index]
+                    if element_type not in avoid_elements_in_cluster_build:
+                        search_index_lists[site_index] = np.append(
+                                        search_index_lists[site_index],
+                                        neighbor_site_index)
             search_index_lists[site_index] = np.unique(search_index_lists[
                                                                 site_index])
         cluster_current_level += 1
