@@ -7,7 +7,8 @@ from PyCT.io import read_poscar, write_poscar
 
 def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
                     terminating_element_type, terminating_bond_distance,
-                    oxidation_list, bridge_search_depth, charge_neutral, prec):
+                    oxidation_list, bridge_search_depth, cluster_levels,
+                    charge_neutral, prec):
     poscar_info = read_poscar(src_file_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -70,6 +71,7 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
     # Generate Cluster
     cluster_element_indices = np.asarray(site_index_list)
 
+    # Search for bridge
     bridge_found = 0
     bridge_depth = 0
     search_index_lists = np.empty(num_sites, dtype=object)
@@ -92,6 +94,24 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
             bridge_found = 1
 
     # Add neighbor indices up to bridging species
+    for site_index in range(num_sites):
+        cluster_element_indices = np.append(cluster_element_indices,
+                                            search_index_lists[site_index])
+    cluster_element_indices = np.unique(cluster_element_indices)
+
+    # Build up to specified cluster size
+    cluster_current_level = 0
+    while cluster_current_level < cluster_levels:
+        for site_index, search_index_list in enumerate(search_index_lists):
+            for search_index in search_index_list:
+                search_index_lists[site_index] = np.append(
+                                search_index_lists[site_index],
+                                bonding_neighbor_list_indices[search_index])
+            search_index_lists[site_index] = np.unique(search_index_lists[
+                                                                site_index])
+        cluster_current_level += 1
+
+    # Add neighbor indices up to specified cluster level
     for site_index in range(num_sites):
         cluster_element_indices = np.append(cluster_element_indices,
                                             search_index_lists[site_index])
