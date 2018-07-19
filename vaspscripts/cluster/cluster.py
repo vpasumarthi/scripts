@@ -8,7 +8,8 @@ from PyCT.io import read_poscar, write_poscar
 def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
                     terminating_element_type, terminating_bond_distance,
                     oxidation_list, bridge_search_depth, cluster_size,
-                    avoid_elements_in_cluster_build, charge_neutral, prec):
+                    avoid_elements_in_cluster_build, charge_neutral,
+                    stringent_termination_check, prec):
     poscar_info = read_poscar(src_file_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -219,12 +220,57 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
             cluster_charge -= 2 * num_pairs_discarded * oxidation_list['H']
             h_bond_parent_element_indices = np.delete(h_bond_parent_element_indices,
                                                       np.asarray(discard_indices))
-            print('Final cluster charge: %d' % cluster_charge)
             h_coordinates_list = [h_coordinates_list[index]
                                   for index in range(num_h_sites)
                                   if index not in discard_indices]
             num_h_sites -= len(discard_indices)
     
+        if cluster_charge % 2 == 0 and cluster_charge > 0 and stringent_termination_check:
+            num_pairs = int(cluster_charge / 2)
+            h_dir_list = []
+            h_disp = []
+            for h_coordinates in h_coordinates_list:
+                dir_vector = h_coordinates - center_of_sites
+                disp = np.linalg.norm(np.dot(dir_vector, lattice_matrix))
+                h_dir_list.append(dir_vector)
+                h_disp.append(disp)
+            h_dir_list = np.asarray(h_dir_list)
+            h_disp = np.asarray(h_disp)
+            sort_indices = h_disp.argsort()
+            sorted_h_dir_list = np.round(h_dir_list[sort_indices], prec)
+            sorted_h_bond_parent_element_indices = (
+                                h_bond_parent_element_indices[sort_indices])
+            discard_indices = []
+            num_pairs_discarded = 0
+            max_index = num_h_sites - 1
+            while (num_pairs_discarded != num_pairs and max_index >= 1):
+                if (np.array_equal(sorted_h_dir_list[max_index],
+                                   -sorted_h_dir_list[max_index - 1])):
+                    parent_site_indices = sorted_h_bond_parent_element_indices[max_index-1:max_index+1]
+                    pair_check = 0
+                    for parent_site_index in parent_site_indices:
+                        bonded_indices = bonding_neighbor_list_indices[parent_site_index]
+                        if len(np.intersect1d(bonded_indices, cluster_element_indices)) >= 2:
+                            pair_check += 1
+                    if pair_check == 2:
+                        discard_indices.extend([sort_indices[max_index - 1],
+                                                sort_indices[max_index]])
+                        sorted_h_bond_parent_element_indices = np.delete(
+                                        sorted_h_bond_parent_element_indices,
+                                        np.array([max_index - 1, max_index]))
+                        num_pairs_discarded += 1
+                    max_index -= 2
+                else:
+                    max_index -= 1
+
+            sort_indices = np.delete(sort_indices, np.asarray(discard_indices))
+            cluster_charge -= 2 * num_pairs_discarded * oxidation_list['H']
+            h_coordinates_list = [h_coordinates_list[index]
+                                  for index in range(num_h_sites)
+                                  if index not in discard_indices]
+            num_h_sites -= len(discard_indices)
+        print('Final cluster charge: %d' % cluster_charge)
+
     # Add terminating H coordinates
     if num_h_sites:
         element_types_cluster.append(terminating_element_type)
