@@ -65,7 +65,27 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
         neighbor_cutoff_dist_limits = [
                         0, neighbor_cutoff_list[distort_element_type_index]]
 
-        if not polyhedron_stretch:
+        if polyhedron_stretch:
+            # generate neighbor list
+            polyhedron_vertex_site_indices = []
+            center_site_coord_list = []
+            for neighbor_site_index, neighbor_site_coord in enumerate(
+                                                            neighbor_site_coords):
+                lattice_directions = (localized_site_coords_imageconsolidated
+                                      - neighbor_site_coord)
+                min_disp = np.linalg.norm(np.sum(lattice_matrix, axis=0))
+                for i_cell in range(num_cells):
+                    displacement = np.linalg.norm(
+                                np.dot(lattice_directions[i_cell], lattice_matrix))
+                    if displacement < min_disp:
+                        min_disp = displacement
+                        center_site_coords = localized_site_coords_imageconsolidated[i_cell]
+                if (neighbor_cutoff_dist_limits[0] < min_disp
+                        <= neighbor_cutoff_dist_limits[1]):
+                    polyhedron_vertex_site_indices.append(neighbor_site_index)
+                    center_site_coord_list.append(center_site_coords)
+            import pdb; pdb.set_trace()
+        else:
             # generate neighbor list
             neighbor_list = []
             center_site_coord_list = []
