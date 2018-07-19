@@ -5,7 +5,7 @@ import numpy as np
 from PyCT.io import read_poscar, write_poscar
 
 
-def bond_distortion(src_file_path, localized_element_type,
+def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                     localized_site_number, neighbor_element_type_list,
                     neighbor_cutoff_list, stretch_percent_list):
     poscar_info = read_poscar(src_file_path)
@@ -65,39 +65,40 @@ def bond_distortion(src_file_path, localized_element_type,
         neighbor_cutoff_dist_limits = [
                         0, neighbor_cutoff_list[distort_element_type_index]]
 
-        # generate neighbor list
-        neighbor_list = []
-        center_site_coord_list = []
-        for neighbor_site_index, neighbor_site_coord in enumerate(
-                                                        neighbor_site_coords):
-            lattice_directions = (localized_site_coords_imageconsolidated
-                                  - neighbor_site_coord)
-            min_disp = np.linalg.norm(np.sum(lattice_matrix, axis=0))
-            for i_cell in range(num_cells):
-                displacement = np.linalg.norm(
-                            np.dot(lattice_directions[i_cell], lattice_matrix))
-                if displacement < min_disp:
-                    min_disp = displacement
-                    center_site_coords = localized_site_coords_imageconsolidated[i_cell]
-            if (neighbor_cutoff_dist_limits[0] < min_disp
-                    <= neighbor_cutoff_dist_limits[1]):
-                neighbor_list.append(neighbor_site_index)
-                center_site_coord_list.append(center_site_coords)
-
-        # generate distortion
-        num_neighbors = len(neighbor_list)
-        head_start = n_elements_consolidated[:neighbor_element_type_index].sum()
-        for i_neighbor in range(num_neighbors):
-            lattice_direction = (neighbor_site_coords[neighbor_list[i_neighbor]]
-                                - center_site_coord_list[i_neighbor])
-            displacement = np.linalg.norm(np.dot(lattice_direction,
-                                                 lattice_matrix))
-            unit_vector = lattice_direction / displacement
-            index = head_start + neighbor_list[i_neighbor]
-            new_coordinate = (
-                center_site_coord_list[i_neighbor] + unit_vector
-                * (displacement * (1 + stretch_percent_list[distort_element_type_index] / 100)))
-            fractional_coords[index] = new_coordinate
+        if not polyhedron_stretch:
+            # generate neighbor list
+            neighbor_list = []
+            center_site_coord_list = []
+            for neighbor_site_index, neighbor_site_coord in enumerate(
+                                                            neighbor_site_coords):
+                lattice_directions = (localized_site_coords_imageconsolidated
+                                      - neighbor_site_coord)
+                min_disp = np.linalg.norm(np.sum(lattice_matrix, axis=0))
+                for i_cell in range(num_cells):
+                    displacement = np.linalg.norm(
+                                np.dot(lattice_directions[i_cell], lattice_matrix))
+                    if displacement < min_disp:
+                        min_disp = displacement
+                        center_site_coords = localized_site_coords_imageconsolidated[i_cell]
+                if (neighbor_cutoff_dist_limits[0] < min_disp
+                        <= neighbor_cutoff_dist_limits[1]):
+                    neighbor_list.append(neighbor_site_index)
+                    center_site_coord_list.append(center_site_coords)
+    
+            # generate distortion
+            num_neighbors = len(neighbor_list)
+            head_start = n_elements_consolidated[:neighbor_element_type_index].sum()
+            for i_neighbor in range(num_neighbors):
+                lattice_direction = (neighbor_site_coords[neighbor_list[i_neighbor]]
+                                    - center_site_coord_list[i_neighbor])
+                displacement = np.linalg.norm(np.dot(lattice_direction,
+                                                     lattice_matrix))
+                unit_vector = lattice_direction / displacement
+                index = head_start + neighbor_list[i_neighbor]
+                new_coordinate = (
+                    center_site_coord_list[i_neighbor] + unit_vector
+                    * (displacement * (1 + stretch_percent_list[distort_element_type_index] / 100)))
+                fractional_coords[index] = new_coordinate
     dst_path = src_file_path.parent
     dst_file_name = src_file_path.name + '.out'
     dst_file_path = dst_path / dst_file_name
