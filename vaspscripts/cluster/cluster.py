@@ -217,6 +217,8 @@ def extract_cluster(src_file_path, dst_file_path, site_index_list, bond_limits,
 
             sort_indices = np.delete(sort_indices, np.asarray(discard_indices))
             cluster_charge -= 2 * num_pairs_discarded * oxidation_list['H']
+            h_bond_parent_element_indices = np.delete(h_bond_parent_element_indices,
+                                                      np.asarray(discard_indices))
             print('Final cluster charge: %d' % cluster_charge)
             h_coordinates_list = [h_coordinates_list[index]
                                   for index in range(num_h_sites)
