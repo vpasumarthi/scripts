@@ -7,7 +7,8 @@ from PyCT.io import read_poscar, write_poscar
 
 def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                     localized_site_number, neighbor_element_type_list,
-                    neighbor_cutoff_list, stretch_percent_list, polyhedron_neighbor_cutoff):
+                    neighbor_cutoff_list, stretch_percent_list,
+                    polyhedron_neighbor_cutoff, polyhedron_neighbor_stretch_percent):
     poscar_info = read_poscar(src_file_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -102,7 +103,7 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                         n_elements_consolidated[:neighbor_element_type_index].sum()
                         + range(n_elements_consolidated[neighbor_element_type_index])]
                 neighbor_cutoff_dist_limits = [0, polyhedron_neighbor_cutoff]
-            for index, vertex_site_index in enumerate(polyhedron_vertex_site_indices):
+            for vertex_site_index in polyhedron_vertex_site_indices:
                 vertex_site_coords = (
                     fractional_coords[n_elements_consolidated[
                                                     :vertex_element_type_index].sum()
@@ -134,6 +135,28 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                 cumulative_vertex_site_neighbor_list.append(vertex_site_neighbor_list)
                 cumulative_vertex_site_neighbor_element_type_list.append(vertex_site_neighbor_element_type_list)
                 cumulative_vertex_site_coord_list.append(vertex_site_coord_list)
+
+            # generate distortion
+            for vertex_index, vertex_site_index in enumerate(polyhedron_vertex_site_indices):
+                neighbor_list = cumulative_vertex_site_neighbor_list[vertex_index]
+                num_neighbors = len(neighbor_list)
+                neighbor_element_type_list = cumulative_vertex_site_neighbor_element_type_list[vertex_index]
+                vertex_site_coord_list = cumulative_vertex_site_coord_list[vertex_index]
+                for i_neighbor in range(num_neighbors):
+                    neighbor_element_type = neighbor_element_type_list[i_neighbor]
+                    neighbor_element_type_index = element_types_consolidated.index(neighbor_element_type)
+                    head_start = n_elements_consolidated[:neighbor_element_type_index].sum()
+                    neighbor_site_index = neighbor_list[i_neighbor]
+                    lattice_direction = (vertex_neighbor_site_coords[neighbor_element_type][neighbor_site_index]
+                                        - vertex_site_coord_list[i_neighbor])
+                    displacement = np.linalg.norm(np.dot(lattice_direction,
+                                                         lattice_matrix))
+                    unit_vector = lattice_direction / displacement
+                    index = head_start + neighbor_site_index
+                    new_coordinate = (
+                        vertex_site_coord_list[i_neighbor] + unit_vector
+                        * (displacement * (1 + polyhedron_neighbor_stretch_percent / 100)))
+                    fractional_coords[index] = new_coordinate
         else:
             # generate neighbor list
             neighbor_list = []
