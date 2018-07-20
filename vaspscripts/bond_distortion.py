@@ -7,7 +7,7 @@ from PyCT.io import read_poscar, write_poscar
 
 def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                     localized_site_number, neighbor_element_type_list,
-                    neighbor_cutoff_list, stretch_percent_list):
+                    neighbor_cutoff_list, stretch_percent_list, polyhedron_neighbor_cutoff):
     poscar_info = read_poscar(src_file_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -66,7 +66,7 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                         0, neighbor_cutoff_list[distort_element_type_index]]
 
         if polyhedron_stretch:
-            # generate neighbor list
+            # generate polyhedron vertex site indices
             polyhedron_vertex_site_indices = []
             center_site_coord_list = []
             for neighbor_site_index, neighbor_site_coord in enumerate(
@@ -84,7 +84,55 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                         <= neighbor_cutoff_dist_limits[1]):
                     polyhedron_vertex_site_indices.append(neighbor_site_index)
                     center_site_coord_list.append(center_site_coords)
-            import pdb; pdb.set_trace()
+
+            # generate neighbor list
+            cumulative_vertex_site_neighbor_list = []
+            cumulative_vertex_site_neighbor_element_type_list = []
+            cumulative_vertex_site_coord_list = []
+            vertex_element_type = neighbor_element_type_list[0]
+            vertex_element_type_index = element_types_consolidated.index(vertex_element_type)
+            vertex_neighbor_element_types_consolidated = element_types_consolidated[:]
+            # Avoid neighbors of same element type as vertex site
+            vertex_neighbor_element_types_consolidated.remove(vertex_element_type)
+            for index, vertex_site_index in enumerate(polyhedron_vertex_site_indices):
+                vertex_site_coords = (
+                    fractional_coords[n_elements_consolidated[
+                                                    :vertex_element_type_index].sum()
+                                      + vertex_site_index])
+                vertex_site_coords_imageconsolidated = (vertex_site_coords
+                                                        + cell_translational_coords)
+                vertex_site_neighbor_list = []
+                vertex_site_neighbor_element_type_list = []
+                vertex_site_coord_list = []
+                for neighbor_element_type in vertex_neighbor_element_types_consolidated:
+                    neighbor_element_type_index = element_types_consolidated.index(neighbor_element_type)
+                    neighbor_site_coords = fractional_coords[
+                            n_elements_consolidated[:neighbor_element_type_index].sum()
+                            + range(n_elements_consolidated[neighbor_element_type_index])]
+                    neighbor_cutoff_dist_limits = [
+                                    0, polyhedron_neighbor_cutoff]
+                    
+                    for neighbor_site_index, neighbor_site_coord in enumerate(
+                                                                    neighbor_site_coords):
+                        # Avoid localized site from vertex neighbor list
+                        if neighbor_element_type != localized_element_type or neighbor_site_index != localized_site_number-1:
+                            lattice_directions = (vertex_site_coords_imageconsolidated
+                                                  - neighbor_site_coord)
+                            min_disp = np.linalg.norm(np.sum(lattice_matrix, axis=0))
+                            for i_cell in range(num_cells):
+                                displacement = np.linalg.norm(
+                                            np.dot(lattice_directions[i_cell], lattice_matrix))
+                                if displacement < min_disp:
+                                    min_disp = displacement
+                                    center_site_coords = vertex_site_coords_imageconsolidated[i_cell]
+                            if (neighbor_cutoff_dist_limits[0] < min_disp
+                                    <= neighbor_cutoff_dist_limits[1]):
+                                vertex_site_neighbor_list.append(neighbor_site_index)
+                                vertex_site_neighbor_element_type_list.append(neighbor_element_type)
+                                vertex_site_coord_list.append(center_site_coords)
+                cumulative_vertex_site_neighbor_list.append(vertex_site_neighbor_list)
+                cumulative_vertex_site_neighbor_element_type_list.append(vertex_site_neighbor_element_type_list)
+                cumulative_vertex_site_coord_list.append(vertex_site_coord_list)
         else:
             # generate neighbor list
             neighbor_list = []
