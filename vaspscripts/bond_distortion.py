@@ -94,6 +94,14 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
             vertex_neighbor_element_types_consolidated = element_types_consolidated[:]
             # Avoid neighbors of same element type as vertex site
             vertex_neighbor_element_types_consolidated.remove(vertex_element_type)
+            # Generate vertex neighbor site coordinate list
+            vertex_neighbor_site_coords = {}
+            for neighbor_element_type in vertex_neighbor_element_types_consolidated:
+                neighbor_element_type_index = element_types_consolidated.index(neighbor_element_type)
+                vertex_neighbor_site_coords[neighbor_element_type] = fractional_coords[
+                        n_elements_consolidated[:neighbor_element_type_index].sum()
+                        + range(n_elements_consolidated[neighbor_element_type_index])]
+                neighbor_cutoff_dist_limits = [0, polyhedron_neighbor_cutoff]
             for index, vertex_site_index in enumerate(polyhedron_vertex_site_indices):
                 vertex_site_coords = (
                     fractional_coords[n_elements_consolidated[
@@ -105,15 +113,8 @@ def bond_distortion(src_file_path, polyhedron_stretch, localized_element_type,
                 vertex_site_neighbor_element_type_list = []
                 vertex_site_coord_list = []
                 for neighbor_element_type in vertex_neighbor_element_types_consolidated:
-                    neighbor_element_type_index = element_types_consolidated.index(neighbor_element_type)
-                    neighbor_site_coords = fractional_coords[
-                            n_elements_consolidated[:neighbor_element_type_index].sum()
-                            + range(n_elements_consolidated[neighbor_element_type_index])]
-                    neighbor_cutoff_dist_limits = [
-                                    0, polyhedron_neighbor_cutoff]
-                    
                     for neighbor_site_index, neighbor_site_coord in enumerate(
-                                                                    neighbor_site_coords):
+                                vertex_neighbor_site_coords[neighbor_element_type]):
                         # Avoid localized site from vertex neighbor list
                         if neighbor_element_type != localized_element_type or neighbor_site_index != localized_site_number-1:
                             lattice_directions = (vertex_site_coords_imageconsolidated
