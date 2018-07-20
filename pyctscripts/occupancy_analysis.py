@@ -99,10 +99,11 @@ class Occupancy(object):
                                 traj_res_time_pool.append(species_wise_res_count[species_index])
                                 species_wise_res_count[species_index] = 0
                 for shell_index in range(num_shells+1):
-                    if site_index in probe_indices[shell_index]:
-                        list_index = probe_indices[shell_index].index(site_index)
-                        site_population_list[shell_index][list_index] += 1
-                        break
+                    for site_index in site_indices:
+                        if site_index in probe_indices[shell_index]:
+                            list_index = probe_indices[shell_index].index(site_index)
+                            site_population_list[shell_index][list_index] += 1
+                            break
         return (num_shells, probe_indices, site_population_list,
                 traj_res_time_pool)
 
