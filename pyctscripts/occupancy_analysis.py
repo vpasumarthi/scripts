@@ -19,13 +19,15 @@ class Occupancy(object):
         return None
 
     def generate_occupancy_histogram(self, shell_wise, res_time, site_wise,
-                                     barrier_shell_index, n_traj):
+                                     barrier_shell_index, n_traj,
+                                     output_traj_length):
+        traj_length_array = np.zeros(n_traj, dtype=int)
         for traj_index in range(n_traj):
             traj_number = traj_index + 1
             (num_shells, probe_indices, site_population_list,
-             traj_res_time_pool) = self.read_trajectory_data(traj_number,
-                                                             res_time,
-                                                             barrier_shell_index)
+             traj_res_time_pool, num_kmc_steps) = self.read_trajectory_data(
+                                    traj_number, res_time, barrier_shell_index)
+            traj_length_array[traj_index] = num_kmc_steps
             if site_wise:
                 self.generate_site_wise_occpancy(num_shells,
                                                  probe_indices,
@@ -45,6 +47,8 @@ class Occupancy(object):
                 res_time_pool.append(traj_res_time_pool)
                 if traj_number == n_traj:
                     self.generate_res_time_distribution(res_time_pool, n_traj)
+        if output_traj_length:
+            np.savetxt('traj_length_data.dat', traj_length_array)
         return None
 
     def read_trajectory_data(self, traj_number, res_time, barrier_shell_index):
@@ -104,8 +108,9 @@ class Occupancy(object):
                             list_index = probe_indices[shell_index].index(site_index)
                             site_population_list[shell_index][list_index] += 1
                             break
+        num_kmc_steps = line_index
         return (num_shells, probe_indices, site_population_list,
-                traj_res_time_pool)
+                traj_res_time_pool, num_kmc_steps)
 
     def read_occupancy_data(self, traj_number):
         occupancy_dir_name = 'occupancy_data'
