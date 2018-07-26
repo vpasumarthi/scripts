@@ -69,8 +69,14 @@ echo "The number of processors is $NPROCS"
 
 TimeLimit=`sacct -j ${SLURM_JOB_ID} -o TimeLimit -n`
 TimeLimitStrLen=`echo -n $TimeLimit | wc -m`
+PlusChar="+"
 if [ $TimeLimitStrLen -gt 8 ]; then
-    DayStringLen=$(($TimeLimitStrLen-9))
+    LastChar=${TimeLimit:9:1}
+    if [ "$LastChar" == "$PlusChar" ]; then
+        DayStringLen=2
+    else
+        DayStringLen=1
+    fi
     TimeLimitDays=${TimeLimit:0:$DayStringLen}
 else
     TimeLimitDays=0
