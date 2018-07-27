@@ -53,13 +53,13 @@ fi
 
 cd $SLURMTMPDIR
 
-if [ 0 -eq `grep "Gamma" KPOINTS -c` ]; then
-	module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
-	module load vasp5.4.4
-else
+if [ "Gamma" == `awk 'NR==3{print $1}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $1}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $2}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $3}' KPOINTS` ]; then
 	module use /projects/academic/mdupuis2/software/modules/vasp_gam
 	module load vasp_gam
-fi		
+else
+	module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
+	module load vasp5.4.4
+fi
 module list
 which vasp
 
