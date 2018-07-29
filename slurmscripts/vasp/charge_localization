@@ -75,14 +75,16 @@ if [ $TimeLimitStrLen -gt 8 ]; then
     LastChar=${TimeLimit:9:1}
     if [ "$LastChar" == "$PlusChar" ]; then
         DayStringLen=2
+        TimeLimitHrStrStartIndex=3
     else
         DayStringLen=1
+        TimeLimitHrStrStartIndex=2
     fi
     TimeLimitDays=${TimeLimit:0:$DayStringLen}
 else
     TimeLimitDays=0
 fi
-TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:2:2}))
+TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:$TimeLimitHrStrStartIndex:2}))
 TimeLimitSec=$(($TimeLimitHr * 3600))
 NumCopy=$(($TimeLimitSec / $CopyFreq))
 printf "TimeLimitHr: %d\n" $TimeLimitHr
