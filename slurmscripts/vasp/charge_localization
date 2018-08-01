@@ -21,6 +21,9 @@
 CopyFreq=3600
 bader_std=0
 bader_mag=1
+# 0: Check for successful completion of the job before performing Bader analysis
+# 1: Check for convergence before performing Bader analysis
+bader_on_convergence=1
 WAVECARLOC='WAVECAR'
 
 echo "SLURMTMPDIR is $SLURMTMPDIR"
@@ -105,20 +108,27 @@ do
     kill -0 $PID
     if [ $? -ne 0 ]; then
         printf "PID is terminated.\n"
-		if [ 0 -ne `grep "switches" OUTCAR -c` ]; then
-			if [ $bader_std -ne 0 ] || [ $bader_mag -ne 0 ]; then
+		if [ `grep "switches" OUTCAR -c` -ne 0 ]; then
+			do_bader=1
+			if [ $bader_on_convergence -ne 0 ]; then
+				if [ `grep "accuracy" OUTCAR -c` -eq 0 ]; then
+					do_bader=0
+				fi
+			fi
+
+			if [ $bader_std -ne 0 ] || [ $bader_mag -ne 0 ] || [ $do_bader -ne 0 ]; then
 			    printf "Generating CHGCAR_sum:\n"
 			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
 			    printf "Finished generating CHGCAR_sum.\n"
 			fi
 
-			if [ $bader_std -ne 0 ]; then
+			if [ $bader_std -ne 0 ] || [ $do_bader -ne 0 ]; then
 			    printf "Initiating Bader analysis on CHGCAR:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR.\n"
 			fi
 
-			if [ $bader_mag -ne 0 ]; then
+			if [ $bader_mag -ne 0 ] || [ $do_bader -ne 0 ]; then
 			    printf "Generating CHGCAR_mag:\n"
 			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
 			    printf "Finished generating CHGCAR_mag.\n"
