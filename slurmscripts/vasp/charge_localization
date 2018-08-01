@@ -19,8 +19,6 @@
 
 # CopyFreq in seconds
 CopyFreq=3600
-generate_chgsum=1
-generate_chgmag=1
 bader_std=0
 bader_mag=1
 WAVECARLOC='WAVECAR'
@@ -108,22 +106,23 @@ do
     if [ $? -ne 0 ]; then
         printf "PID is terminated.\n"
 		if [ 0 -ne `grep "switches" OUTCAR -c` ]; then
-			if [ $generate_chgsum -ne 0 ]; then
+			if [ $bader_std -ne 0 ] || [ $bader_mag -ne 0 ]; then
 			    printf "Generating CHGCAR_sum:\n"
 			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
 			    printf "Finished generating CHGCAR_sum.\n"
 			fi
-			if [ $generate_chgmag -ne 0 ]; then
-			    printf "Generating CHGCAR_mag:\n"
-			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
-			    printf "Finished generating CHGCAR_mag.\n"
-			fi
+
 			if [ $bader_std -ne 0 ]; then
 			    printf "Initiating Bader analysis on CHGCAR:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR.\n"
 			fi
+
 			if [ $bader_mag -ne 0 ]; then
+			    printf "Generating CHGCAR_mag:\n"
+			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
+			    printf "Finished generating CHGCAR_mag.\n"
+
 			    printf "Initiating Bader analysis on CHGCAR_mag:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR_mag.\n"
