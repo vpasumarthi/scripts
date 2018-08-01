@@ -12,7 +12,6 @@
 #SBATCH --mem=64000
 #SBATCH --mail-user=pasumart@buffalo.edu
 #SBATCH --mail-type=END
-#SBATCH --constraint=IB
 
 # Job description:
 # run hondo job; also prints the job run time to the standard output
