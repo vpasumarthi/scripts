@@ -17,6 +17,9 @@
 # Job description:
 # run hondo job; also prints the job run time to the standard output
 
+# CopyFreq in seconds
+CopyFreq=3600
+
 echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
@@ -66,6 +69,13 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 SECONDS=0
 
 srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out
+
+for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
+do
+    sleep $CopyFreq
+    cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+done
+
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 duration=$SECONDS
