@@ -20,7 +20,13 @@ echo "SLURM_JOBID="$SLURM_JOBID
 echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
 echo "SLURMTMPDIR="$SLURMTMPDIR
 
-echo "working directory = "$SLURM_SUBMIT_DIR
+cd $SLURM_SUBMIT_DIR
+sbcast $SLURM_SUBMIT_DIR/Run.py $SLURMTMPDIR/Run.py
+sbcast $SLURM_SUBMIT_DIR/MSD.py $SLURMTMPDIR/MSD.py
+sbcast $SLURM_SUBMIT_DIR/simulation_parameters.yml $SLURMTMPDIR/simulation_parameters.yml
+cd $SLURMTMPDIR
+
+echo "working directory = "$SLURMTMPDIR
 
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
