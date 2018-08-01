@@ -55,7 +55,7 @@ fi
 
 cd $SLURMTMPDIR
 
-if [ "Gamma" == `awk 'NR==3{print $1}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $1}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $2}' KPOINTS` ] && [ 1 -eq `awk 'NR==4{print $3}' KPOINTS` ]; then
+if [ "Gamma" == `awk 'NR==3{print $1}' KPOINTS` ] && [ `awk 'NR==4{print $1}' KPOINTS` -eq 1 ] && [ `awk 'NR==4{print $2}' KPOINTS` -eq 1 ] && [ `awk 'NR==4{print $3}' KPOINTS` -eq 1 ]; then
 	module use /projects/academic/mdupuis2/software/modules/vasp_gam
 	module load vasp_gam
 else
