@@ -22,6 +22,8 @@ echo "SLURMTMPDIR="$SLURMTMPDIR
 
 old_line=`awk '/work_dir_depth/{print $0;exit}' simulation_parameters.yml`
 system_dir_depth=`echo $old_line | awk '{print $2}'`
+new_work_dir_depth=0
+new_line=`echo "${old_line/$system_dir_depth/$new_work_dir_depth}"`
 
 cd $SLURM_SUBMIT_DIR
 sbcast $SLURM_SUBMIT_DIR/Run.py $SLURMTMPDIR/Run.py
