@@ -68,7 +68,12 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
 SECONDS=0
 
-srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out
+srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out &
+
+PID=$!
+printf "PID: %d\n" $PID
+CID=$$
+printf "CID: %d\n" $CID
 
 for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
 do
