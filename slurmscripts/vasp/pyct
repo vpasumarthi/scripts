@@ -1,0 +1,43 @@
+#!/bin/sh
+
+#SBATCH --job-name="Fe2O3-9x9x4_no_field_undoped_e1h0"
+#SBATCH --output=job.out
+#SBATCH --clusters=mae
+#SBATCH --partition=scavenger
+#SBATCH --qos=scavenger
+#SBATCH --time=00-72:00:00
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --mem=32000
+#SBATCH --mail-user=pasumart@buffalo.edu
+#SBATCH --mail-type=END
+#SBATCH --constraint=MAE&CPU-Gold-6138&INTEL
+
+# Job description:
+# run KMC simulation followed by performing MSD analysis of the output trajectories
+
+echo "SLURM_JOBID="$SLURM_JOBID
+echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
+echo "SLURM_NNODES"=$SLURM_NNODES
+echo "SLURMTMPDIR="$SLURMTMPDIR
+
+echo "working directory = "$SLURM_SUBMIT_DIR
+
+HOSTFILE=hosts.$SLURM_JOB_ID
+srun hostname -s | sort > $HOSTFILE
+module load python
+source activate devel
+module list
+ulimit -s unlimited
+
+# The initial srun will trigger the SLURM prologue on the compute nodes.
+NPROCS=`srun --nodes=${SLURM_NNODES} bash -c 'hostname' |wc -l`
+echo NPROCS=$NPROCS
+echo "Launch mymodel with srun"
+
+#The PMI library is necessary for srun
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+srun Run.py
+srun MSD.py
+
+echo "All Done!"
