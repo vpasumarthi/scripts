@@ -31,8 +31,9 @@ cd $SLURM_SUBMIT_DIR
 sbcast $SLURM_SUBMIT_DIR/bi2-nn.hnd $SLURMTMPDIR/bi2-nn.hnd
 cd $SLURMTMPDIR
 
-module load intel
-module load intel-mpi
+module load intel/15.0
+module use /projects/academic/mdupuis2/software/modules/
+module load hondo
 module list
 
 echo "The number of nodes is $SLURM_NNODES"
