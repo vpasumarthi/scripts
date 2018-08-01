@@ -65,10 +65,10 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
 SECONDS=0
 srun Run.py
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+cp $SLURMTMPDIR/{*.dat,Run.log} $SLURM_SUBMIT_DIR
 
 srun MSD.py
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+cp $SLURMTMPDIR/MSD_* $SLURM_SUBMIT_DIR
 
 echo "All Done!"
 
