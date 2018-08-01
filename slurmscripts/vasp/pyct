@@ -26,6 +26,7 @@ system_dir_depth=`echo $old_line | awk '{print $2}'`
 new_work_dir_depth=0
 new_line=`echo "${old_line/$system_dir_depth/$new_work_dir_depth}"`
 line_number=`awk '/work_dir_depth/{print NR;exit}' simulation_parameters.yml`
+sed -i "$line_number"'s/.*/'"$new_line"'/' simulation_parameters.yml
 
 cd $SLURM_SUBMIT_DIR
 sbcast $SLURM_SUBMIT_DIR/Run.py $SLURMTMPDIR/Run.py
