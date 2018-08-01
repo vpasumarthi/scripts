@@ -70,6 +70,9 @@ cp $SLURMTMPDIR/{*.dat,Run.log} $SLURM_SUBMIT_DIR
 srun MSD.py
 cp $SLURMTMPDIR/MSD_* $SLURM_SUBMIT_DIR
 
+cd $SLURM_SUBMIT_DIR
+mv simulation_parameters.yml.bck simulation_parameters.yml
+
 echo "All Done!"
 
 duration=$SECONDS
