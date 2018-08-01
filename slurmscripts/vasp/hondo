@@ -17,6 +17,7 @@
 # Job description:
 # run hondo job; also prints the job run time to the standard output
 
+echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
 ulimit -s unlimited
@@ -25,6 +26,10 @@ export NPROCS=`srun -l hostname | wc -l`
 
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
+
+cd $SLURM_SUBMIT_DIR
+sbcast $SLURM_SUBMIT_DIR/bi2-nn.hnd $SLURMTMPDIR/bi2-nn.hnd
+cd $SLURMTMPDIR
 
 module load intel
 module load intel-mpi
@@ -39,6 +44,7 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 SECONDS=0
 
 srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out
+cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 duration=$SECONDS
 days=$((duration/60/60/24))
