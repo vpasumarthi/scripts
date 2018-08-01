@@ -1,41 +1,21 @@
 #!/bin/sh
-##
-##Frequently Modified Metadata
-##
-#SBATCH --job-name=BVO-VAB-V2-cluster01-v1-v2
+
+#SBATCH --job-name=SPE-Fe2O3-Exp
 #SBATCH --output=job.out
 #SBATCH --error=job.err
-##
-##Dupuis Cluster
-##
-#SBATCH --partition=mdupuis2
-#SBATCH --clusters=chemistry
-#SBATCH --time=20-00:00:00
+#SBATCH --clusters=ub-hpc
+#SBATCH --partition=general-compute
+#SBATCH --qos=general-compute
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
-#SBATCH --tasks-per-node=1
+#SBATCH --tasks-per-node=16
 #SBATCH --exclusive
-##
-##General Compute
-##
-##SBATCH --partition=general-compute
-##SBATCH --time=20:00:00
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=1
-##SBATCH --mem=48000
-##
-##Debug
-##
-##SBATCH --partition=debug
-##SBATCH --time=01:00:00
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=1
-##SBATCH --mem=48000
-##
-##Infrequently Modified Metadata
-##
 #SBATCH --mail-user=pasumart@buffalo.edu
 #SBATCH --mail-type=END
 #SBATCH --constraint=IB
+
+# Job description:
+# run hondo job; also prints the job run time to the standard output
 
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
