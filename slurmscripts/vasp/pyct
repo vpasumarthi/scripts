@@ -42,6 +42,8 @@ echo "Launch mymodel with srun"
 
 #The PMI library is necessary for srun
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+
+SECONDS=0
 srun Run.py
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
@@ -49,3 +51,15 @@ srun MSD.py
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 echo "All Done!"
+
+duration=$SECONDS
+days=$((duration/60/60/24))
+hours=$((duration/60/60%24))
+minutes=$((duration/60%60))
+seconds=$((duration%60))
+printf 'Time elapsed: '
+(( $days > 0 )) && printf '%d days ' $days
+(( $hours > 0 )) && printf '%d hours ' $hours
+(( $minutes > 0 )) && printf '%d minutes ' $minutes
+(( $days > 0 || $hours > 0 || $minutes > 0 )) && printf 'and '
+printf '%d seconds\n' $seconds
