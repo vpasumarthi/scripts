@@ -26,8 +26,6 @@ export NPROCS=`srun -l hostname | wc -l`
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
 
-source /etc/profile.d/modules.sh
-
 module load intel
 module load intel-mpi
 module list
