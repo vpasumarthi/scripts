@@ -79,7 +79,7 @@ BREAKFLAG=0
 for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
 do
     sleep $CopyFreq
-    cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+    cp $SLURMTMPDIR/{*pun,*.DA10,*.out} $SLURM_SUBMIT_DIR
     kill -0 $PID
     if [ $? -ne 0 ]; then
         printf "PID is terminated.\n"
@@ -87,8 +87,6 @@ do
         break
     fi
 done
-
-cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 if [ $BREAKFLAG ]; then
     kill -0 $PID
