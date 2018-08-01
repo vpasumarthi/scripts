@@ -20,10 +20,24 @@ echo "SLURM_JOBID="$SLURM_JOBID
 echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
 echo "SLURMTMPDIR="$SLURMTMPDIR
 
+system_dir_depth=`awk '/work_dir_depth/{print $2;exit}' simulation_parameters.yml`
+
 cd $SLURM_SUBMIT_DIR
 sbcast $SLURM_SUBMIT_DIR/Run.py $SLURMTMPDIR/Run.py
 sbcast $SLURM_SUBMIT_DIR/MSD.py $SLURMTMPDIR/MSD.py
 sbcast $SLURM_SUBMIT_DIR/simulation_parameters.yml $SLURMTMPDIR/simulation_parameters.yml
+
+input_directory_path=$PWD
+for i in $(seq 1 $system_dir_depth); do
+    input_directory_path="$(dirname "$input_directory_path")"
+done
+input_directory_path="$input_directory_path"/InputFiles
+mkdir $SLURMTMPDIR/InputFiles
+sbcast $input_directory_path/sys_config.yml $SLURMTMPDIR/InputFiles/sys_config.yml
+sbcast $input_directory_path/POSCAR $SLURMTMPDIR/InputFiles/POSCAR
+sbcast $input_directory_path/hop_neighbor_list.npy $SLURMTMPDIR/InputFiles/hop_neighbor_list.npy
+sbcast $input_directory_path/cumulative_displacement_list.npy $SLURMTMPDIR/InputFiles/cumulative_displacement_list.npy
+sbcast $input_directory_path/precomputed_array.npy $SLURMTMPDIR/InputFiles/precomputed_array.npy
 cd $SLURMTMPDIR
 
 echo "working directory = "$SLURMTMPDIR
