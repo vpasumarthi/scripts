@@ -21,7 +21,7 @@
 CopyFreq=3600
 generate_chgsum=1
 generate_chgmag=1
-bader=0
+bader_std=0
 bader_mag=1
 WAVECARLOC='WAVECAR'
 
@@ -118,7 +118,7 @@ do
 			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
 			    printf "Finished generating CHGCAR_mag.\n"
 			fi
-			if [ $bader -ne 0 ]; then
+			if [ $bader_std -ne 0 ]; then
 			    printf "Initiating Bader analysis on CHGCAR:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR.\n"
