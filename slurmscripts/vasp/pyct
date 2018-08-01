@@ -43,6 +43,9 @@ echo "Launch mymodel with srun"
 #The PMI library is necessary for srun
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 srun Run.py
+cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+
 srun MSD.py
+cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
 
 echo "All Done!"
