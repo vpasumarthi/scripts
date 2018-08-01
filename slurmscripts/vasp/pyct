@@ -21,7 +21,7 @@ echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
 echo "SLURMTMPDIR="$SLURMTMPDIR
 
 cp simulation_parameters.yml simulation_parameters.yml.bck
-old_line=`awk '/work_dir_depth/{print $0;exit}' simulation_parameters.yml`
+old_line=`awk '/work_dir_depth/{print $0;exit}' simulation_parameters.yml.bck`
 system_dir_depth=`echo $old_line | awk '{print $2}'`
 new_work_dir_depth=0
 new_line=`echo "${old_line/$system_dir_depth/$new_work_dir_depth}"`
