@@ -75,13 +75,28 @@ printf "PID: %d\n" $PID
 CID=$$
 printf "CID: %d\n" $CID
 
+BREAKFLAG=0
 for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
 do
     sleep $CopyFreq
     cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+    kill -0 $PID
+    if [ $? -ne 0 ]; then
+        printf "PID is terminated.\n"
+        BREAKFLAG=1
+        break
+    fi
 done
 
 cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
+
+if [ $BREAKFLAG ]; then
+    kill -0 $PID
+    if [ $? -ne 1 ]; then
+        printf "Exceeded wall-time requested. Terminating PID.\n" 1>&2
+        kill $PID
+    fi
+fi
 
 duration=$SECONDS
 days=$((duration/60/60/24))
