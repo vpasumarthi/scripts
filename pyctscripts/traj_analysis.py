@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from PyCT import constants
 
 
-def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
+def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
+                  annotate):
     position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
                       / constants.ANG2BOHR)
 
@@ -77,9 +78,10 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
             edgecolor='black')
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(counts_hops[hop_proc_indices]):
-        ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
-                fontweight='bold')
+    if annotate:
+        for i, v in enumerate(counts_hops[hop_proc_indices]):
+            ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
 
     ax.set_xlabel('Hopping Distance')
     ax.set_ylabel('Frequency')
@@ -99,9 +101,10 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
             edgecolor='black')
     plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(escape_counts[escape_proc_indices]):
-        ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                fontweight='bold')
+    if annotate:
+        for i, v in enumerate(escape_counts[escape_proc_indices]):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
     ax.set_xlabel('Escape Distance')
     ax.set_ylabel('Frequency')
     ax.set_title('Histogram of Escape Distances')
@@ -123,9 +126,10 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
             edgecolor='black')
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
-        ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                fontweight='bold')
+    if annotate:
+        for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
     ax.set_xlabel('Hop Distance')
     ax.set_ylabel('Frequency')
     ax.set_title('Histogram of Hop Distances contributing to mobility')
@@ -147,9 +151,10 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
             edgecolor='black')
     plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(counts_rattle_hops):
-        ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                fontweight='bold')
+    if annotate:
+        for i, v in enumerate(counts_rattle_hops):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
     ax.set_xlabel('Hop Distance')
     ax.set_ylabel('Frequency')
     ax.set_title('Histogram of Hop Distances contributing to rattling')
