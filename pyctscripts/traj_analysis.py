@@ -7,7 +7,7 @@ from PyCT import constants
 
 
 def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
-                  annotate):
+                  annotate, bar_color):
     position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
                       / constants.ANG2BOHR)
 
@@ -75,7 +75,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
     xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
     plt.bar(hop_proc_indices, counts_hops[hop_proc_indices], align='center', alpha=0.5,
-            edgecolor='black')
+            edgecolor='black', color=bar_color)
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
     if annotate:
@@ -98,7 +98,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
     xtick_items = ['%1.4f' % item for item in uni_escape_dist[escape_proc_indices]]
     plt.bar(escape_dist_indices, escape_counts[escape_proc_indices], align='center', alpha=0.5,
-            edgecolor='black')
+            edgecolor='black', color=bar_color)
     plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
 
     if annotate:
@@ -123,7 +123,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
     xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist[mobil_proc_indices]]
     plt.bar(mobil_dist_indices, counts_mobil_hops[mobil_proc_indices], align='center', alpha=0.5,
-            edgecolor='black')
+            edgecolor='black', color=bar_color)
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
     if annotate:
@@ -148,7 +148,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     rattle_dist_indices = np.arange(len(unique_rattle_hop_dist))
     xtick_items = ['%1.4f' % item for item in unique_rattle_hop_dist]
     plt.bar(rattle_dist_indices, counts_rattle_hops, align='center', alpha=0.5,
-            edgecolor='black')
+            edgecolor='black', color=bar_color)
     plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
 
     if annotate:
