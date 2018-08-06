@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from PyCT import constants
 
 
-def traj_analysis(dst_path, disp_prec):
+def traj_analysis(dst_path, disp_prec, max_hop_dist):
     intra_poly_dist_list = np.array([2.8541, 2.8600, 2.9958, 3.0473])
 
     position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
@@ -51,7 +51,8 @@ def traj_analysis(dst_path, disp_prec):
     total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
     [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
                                                  return_counts=True)
-    escape_dist_list = list(uni_escape_dist)
+    escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
+    escape_dist_list = list(uni_escape_dist[escape_proc_indices])
     with open(report_file_name, 'w') as report_file:
         report_file.write(f'Total number of kmc steps in simulation: '
                           f'{num_kmc_steps}\n')
@@ -72,14 +73,14 @@ def traj_analysis(dst_path, disp_prec):
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    proc_indices = np.arange(len(unique_hop_dist))
-    xtick_items = ['%1.4f' % item for item in unique_hop_dist]
-    plt.bar(proc_indices, counts_hops, align='center', alpha=0.5,
+    hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
+    xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
+    plt.bar(hop_proc_indices, counts_hops[hop_proc_indices], align='center', alpha=0.5,
             edgecolor='black')
-    plt.xticks(proc_indices, xtick_items, rotation='vertical')
+    plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(counts_hops):
-        ax.text(i - 0.2, v + 100, str(v), color='green', rotation='vertical',
+    for i, v in enumerate(counts_hops[hop_proc_indices]):
+        ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
                 fontweight='bold')
 
     ax.set_xlabel('Hopping Distance')
@@ -94,13 +95,13 @@ def traj_analysis(dst_path, disp_prec):
     # analysis on escape distances
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    escape_dist_indices = np.arange(len(uni_escape_dist))
-    xtick_items = ['%1.4f' % item for item in uni_escape_dist]
-    plt.bar(escape_dist_indices, escape_counts, align='center', alpha=0.5,
+    escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
+    xtick_items = ['%1.4f' % item for item in uni_escape_dist[escape_proc_indices]]
+    plt.bar(escape_dist_indices, escape_counts[escape_proc_indices], align='center', alpha=0.5,
             edgecolor='black')
     plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(escape_counts):
+    for i, v in enumerate(escape_counts[escape_proc_indices]):
         ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                 fontweight='bold')
     ax.set_xlabel('Escape Distance')
@@ -115,16 +116,16 @@ def traj_analysis(dst_path, disp_prec):
     # analysis on hopping distance contributing to mobility
     [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
                                                            return_counts=True)
-
+    mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    mobil_dist_indices = np.arange(len(unique_mobil_hop_dist))
-    xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist]
-    plt.bar(mobil_dist_indices, counts_mobil_hops, align='center', alpha=0.5,
+    mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
+    xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist[mobil_proc_indices]]
+    plt.bar(mobil_dist_indices, counts_mobil_hops[mobil_proc_indices], align='center', alpha=0.5,
             edgecolor='black')
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
-    for i, v in enumerate(counts_mobil_hops):
+    for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
         ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                 fontweight='bold')
     ax.set_xlabel('Hop Distance')
