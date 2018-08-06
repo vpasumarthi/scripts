@@ -6,9 +6,7 @@ import matplotlib.pyplot as plt
 from PyCT import constants
 
 
-def traj_analysis(dst_path, disp_prec, max_hop_dist):
-    intra_poly_dist_list = np.array([2.8541, 2.8600, 2.9958, 3.0473])
-
+def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec):
     position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
                       / constants.ANG2BOHR)
 
