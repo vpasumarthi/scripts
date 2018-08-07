@@ -8,6 +8,8 @@ from PyCT import constants
 
 def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                   annotate, bar_color):
+    #NOTE: currently works with unwrapped_traj.dat which has positions at every
+    # step written to it using 'write_every_step' branch of PyCT
     position_array = (np.loadtxt(dst_path.joinpath('unwrapped_traj.dat'))
                       / constants.ANG2BOHR)
 
