@@ -17,6 +17,7 @@ search_term = 'localized_site_number = '
 exp_num_diff_lines = 4
 ref_site_index = 20
 ref_partial_run_index = 1
+system_search_term = "SYSTEM          = "
 
 for site_index in site_indices:
     # Generate input files
@@ -62,3 +63,14 @@ for site_index in site_indices:
     else:
         print(f'Unexpected bond distortion output in {work_dir_path}')
     chdir(cwd)
+
+    # Modify INCAR file
+    old_incar_file_path = work_dir_path / "INCAR"
+    new_incar_file_path = work_dir_path / "INCAR.new"
+    with open(old_incar_file_path) as old_incar, open(new_incar_file_path, 'w') as new_incar:
+        for line in old_incar:
+            if system_search_term in line:
+                new_incar.write(f'{system_search_term}BVO-e-W36-ox6-V{site_index:02}-ox4  # System name\n')
+            else:
+                new_incar.write(line)
+    move(new_incar_file_path, old_incar_file_path)
