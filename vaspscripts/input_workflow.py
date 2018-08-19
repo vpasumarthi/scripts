@@ -4,6 +4,7 @@
 
 from pathlib import Path
 from shutil import copy, copymode, move
+from os import chdir
 
 import numpy as np
 
@@ -32,3 +33,8 @@ for site_index in site_indices:
                 new_file.write(line)
     copymode(old_file_path, new_file_path)
     move(new_file_path, old_file_path)
+
+    # Generate bond distortion
+    chdir(work_dir_path)
+    exec(open(old_file_path).read())
+    chdir(cwd)
