@@ -13,7 +13,7 @@ site_indices = np.loadtxt('site_indices.dat', dtype=int)
 cwd = Path.cwd()
 partial_run_index = 1
 copy_file_names = ["POSCAR", "POTCAR", "INCAR", "KPOINTS", "slurmscript", "generate_bond_distortion.py"]
-poscar_search_term = 'localized_site_number = '
+site_index_search_term = 'localized_site_number = '
 exp_num_diff_lines = 4
 ref_site_index = 20
 ref_partial_run_index = 1
@@ -31,8 +31,8 @@ for site_index in site_indices:
     new_file_path = work_dir_path / 'generate_bond_distortion.py.new'
     with open(old_file_path) as old_file, open(new_file_path, 'w') as new_file:
         for line in old_file:
-            if poscar_search_term in line:
-                new_file.write(f'{poscar_search_term}{site_index}\n')
+            if site_index_search_term in line:
+                new_file.write(f'{site_index_search_term}{site_index}\n')
             else:
                 new_file.write(line)
     copymode(old_file_path, new_file_path)
