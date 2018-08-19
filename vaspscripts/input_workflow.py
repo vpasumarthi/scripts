@@ -17,7 +17,9 @@ site_index_search_term = 'localized_site_number = '
 exp_num_diff_lines = 4
 ref_site_index = 20
 ref_partial_run_index = 1
+localized_site_element = 'V'
 system_search_term = "SYSTEM          = "
+magmom_search_term = "MAGMOM          = "
 
 for site_index in site_indices:
     # Generate input files
@@ -37,6 +39,15 @@ for site_index in site_indices:
                 new_file.write(line)
     copymode(old_file_path, new_file_path)
     move(new_file_path, old_file_path)
+
+    # Identify element distribution
+    coord_file_path = work_dir_path / "POSCAR"
+    with open(coord_file_path) as coord_file:
+        for line_index, line in enumerate(coord_file):
+            if line_index == 5:
+                element_list = line.split()
+            elif line_index == 6:
+                num_elements_list = [int(num_elements) for num_elements in line.split()]
 
     # Generate bond distortion
     chdir(work_dir_path)
@@ -71,6 +82,14 @@ for site_index in site_indices:
         for line in old_incar:
             if system_search_term in line:
                 new_incar.write(f'{system_search_term}BVO-e-W36-ox6-V{site_index:02}-ox4  # System name\n')
+            elif magmom_search_term in line:
+                magmom_line = magmom_search_term
+                for element_index, element_type in enumerate(element_list):
+                    if element_type == localized_site_element:
+                        magmom_line = f'{magmom_line} {site_index - 1}*0.0 1*1.0 {num_elements_list[element_index] - site_index}*0.0'
+                    else:
+                        magmom_line = f'{magmom_line} {num_elements_list[element_index]}*0.0'
+                new_incar.write(magmom_line)
             else:
                 new_incar.write(line)
     move(new_incar_file_path, old_incar_file_path)
