@@ -20,6 +20,7 @@ ref_partial_run_index = 1
 localized_site_element = 'V'
 system_search_term = "SYSTEM          = "
 magmom_search_term = "MAGMOM          = "
+slurm_search_term = "#SBATCH --job-name="
 
 for site_index in site_indices:
     # Generate input files
@@ -93,3 +94,16 @@ for site_index in site_indices:
             else:
                 new_incar.write(line)
     move(new_incar_file_path, old_incar_file_path)
+
+    # Modify slurmscript
+    old_slurm_file_path = work_dir_path / "slurmscript"
+    new_slurm_file_path = work_dir_path / "slurmscript.new"
+    with open(old_slurm_file_path) as old_slurm, open(new_slurm_file_path, 'w') as new_slurm:
+        for line in old_slurm:
+            if slurm_search_term in line:
+                slurm_line = f'#SBATCH --job-name=BVO552-W36-ox6-V{site_index:02}-ox4-K111\n'
+                new_slurm.write(slurm_line)
+            else:
+                new_slurm.write(line)
+    move(new_slurm_file_path, old_slurm_file_path)
+
