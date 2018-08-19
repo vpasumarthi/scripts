@@ -14,6 +14,7 @@ cwd = Path.cwd()
 partial_run_index = 1
 copy_file_names = ["POSCAR", "POTCAR", "INCAR", "KPOINTS", "slurmscript", "generate_bond_distortion.py"]
 search_term = 'localized_site_number = '
+exp_num_diff_lines = 4
 
 for site_index in site_indices:
     # Generate input files
@@ -37,4 +38,13 @@ for site_index in site_indices:
     # Generate bond distortion
     chdir(work_dir_path)
     exec(open(old_file_path).read())
+    num_diff_lines = 0
+    with open("POSCAR") as old_file, open("POSCAR.out") as new_file:
+        for line1, line2 in zip(old_file, new_file):
+            if line1 != line2 and '.' in line1 and '.' in line2:
+                num_diff_lines += 1
+    if num_diff_lines == exp_num_diff_lines:
+        move("POSCAR.out", "POSCAR")
+    else:
+        print(f'Unexpected bond distortion output in {work_dir_path}')
     chdir(cwd)
