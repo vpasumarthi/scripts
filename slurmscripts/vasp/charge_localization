@@ -17,11 +17,13 @@
 # Job description:
 # run vasp job followed by bader analysis; also prints the job run time to the output file
 
-COPYFREQ=3600
-generate_chgsum=1
-generate_chgmag=1
-bader=0
+# CopyFreq in seconds
+CopyFreq=3600
+bader_std=0
 bader_mag=1
+# 0: Check for successful completion of the job before performing Bader analysis
+# 1: Check for convergence before performing Bader analysis
+bader_on_convergence=1
 WAVECARLOC='WAVECAR'
 
 echo "SLURMTMPDIR is $SLURMTMPDIR"
@@ -53,13 +55,13 @@ fi
 
 cd $SLURMTMPDIR
 
-if [ 0 -eq `grep "Gamma" KPOINTS -c` ]; then
-	module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
-	module load vasp5.4.4
-else
+if [ "Gamma" == `awk 'NR==3{print $1}' KPOINTS` ] && [ `awk 'NR==4{print $1}' KPOINTS` -eq 1 ] && [ `awk 'NR==4{print $2}' KPOINTS` -eq 1 ] && [ `awk 'NR==4{print $3}' KPOINTS` -eq 1 ]; then
 	module use /projects/academic/mdupuis2/software/modules/vasp_gam
 	module load vasp_gam
-fi		
+else
+	module use /projects/academic/mdupuis2/software/modules/vasp5.4.4
+	module load vasp5.4.4
+fi
 module list
 which vasp
 
@@ -69,13 +71,23 @@ echo "The number of processors is $NPROCS"
 
 TimeLimit=`sacct -j ${SLURM_JOB_ID} -o TimeLimit -n`
 TimeLimitStrLen=`echo -n $TimeLimit | wc -m`
+PlusChar="+"
 if [ $TimeLimitStrLen -gt 8 ]; then
-    DayStringLen=$(($TimeLimitStrLen-9))
+    LastChar=${TimeLimit:9:1}
+    if [ "$LastChar" == "$PlusChar" ]; then
+        DayStringLen=2
+        TimeLimitHrStrStartIndex=3
+    else
+        DayStringLen=1
+        TimeLimitHrStrStartIndex=2
+    fi
     TimeLimitDays=${TimeLimit:0:$DayStringLen}
 else
     TimeLimitDays=0
 fi
-TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:2:2}))
+TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:$TimeLimitHrStrStartIndex:2}))
+TimeLimitSec=$(($TimeLimitHr * 3600))
+NumCopy=$(($TimeLimitSec / $CopyFreq))
 printf "TimeLimitHr: %d\n" $TimeLimitHr
 
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
@@ -89,30 +101,38 @@ CID=$$
 printf "CID: %d\n" $CID
 
 BREAKFLAG=0
-for (( iHr=1; iHr<$TimeLimitHr; iHr++ ))
+for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
 do
-    sleep $COPYFREQ
+    sleep $CopyFreq
     cp $SLURMTMPDIR/* $SLURM_SUBMIT_DIR
     kill -0 $PID
     if [ $? -ne 0 ]; then
         printf "PID is terminated.\n"
-		if [ 0 -ne `grep "switches" OUTCAR -c` ]; then
-			if [ $generate_chgsum -ne 0 ]; then
+		if [ `grep "switches" OUTCAR -c` -ne 0 ]; then
+			do_bader=1
+			if [ $bader_on_convergence -ne 0 ]; then
+				if [ `grep "accuracy" OUTCAR -c` -eq 0 ]; then
+					do_bader=0
+				fi
+			fi
+
+			if [ $bader_std -ne 0 ] || [ $bader_mag -ne 0 ] || [ $do_bader -ne 0 ]; then
 			    printf "Generating CHGCAR_sum:\n"
 			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsum.pl AECCAR0 AECCAR2
 			    printf "Finished generating CHGCAR_sum.\n"
 			fi
-			if [ $generate_chgmag -ne 0 ]; then
-			    printf "Generating CHGCAR_mag:\n"
-			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
-			    printf "Finished generating CHGCAR_mag.\n"
-			fi
-			if [ $bader -ne 0 ]; then
+
+			if [ $bader_std -ne 0 ] || [ $do_bader -ne 0 ]; then
 			    printf "Initiating Bader analysis on CHGCAR:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR.\n"
 			fi
-			if [ $bader_mag -ne 0 ]; then
+
+			if [ $bader_mag -ne 0 ] || [ $do_bader -ne 0 ]; then
+			    printf "Generating CHGCAR_mag:\n"
+			    /projects/academic/mdupuis2/vish/lib/vtstscripts-930/chgsplit.pl CHGCAR
+			    printf "Finished generating CHGCAR_mag.\n"
+
 			    printf "Initiating Bader analysis on CHGCAR_mag:\n"
 			    /projects/academic/mdupuis2/vish/bin/bader CHGCAR_mag -ref CHGCAR_sum
 			    printf "Finished Bader analysis on CHGCAR_mag.\n"

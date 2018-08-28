@@ -1,42 +1,25 @@
 #!/bin/sh
-##
-##Frequently Modified Metadata
-##
-#SBATCH --job-name=BVO-VAB-V2-cluster01-v1-v2
+
+#SBATCH --job-name=SPE-Fe2O3-Exp
 #SBATCH --output=job.out
 #SBATCH --error=job.err
-##
-##Dupuis Cluster
-##
-#SBATCH --partition=mdupuis2
-#SBATCH --clusters=chemistry
-#SBATCH --time=20-00:00:00
+#SBATCH --clusters=ub-hpc
+#SBATCH --partition=general-compute
+#SBATCH --qos=general-compute
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
-#SBATCH --tasks-per-node=1
-#SBATCH --exclusive
-##
-##General Compute
-##
-##SBATCH --partition=general-compute
-##SBATCH --time=20:00:00
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=1
-##SBATCH --mem=48000
-##
-##Debug
-##
-##SBATCH --partition=debug
-##SBATCH --time=01:00:00
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=1
-##SBATCH --mem=48000
-##
-##Infrequently Modified Metadata
-##
+#SBATCH --tasks-per-node=16
+#SBATCH --mem=64000
 #SBATCH --mail-user=pasumart@buffalo.edu
 #SBATCH --mail-type=END
-#SBATCH --constraint=IB
 
+# Job description:
+# run hondo job; also prints the job run time to the standard output
+
+# CopyFreq in seconds
+CopyFreq=3600
+
+echo "SLURMTMPDIR is $SLURMTMPDIR"
 export OMP_NUM_THREADS=1
 export I_MPI_PIN=0
 ulimit -s unlimited
@@ -46,21 +29,71 @@ export NPROCS=`srun -l hostname | wc -l`
 HOSTFILE=hosts.$SLURM_JOB_ID
 srun hostname -s | sort > $HOSTFILE
 
-source /etc/profile.d/modules.sh
+cd $SLURM_SUBMIT_DIR
+sbcast $SLURM_SUBMIT_DIR/bi2-nn.hnd $SLURMTMPDIR/bi2-nn.hnd
+cd $SLURMTMPDIR
 
-module load intel
-module load intel-mpi
+module load intel/15.0
+module use /projects/academic/mdupuis2/software/modules/
+module load hondo
 module list
 
 echo "The number of nodes is $SLURM_NNODES"
 echo "The number of processors per node $SLURM_NTASKS_PER_NODE"
 echo "The number of processors is $NPROCS"
 
+TimeLimit=`sacct -j ${SLURM_JOB_ID} -o TimeLimit -n`
+TimeLimitStrLen=`echo -n $TimeLimit | wc -m`
+PlusChar="+"
+if [ $TimeLimitStrLen -gt 8 ]; then
+    LastChar=${TimeLimit:9:1}
+    if [ "$LastChar" == "$PlusChar" ]; then
+        DayStringLen=2
+        TimeLimitHrStrStartIndex=3
+    else
+        DayStringLen=1
+        TimeLimitHrStrStartIndex=2
+    fi
+    TimeLimitDays=${TimeLimit:0:$DayStringLen}
+else
+    TimeLimitDays=0
+fi
+TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:$TimeLimitHrStrStartIndex:2}))
+TimeLimitSec=$(($TimeLimitHr * 3600))
+NumCopy=$(($TimeLimitSec / $CopyFreq))
+printf "TimeLimitHr: %d\n" $TimeLimitHr
+
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
 
 SECONDS=0
 
-srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out
+srun hondo.linux.intel bvo_cluster01-v1-v2.hnd bvo_cluster01-v1-v2.out &
+
+PID=$!
+printf "PID: %d\n" $PID
+CID=$$
+printf "CID: %d\n" $CID
+
+BREAKFLAG=0
+for (( iCopy=1; iCopy<$NumCopy; iCopy++ ))
+do
+    sleep $CopyFreq
+    cp $SLURMTMPDIR/{*pun,*.DA10,*.out} $SLURM_SUBMIT_DIR
+    kill -0 $PID
+    if [ $? -ne 0 ]; then
+        printf "PID is terminated.\n"
+        BREAKFLAG=1
+        break
+    fi
+done
+
+if [ $BREAKFLAG ]; then
+    kill -0 $PID
+    if [ $? -ne 1 ]; then
+        printf "Exceeded wall-time requested. Terminating PID.\n" 1>&2
+        kill $PID
+    fi
+fi
 
 duration=$SECONDS
 days=$((duration/60/60/24))

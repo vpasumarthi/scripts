@@ -1,0 +1,88 @@
+#!/bin/sh
+
+#SBATCH --job-name="Fe2O3-9x9x4_no_field_undoped_e1h0"
+#SBATCH --output=job.out
+#SBATCH --clusters=mae
+#SBATCH --partition=scavenger
+#SBATCH --qos=scavenger
+#SBATCH --time=00-72:00:00
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --mem=32000
+#SBATCH --mail-user=pasumart@buffalo.edu
+#SBATCH --mail-type=END
+#SBATCH --constraint=MAE&CPU-Gold-6138&INTEL
+
+# Job description:
+# run KMC simulation followed by performing MSD analysis of the output trajectories
+
+echo "SLURM_JOBID="$SLURM_JOBID
+echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
+echo "SLURMTMPDIR="$SLURMTMPDIR
+
+cp simulation_parameters.yml simulation_parameters.yml.bck
+old_line=`awk '/work_dir_depth/{print $0;exit}' simulation_parameters.yml.bck`
+system_dir_depth=`echo $old_line | awk '{print $2}'`
+new_work_dir_depth=0
+new_line=`echo "${old_line/$system_dir_depth/$new_work_dir_depth}"`
+line_number=`awk '/work_dir_depth/{print NR;exit}' simulation_parameters.yml`
+sed -i "$line_number"'s/.*/'"$new_line"'/' simulation_parameters.yml
+
+cd $SLURM_SUBMIT_DIR
+sbcast $SLURM_SUBMIT_DIR/Run.py $SLURMTMPDIR/Run.py
+sbcast $SLURM_SUBMIT_DIR/MSD.py $SLURMTMPDIR/MSD.py
+sbcast $SLURM_SUBMIT_DIR/simulation_parameters.yml $SLURMTMPDIR/simulation_parameters.yml
+
+input_directory_path=$PWD
+for i in $(seq 1 $system_dir_depth); do
+    input_directory_path="$(dirname "$input_directory_path")"
+done
+input_directory_path="$input_directory_path"/InputFiles
+mkdir $SLURMTMPDIR/InputFiles
+sbcast $input_directory_path/sys_config.yml $SLURMTMPDIR/InputFiles/sys_config.yml
+sbcast $input_directory_path/POSCAR $SLURMTMPDIR/InputFiles/POSCAR
+sbcast $input_directory_path/hop_neighbor_list.npy $SLURMTMPDIR/InputFiles/hop_neighbor_list.npy
+sbcast $input_directory_path/cumulative_displacement_list.npy $SLURMTMPDIR/InputFiles/cumulative_displacement_list.npy
+sbcast $input_directory_path/precomputed_array.npy $SLURMTMPDIR/InputFiles/precomputed_array.npy
+cd $SLURMTMPDIR
+
+echo "working directory = "$SLURMTMPDIR
+
+HOSTFILE=hosts.$SLURM_JOB_ID
+srun hostname -s | sort > $HOSTFILE
+module load python
+source activate devel
+module list
+ulimit -s unlimited
+
+# The initial srun will trigger the SLURM prologue on the compute nodes.
+NPROCS=`srun --nodes=${SLURM_NNODES} bash -c 'hostname' |wc -l`
+echo NPROCS=$NPROCS
+echo "Launch mymodel with srun"
+
+#The PMI library is necessary for srun
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+
+SECONDS=0
+srun Run.py
+cp $SLURMTMPDIR/{*.dat,Run.log} $SLURM_SUBMIT_DIR
+
+srun MSD.py
+cp $SLURMTMPDIR/MSD_* $SLURM_SUBMIT_DIR
+
+cd $SLURM_SUBMIT_DIR
+mv simulation_parameters.yml.bck simulation_parameters.yml
+
+echo "All Done!"
+
+duration=$SECONDS
+days=$((duration/60/60/24))
+hours=$((duration/60/60%24))
+minutes=$((duration/60%60))
+seconds=$((duration%60))
+printf 'Time elapsed: '
+(( $days > 0 )) && printf '%d days ' $days
+(( $hours > 0 )) && printf '%d hours ' $hours
+(( $minutes > 0 )) && printf '%d minutes ' $minutes
+(( $days > 0 || $hours > 0 || $minutes > 0 )) && printf 'and '
+printf '%d seconds\n' $seconds
