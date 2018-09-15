@@ -8,7 +8,7 @@ from shutil import copy, move
 
 start_traj = 1
 end_traj = 100
-copy_file_names = ["Run.py", "MSD.py", "slurmscript", "simulation_parameters.yml"]
+copy_file_names = ["Run.py", "slurmscript", "simulation_parameters.yml"]
 random_seed_search_term = "random_seed:"
 work_dir_depth_search_term = "work_dir_depth:"
 work_dir_depth_addon = 2
@@ -30,7 +30,7 @@ for traj_number in range(start_traj, end_traj+1):
         for line in old_params_file:
             if random_seed_search_term in line:
                 new_params_file.write(f'{random_seed_search_term} {traj_number}\n')
-            elif work_dir_depth_search_term in line:
+            elif work_dir_depth_search_term in line and "step" not in line:
                 old_depth = int(line.strip().split()[1])
                 new_depth = old_depth + work_dir_depth_addon
                 new_params_file.write(f'{work_dir_depth_search_term} {new_depth}\n')
