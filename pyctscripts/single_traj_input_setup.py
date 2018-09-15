@@ -11,7 +11,7 @@ end_traj = 100
 copy_file_names = ["Run.py", "slurmscript", "simulation_parameters.yml"]
 random_seed_search_term = "random_seed:"
 work_dir_depth_search_term = "work_dir_depth:"
-work_dir_depth_addon = 2
+work_dir_depth_addon = 1
 cwd = Path.cwd()
 
 for traj_number in range(start_traj, end_traj+1):
