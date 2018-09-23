@@ -4,24 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plotEnergyDiagram(inputDataFilePath, colorInfo, markerInfo, linestyleInfo,
-                      markerSize, fontSize):
+def plot_energy_diagram(input_data_file_path, color_info, marker_info,
+                        linestyle_info, marker_size, font_size):
     plt.switch_backend('Agg')
-    energyData = np.loadtxt(inputDataFilePath)
+    energy_data = np.loadtxt(input_data_file_path)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    numData = len(energyData)
-    rcData = np.linspace(0, 1, numData)
-    ax.plot(rcData[0:int(numData / 2) + 1],
-            energyData[0:int(numData / 2) + 1], c=colorInfo,
-            marker=markerInfo, ls=linestyleInfo, markersize=markerSize)
-    ax.plot(rcData[int(numData / 2):numData],
-            energyData[int(numData / 2):numData], c=colorInfo,
-            marker=markerInfo, ls=linestyleInfo, markersize=markerSize)
-    ax.set_xlabel('Reaction Coordinate', fontsize=fontSize)
-    ax.set_ylabel('Energy (eV)', fontsize=fontSize)
-    plt.xticks(fontsize=fontSize)
-    plt.yticks(fontsize=fontSize)
+    num_data = len(energy_data)
+    rc_data = np.linspace(0, 1, num_data)
+    ax.plot(rc_data[0:int(num_data / 2) + 1],
+            energy_data[0:int(num_data / 2) + 1], c=color_info,
+            marker=marker_info, ls=linestyle_info, markersize=marker_size)
+    ax.plot(rc_data[int(num_data / 2):num_data],
+            energy_data[int(num_data / 2):num_data], c=color_info,
+            marker=marker_info, ls=linestyle_info, markersize=marker_size)
+    ax.set_xlabel('Reaction Coordinate', fontsize=font_size)
+    ax.set_ylabel('Energy (e_v)', fontsize=font_size)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
     plt.show()
-    figurePath = inputDataFilePath.with_suffix('.png')
-    plt.savefig(str(figurePath))
+    figure_path = input_data_file_path.with_suffix('.png')
+    plt.savefig(str(figure_path))
