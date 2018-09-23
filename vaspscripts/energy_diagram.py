@@ -19,7 +19,7 @@ def plot_energy_diagram(input_data_file_path, color_info, marker_info,
             energy_data[int(num_data / 2):num_data], c=color_info,
             marker=marker_info, ls=linestyle_info, markersize=marker_size)
     ax.set_xlabel('Reaction Coordinate', fontsize=font_size)
-    ax.set_ylabel('Energy (e_v)', fontsize=font_size)
+    ax.set_ylabel('Energy (eV)', fontsize=font_size)
     plt.xticks(fontsize=font_size)
     plt.yticks(fontsize=font_size)
     plt.show()
