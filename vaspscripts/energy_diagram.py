@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_energy_diagram(input_data_file_path, color_info, marker_info,
-                        linestyle_info, marker_size, font_size, shift):
+                        linestyle_info, marker_size, font_size, shift,
+                        num_forecast_periods):
     plt.switch_backend('Agg')
     energy_data = np.loadtxt(input_data_file_path)
     fig = plt.figure()
@@ -16,10 +17,24 @@ def plot_energy_diagram(input_data_file_path, color_info, marker_info,
             energy_data[0:int(num_data / 2) + 1 + (shift if shift < 0 else 0)],
             c=color_info, marker=marker_info, ls=linestyle_info,
             markersize=marker_size)
+    if num_forecast_periods > 0:
+        poly = np.polyfit(rc_data[0:int(num_data / 2) + 1 + (shift if shift < 0 else 0)],
+                          energy_data[0:int(num_data / 2) + 1 + (shift if shift < 0 else 0)], deg=2)
+        y_int  = np.polyval(poly, rc_data[0:int(num_data / 2) + 1 + (shift if shift < 0 else 0) + num_forecast_periods])
+        ax.plot(rc_data[0:int(num_data / 2) + 1 + (shift if shift < 0 else 0) + num_forecast_periods],
+                y_int, c=color_info, marker=marker_info, ls='--',
+                markersize=marker_size)
     ax.plot(rc_data[int(num_data / 2) + (shift if shift > 0 else 0):num_data],
             energy_data[int(num_data / 2) + (shift if shift > 0 else 0):num_data],
             c=color_info, marker=marker_info, ls=linestyle_info,
             markersize=marker_size)
+    if num_forecast_periods < 0:
+        poly = np.polyfit(rc_data[int(num_data / 2) + (shift if shift > 0 else 0):num_data],
+                          energy_data[int(num_data / 2) + (shift if shift > 0 else 0):num_data], deg=2)
+        y_int  = np.polyval(poly, rc_data[int(num_data / 2) + (shift if shift > 0 else 0) + num_forecast_periods:num_data])
+        ax.plot(rc_data[int(num_data / 2) + (shift if shift > 0 else 0) + num_forecast_periods:num_data],
+                y_int, c=color_info, marker=marker_info, ls='--',
+                markersize=marker_size)
     ax.set_xlabel('Reaction Coordinate', fontsize=font_size)
     ax.set_ylabel('Energy (eV)', fontsize=font_size)
     plt.xticks(fontsize=font_size)
