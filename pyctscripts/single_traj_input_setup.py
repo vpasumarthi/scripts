@@ -11,6 +11,7 @@ end_traj = 100
 copy_file_names = ["Run.py", "slurmscript", "simulation_parameters.yml"]
 random_seed_search_term = "random_seed:"
 work_dir_depth_search_term = "work_dir_depth:"
+slurm_search_term = "job-name"
 work_dir_depth_addon = 1
 cwd = Path.cwd()
 
@@ -37,4 +38,15 @@ for traj_number in range(start_traj, end_traj+1):
             else:
                 new_params_file.write(line)
     move(new_params_file_path, old_params_file_path)
+
+    # Modify slurmscript file
+    old_slurm_file_path = traj_dir_path / "slurmscript"
+    new_slurm_file_path = traj_dir_path / "slurmscript.new"
+    with open(old_slurm_file_path) as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
+        for line in old_slurm_file:
+            if slurm_search_term in line:
+                new_slurm_file.write(f'{line[:-2]}-traj{traj_number}"\n')
+            else:
+                new_slurm_file.write(line)
+    move(new_slurm_file_path, old_slurm_file_path)
 
