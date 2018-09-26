@@ -7,7 +7,7 @@ from pathlib import Path
 
 start_traj = 1
 end_traj = 100
-output_file_names = ["unwrapped_traj.dat"]
+output_file_names = ["unwrapped_traj.dat", "random_state_info.txt"]
 cwd = Path.cwd()
 
 for file_name in output_file_names:
