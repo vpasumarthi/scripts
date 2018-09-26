@@ -12,6 +12,7 @@ copy_file_names = ["Run.py", "slurmscript", "simulation_parameters.yml"]
 random_seed_search_term = "random_seed:"
 work_dir_depth_search_term = "work_dir_depth:"
 slurm_search_term = "job-name"
+n_traj_search_term = "n_traj:"
 work_dir_depth_addon = 1
 cwd = Path.cwd()
 
@@ -35,6 +36,9 @@ for traj_number in range(start_traj, end_traj+1):
                 old_depth = int(line.strip().split()[1])
                 new_depth = old_depth + work_dir_depth_addon
                 new_params_file.write(f'{work_dir_depth_search_term} {new_depth}\n')
+            elif n_traj_search_term in line:
+                new_value = 1.0
+                new_params_file.write(f'{n_traj_search_term} {new_value}\n')
             else:
                 new_params_file.write(line)
     move(new_params_file_path, old_params_file_path)
