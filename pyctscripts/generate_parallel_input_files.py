@@ -33,8 +33,8 @@ def parallel_input_files(src_path):
                         new_slurm_file.write(f'{line[:-2]}-traj{traj_index+1}"\n')
                     elif mail_type_search_term in line:
                         if traj_index == n_traj - 1:
-                            new_slurm_file.write(f'{mail_type_search_term}{end_term}"\n')
+                            new_slurm_file.write(f'{mail_type_search_term}{end_term}\n')
                         else:
-                            new_slurm_file.write(f'{mail_type_search_term}{none_term}"\n')
+                            new_slurm_file.write(f'{mail_type_search_term}{none_term}\n')
                     else:
                         new_slurm_file.write(line)
