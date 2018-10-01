@@ -7,4 +7,4 @@ from pyctscripts.parallel_input_files import generate_parallel_input_files
 
 cwd = Path.cwd()
 material_preprod(cwd)
-parallel_input_files(cwd)
+generate_parallel_input_files(cwd)
