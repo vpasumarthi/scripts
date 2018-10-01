@@ -17,3 +17,14 @@ def generate_symlink(src_path):
                 src_file_path = src_path / file_name
                 dst_file_path = src_path / f'traj{traj_index+1}' / file_name
                 os.symlink(src_file_path, dst_file_path)
+
+            # generate slurm files
+            slurm_file_name = 'slurmscript'
+            old_slurm_file_path = src_path / slurm_file_name
+            new_slurm_file_path = src_path / f'traj{traj_index+1}' / slurm_file_name
+            with open(old_slurm_file_path) as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
+                for line in old_slurm_file:
+                    if slurm_search_term in line:
+                        new_slurm_file.write(f'{line[:-2]}-traj{traj_number}"\n')
+                    else:
+                        new_slurm_file.write(line)
