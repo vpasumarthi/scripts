@@ -12,6 +12,9 @@ def parallel_input_files(src_path):
     
     sym_link_file_names = ['Run.py', 'simulation_parameters.yml']
     slurm_search_term = "job-name"
+    mail_type_search_term = "#SBATCH --mail-type="
+    none_term = 'NONE'
+    end_term = 'END'
     if compute_mode == 'parallel':
         for traj_index in range(n_traj):
             traj_dir_path = src_path / f'traj{traj_index+1}'
@@ -28,5 +31,10 @@ def parallel_input_files(src_path):
                 for line in old_slurm_file:
                     if slurm_search_term in line:
                         new_slurm_file.write(f'{line[:-2]}-traj{traj_index+1}"\n')
+                    elif mail_type_search_term in line:
+                        if traj_index == n_traj - 1:
+                            new_slurm_file.write(f'{mail_type_serach_term}{end_term}"\n')
+                        else:
+                            new_slurm_file.write(f'{mail_type_serach_term}{none_term}"\n')
                     else:
                         new_slurm_file.write(line)
