@@ -16,5 +16,4 @@ def generate_symlink(src_path):
             for file_name in sym_link_file_names:
                 src_file_path = src_path / file_name
                 dst_file_path = src_path / f'traj{traj_index+1}' / file_name
-                import pdb; pdb.set_trace()
                 os.symlink(src_file_path, dst_file_path)
