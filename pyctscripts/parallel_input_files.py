@@ -48,6 +48,8 @@ def generate_slurm_msd_script(src_path):
     insert_line_number = 13
     run_search_term = 'srun Run.py'
     msd_search_term = 'srun MSD.py'
+    mail_type_search_term = "#SBATCH --mail-type="
+    end_term = 'END'
     
     with open(job_ids_file_path, 'r') as job_ids_file:
        job_ids = job_ids_file.readline().strip()[:-1]
@@ -57,6 +59,8 @@ def generate_slurm_msd_script(src_path):
             if line_index == insert_line_number - 1:
                 new_slurm_file.write(f'#SBATCH --dependency=afterany:{job_ids}\n')
                 new_slurm_file.write(line)
+            elif mail_type_search_term in line:
+                new_slurm_file.write(f'{mail_type_search_term}{end_term}\n')
             elif run_search_term in line:
                 new_slurm_file.write(f'srun MSD.py\n')
             elif msd_search_term not in line:
