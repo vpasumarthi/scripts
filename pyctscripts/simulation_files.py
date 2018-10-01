@@ -136,7 +136,7 @@ class SimulationFiles(object):
                         "from pyctscripts.parallel_input_files import generate_parallel_input_files\n\n"
                         "cwd = Path.cwd()\n"
                         "material_preprod(cwd)\n"
-                        "parallel_input_files(cwd)\n")
+                        "generate_parallel_input_files(cwd)\n")
                 pre_prod_file_path.chmod(0o755)
 
                 # generate slurmscript file to compute MSD
