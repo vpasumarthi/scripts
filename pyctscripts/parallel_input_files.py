@@ -38,3 +38,19 @@ def generate_parallel_input_files(src_path):
                             new_slurm_file.write(f'{mail_type_search_term}{none_term}\n')
                     else:
                         new_slurm_file.write(line)
+    return None
+
+def generate_slurm_msd_script(src_path):
+    old_slurm_file_path = src_path / 'slurmscript'
+    new_slurm_file_path = src_path / 'slurmscript_msd'
+    
+    run_search_term = 'srun Run.py'
+    msd_search_term = 'srun MSD.py'
+    
+    with open(old_slurm_file_path, 'r') as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
+        for line in old_slurm_file:
+            if run_search_term in line:
+                new_slurm_file.write(f'srun MSD.py\n')
+            elif msd_search_term not in line:
+                new_slurm_file.write(line)
+    return None
