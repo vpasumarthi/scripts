@@ -13,6 +13,7 @@ n_traj_key="1.00E+02"
 for ((j=$start_carriers; j<=$end_carriers; j++))
 do
 	cd "SimulationFiles/"$j"electrons,0holes/"$t_final"SEC,"$time_interval"TimeInterval,"$n_traj_key"Traj/no_field_"$doping_tag
+	./pre_prod.py
 	for ((i=1; i<=$n_traj; i++))
 	do
 	    cd "traj"$i
