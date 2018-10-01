@@ -11,6 +11,7 @@ def parallel_input_files(src_path):
                 n_traj = int(float(line.strip().split()[-1]))
     
     sym_link_file_names = ['Run.py', 'simulation_parameters.yml']
+    slurm_search_term = "job-name"
     if compute_mode == 'parallel':
         for traj_index in range(n_traj):
             traj_dir_path = src_path / f'traj{traj_index+1}'
