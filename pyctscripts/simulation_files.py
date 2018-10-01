@@ -124,8 +124,8 @@ class SimulationFiles(object):
                     "material_run(dst_path)\n")
             run_file_path.chmod(0o755)
 
-            # generate simulation preproduction file
             if self.run['compute_mode'] == 'parallel':
+                # generate simulation preproduction file
                 pre_prod_file_path = work_dir_path.joinpath(self.run['pre_prod_file_name'])
                 with pre_prod_file_path.open('w') as pre_prod_file:
                     pre_prod_file.write(
@@ -137,6 +137,17 @@ class SimulationFiles(object):
                         "cwd = Path.cwd()\n"
                         "material_preprod(cwd)\n"
                         "parallel_input_files(cwd)\n")
+                pre_prod_file_path.chmod(0o755)
+
+                # generate slurmscript file to compute MSD
+                generate_msd_slurm_file_path = work_dir_path.joinpath('generate_slurm_msd.py')
+                with pre_prod_file_path.open('w') as pre_prod_file:
+                    pre_prod_file.write(
+                        "#!/usr/bin/env python\n\n"
+                        "from pathlib import Path\n\n"
+                        "from pyctscripts.parallel_input_files import generate_slurm_msd_script\n\n"
+                        "cwd = Path.cwd()\n"
+                        "generate_slurm_msd_script(cwd)\n")
                 pre_prod_file_path.chmod(0o755)
         return None
 
