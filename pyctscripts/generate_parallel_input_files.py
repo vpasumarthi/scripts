@@ -2,7 +2,7 @@
 
 import os
 
-def parallel_input_files(src_path):
+def generate_parallel_input_files(src_path):
     with open(src_path / 'simulation_parameters.yml') as params_file:
         for line in params_file:
             if 'compute_mode' in line:
