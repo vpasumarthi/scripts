@@ -112,17 +112,17 @@ class SimulationFiles(object):
 
             species_count_list = self.system['species_count']
             (work_dir_path, _) = self.dst_path(species_count_list)
-            dst_file_path = work_dir_path.joinpath(self.run['dst_file_name'])
+            run_file_path = work_dir_path.joinpath(self.run['run_file_name'])
 
             # generate simulation executable file
-            with dst_file_path.open('w') as dst_file:
-                dst_file.write(
+            with run_file_path.open('w') as run_file:
+                run_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
                     "from PyCT.material_run import material_run\n\n"
                     "dst_path = Path.cwd()\n"
                     "material_run(dst_path)\n")
-            dst_file_path.chmod(0o755)
+            run_file_path.chmod(0o755)
         return None
 
     def msd_files(self):
