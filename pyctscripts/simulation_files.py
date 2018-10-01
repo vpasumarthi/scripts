@@ -133,10 +133,10 @@ class SimulationFiles(object):
                         "from pathlib import Path\n"
                         "import os\n\n"
                         "from PyCT.material_preprod import material_preprod\n"
-                        "from pyctscripts.generate_symlink import generate_symlink\n\n"
+                        "from pyctscripts.generate_parallel_input_files import parallel_input_files\n\n"
                         "cwd = Path.cwd()\n"
                         "material_preprod(cwd)\n"
-                        "generate_symlink(cwd)\n")
+                        "parallel_input_files(cwd)\n")
                 pre_prod_file_path.chmod(0o755)
         return None
 

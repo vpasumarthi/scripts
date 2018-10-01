@@ -3,8 +3,8 @@
 from pathlib import Path
 
 from PyCT.material_preprod import material_preprod
-from pyctscripts.generate_symlink import generate_symlink
+from pyctscripts.generate_parallel_input_files import parallel_input_files
 
 cwd = Path.cwd()
 material_preprod(cwd)
-generate_symlink(cwd)
+parallel_input_files(cwd)
