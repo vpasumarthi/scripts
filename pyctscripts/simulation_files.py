@@ -112,9 +112,9 @@ class SimulationFiles(object):
 
             species_count_list = self.system['species_count']
             (work_dir_path, _) = self.dst_path(species_count_list)
-            run_file_path = work_dir_path.joinpath(self.run['run_file_name'])
 
             # generate simulation executable file
+            run_file_path = work_dir_path.joinpath(self.run['run_file_name'])
             with run_file_path.open('w') as run_file:
                 run_file.write(
                     "#!/usr/bin/env python\n\n"
@@ -123,6 +123,21 @@ class SimulationFiles(object):
                     "dst_path = Path.cwd()\n"
                     "material_run(dst_path)\n")
             run_file_path.chmod(0o755)
+
+            # generate simulation preproduction file
+            if self.run['compute_mode'] == 'parallel':
+                pre_prod_file_path = work_dir_path.joinpath(self.run['pre_prod_file_name'])
+                with pre_prod_file_path.open('w') as pre_prod_file:
+                    pre_prod_file.write(
+                        "#!/usr/bin/env python\n\n"
+                        "from pathlib import Path\n"
+                        "import os\n\n"
+                        "from PyCT.material_preprod import material_preprod\n"
+                        "from pyctscripts.generate_symlink import generate_symlink\n\n"
+                        "cwd = Path.cwd()\n"
+                        "material_preprod(cwd)\n"
+                        "generate_symlink(cwd)\n")
+                pre_prod_file_path.chmod(0o755)
         return None
 
     def msd_files(self):
