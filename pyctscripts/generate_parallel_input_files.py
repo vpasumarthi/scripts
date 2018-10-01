@@ -27,6 +27,6 @@ def parallel_input_files(src_path):
             with open(old_slurm_file_path) as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
                 for line in old_slurm_file:
                     if slurm_search_term in line:
-                        new_slurm_file.write(f'{line[:-2]}-traj{traj_number}"\n')
+                        new_slurm_file.write(f'{line[:-2]}-traj{traj_index+1}"\n')
                     else:
                         new_slurm_file.write(line)
