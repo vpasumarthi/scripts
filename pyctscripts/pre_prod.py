@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from PyCT.material_preprod import material_preprod
-from pyctscripts.generate_parallel_input_files import parallel_input_files
+from pyctscripts.parallel_input_files import generate_parallel_input_files
 
 cwd = Path.cwd()
 material_preprod(cwd)
