@@ -43,13 +43,21 @@ def generate_parallel_input_files(src_path):
 def generate_slurm_msd_script(src_path):
     old_slurm_file_path = src_path / 'slurmscript'
     new_slurm_file_path = src_path / 'slurmscript_msd'
+    job_ids_file_path = src_path / 'job_ids.txt'
     
+    insert_line_number = 13
     run_search_term = 'srun Run.py'
     msd_search_term = 'srun MSD.py'
     
+    with open(job_ids_file_path, 'r') as job_ids_file:
+       job_ids = job_ids_file.readline().strip()[:-1]
+    
     with open(old_slurm_file_path, 'r') as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
-        for line in old_slurm_file:
-            if run_search_term in line:
+        for line_index, line in enumerate(old_slurm_file):
+            if line_index == insert_line_number - 1:
+                new_slurm_file.write(f'#SBATCH --dependency=afterany:{job_ids}\n')
+                new_slurm_file.write(line)
+            elif run_search_term in line:
                 new_slurm_file.write(f'srun MSD.py\n')
             elif msd_search_term not in line:
                 new_slurm_file.write(line)
