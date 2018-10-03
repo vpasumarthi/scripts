@@ -10,6 +10,7 @@ t_final="1.00E-02"
 time_interval="1.00E-08"
 n_traj_key="1.00E+02"
 execute_pre_prod=1
+submit_slurm_msd=0
 
 for ((j=$start_carriers; j<=$end_carriers; j++))
 do
@@ -27,6 +28,9 @@ do
 	done
 
 	./generate_slurm_msd.py
-	sbatch slurmscript_msd
+	if [ $submit_slurm_msd -eq 1 ]
+	then
+		sbatch slurmscript_msd
+	fi
 	cd ../../../../
 done
