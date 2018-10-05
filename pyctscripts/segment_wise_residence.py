@@ -88,5 +88,6 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax2.set_xlabel('Doping level (%)')
     ax1.set_xlabel('Segment Index')
     ax1.set_ylabel('Frequency')
+    plt.tight_layout()
     plt.savefig(str(src_path / 'Segment-wise Residence.png'))
     return None
