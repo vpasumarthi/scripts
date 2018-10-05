@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def read_occupancy(src_path, n_traj):
@@ -62,4 +63,17 @@ def compute_layer_wise_residence(src_path, system_size, total_elements_per_unit_
         layer_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, 0], bin_edges)[0]
     mean_layer_wise_residence = np.mean(layer_wise_residence, axis=0)
     std_layer_wise_residence = np.std(layer_wise_residence, axis=0)
+    
+    plt.switch_backend('Agg')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.bar(range(1, num_partitions+1), mean_layer_wise_residence, width=0.8,
+           color='#0504aa', alpha=0.7)
+    ax.errorbar(range(1, num_partitions+1), mean_layer_wise_residence,
+                yerr=std_layer_wise_residence, fmt='ko', capsize=3, mfc='none',
+                mec='none')
+    ax.set_title('Partition-wise Mean Electron Residence')
+    ax.set_xlabel('Partition Index')
+    ax.set_ylabel('Frequency')
+    plt.savefig(str(src_path / 'layer_wise_residence.png'))
     return None
