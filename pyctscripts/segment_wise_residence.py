@@ -73,14 +73,19 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     
     plt.switch_backend('Agg')
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.bar(range(1, num_segments+1), mean_segment_wise_residence, width=0.8,
-           color='#0504aa', alpha=0.7)
-    ax.errorbar(range(1, num_segments+1), mean_segment_wise_residence,
-                yerr=std_segment_wise_residence, fmt='ko', capsize=3, mfc='none',
-                mec='none')
-    ax.set_title('Frequency of Segment-wise Electron Residence')
-    ax.set_xlabel('Segment Index')
-    ax.set_ylabel('Frequency')
+    ax1 = fig.add_subplot(111)
+    ax2 = ax1.twiny()
+    segment_index_list = range(1, num_segments+1)
+    ax1.bar(segment_index_list, mean_segment_wise_residence, width=0.8,
+            color='#0504aa', alpha=0.7)
+    ax1.errorbar(segment_index_list, mean_segment_wise_residence,
+                 yerr=std_segment_wise_residence, fmt='ko', capsize=3, mfc='none',
+                 mec='none')
+    ax2.set_xlim(ax1.get_xlim())
+    ax2.set_xticks(segment_index_list)
+    ax2.set_xticklabels(segmentwise_doping_level)
+    ax2.set_xlabel('Doping level (%)')
+    ax1.set_xlabel('Segment Index')
+    ax1.set_ylabel('Frequency')
     plt.savefig(str(src_path / 'Segment-wise Residence.png'))
     return None
