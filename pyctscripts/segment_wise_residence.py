@@ -41,7 +41,8 @@ def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
     return unit_cell_index_data
 
 def compute_segment_wise_residence(src_path, system_size, total_elements_per_unit_cell,
-                                   n_traj, gradient_ld, segment_length_ratio):
+                                   n_traj, gradient_ld, segment_length_ratio,
+                                   segmentwise_num_dopants, num_acceptor_sites_per_unit_cell):
     """Returns the segment wise residence of charge carriers
     :param src_path:
     :param system_size:
@@ -54,11 +55,17 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     unit_cell_index_data = get_unit_cell_indices(
             system_size, total_elements_per_unit_cell, n_traj, occupancy_data)
     num_elemental_segments = np.sum(segment_length_ratio)
+    elemental_segment_system_size = np.copy(system_size)
+    elemental_segment_system_size[gradient_ld] //= num_elemental_segments
     num_segments = len(segment_length_ratio)
     bin_edges = [0]
+    segmentwise_doping_level = []
     segment_wise_residence = np.zeros((n_traj, num_segments), int)
     for segment_index in range(num_segments):
-        bin_edges.append(bin_edges[-1] + system_size[gradient_ld] // num_elemental_segments * segment_length_ratio[segment_index])
+        segment_system_size = elemental_segment_system_size * segment_length_ratio[segment_index]
+        bin_edges.append(bin_edges[-1] + segment_system_size[gradient_ld])
+        segmentwise_num_acceptor_sites = segment_system_size.prod() * num_acceptor_sites_per_unit_cell
+        segmentwise_doping_level.append(segmentwise_num_dopants[segment_index] / segmentwise_num_acceptor_sites * 100)
     for traj_index in range(n_traj):
         segment_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, 0], bin_edges)[0]
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
