@@ -41,7 +41,7 @@ def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
     return unit_cell_index_data
 
 def compute_segment_wise_residence(src_path, system_size, total_elements_per_unit_cell,
-                                   n_traj, gradient_ld, partition_length_ratio):
+                                   n_traj, gradient_ld, segment_length_ratio):
     """Returns the segment wise residence of charge carriers
     :param src_path:
     :param system_size:
@@ -53,12 +53,12 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     occupancy_data = read_occupancy(src_path, n_traj)
     unit_cell_index_data = get_unit_cell_indices(
             system_size, total_elements_per_unit_cell, n_traj, occupancy_data)
-    num_elemental_partitions = np.sum(partition_length_ratio)
-    num_segments = len(partition_length_ratio)
+    num_elemental_segments = np.sum(segment_length_ratio)
+    num_segments = len(segment_length_ratio)
     bin_edges = [0]
     segment_wise_residence = np.zeros((n_traj, num_segments), int)
-    for partition_index in range(num_segments):
-        bin_edges.append(bin_edges[-1] + system_size[gradient_ld] // num_elemental_partitions * partition_length_ratio[partition_index])
+    for segment_index in range(num_segments):
+        bin_edges.append(bin_edges[-1] + system_size[gradient_ld] // num_elemental_segments * segment_length_ratio[segment_index])
     for traj_index in range(n_traj):
         segment_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, 0], bin_edges)[0]
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
