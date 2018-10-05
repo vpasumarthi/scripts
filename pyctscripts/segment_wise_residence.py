@@ -70,7 +70,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
         trajwise_unit_cell_index_data = unit_cell_index_data[traj_index+1]
         (num_states, num_species) = trajwise_unit_cell_index_data.shape[:2]
         reshaped_trajwise_unit_cell_index_data = trajwise_unit_cell_index_data.reshape(num_states * num_species, 3)
-        segment_wise_residence[traj_index] = np.histogram(reshaped_trajwise_unit_cell_index_data[:, 0], bin_edges)[0]
+        segment_wise_residence[traj_index] = np.histogram(reshaped_trajwise_unit_cell_index_data[:, gradient_ld], bin_edges)[0]
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
     std_segment_wise_residence = np.std(segment_wise_residence, axis=0)
     
