@@ -28,15 +28,16 @@ def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
     """
     unit_cell_index_data = {}
     for traj_index in range(n_traj):
+        num_species = occupancy_data[traj_index+1].shape[1]
         num_states = len(occupancy_data[traj_index+1])
-        traj_occupancy_data = occupancy_data[traj_index+1].reshape(num_states)
-        traj_unit_cell_indices = np.zeros((num_states, 3), int)
+        traj_occupancy_data = occupancy_data[traj_index+1]
+        traj_unit_cell_indices = np.zeros((num_states, num_species, 3), int)
         unit_cell_element_indices = traj_occupancy_data % total_elements_per_unit_cell
         total_filled_unit_cells = ((traj_occupancy_data - unit_cell_element_indices)
-                                   / total_elements_per_unit_cell)
+                                   // total_elements_per_unit_cell)
         for index in range(3):
-            traj_unit_cell_indices[:, index] = total_filled_unit_cells / system_size[index+1:].prod()
-            total_filled_unit_cells -= traj_unit_cell_indices[:, index] * system_size[index+1:].prod()
+            traj_unit_cell_indices[:, :, index] = total_filled_unit_cells / system_size[index+1:].prod()
+            total_filled_unit_cells -= traj_unit_cell_indices[:, :, index] * system_size[index+1:].prod()
         unit_cell_index_data[traj_index+1] = traj_unit_cell_indices
     return unit_cell_index_data
 
@@ -67,7 +68,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
         segmentwise_num_acceptor_sites = segment_system_size.prod() * num_acceptor_sites_per_unit_cell
         segmentwise_doping_level.append(segmentwise_num_dopants[segment_index] / segmentwise_num_acceptor_sites * 100)
     for traj_index in range(n_traj):
-        segment_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, 0], bin_edges)[0]
+        segment_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, :, 0], bin_edges)[0]
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
     std_segment_wise_residence = np.std(segment_wise_residence, axis=0)
     
