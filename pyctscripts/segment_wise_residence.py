@@ -41,7 +41,7 @@ def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
     return unit_cell_index_data
 
 def compute_segment_wise_residence(src_path, system_size, total_elements_per_unit_cell,
-                                 n_traj, gradient_ld, partition_length_ratio):
+                                   n_traj, gradient_ld, partition_length_ratio):
     """Returns the segment wise residence of charge carriers
     :param src_path:
     :param system_size:
@@ -72,7 +72,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax.errorbar(range(1, num_segments+1), mean_segment_wise_residence,
                 yerr=std_segment_wise_residence, fmt='ko', capsize=3, mfc='none',
                 mec='none')
-    ax.set_title('Segment-wise Mean Electron Residence')
+    ax.set_title('Frequency of Segment-wise Electron Residence')
     ax.set_xlabel('Segment Index')
     ax.set_ylabel('Frequency')
     plt.savefig(str(src_path / 'Segment-wise Residence.png'))
