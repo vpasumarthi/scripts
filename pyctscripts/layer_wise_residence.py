@@ -55,6 +55,11 @@ def compute_layer_wise_residence(src_path, system_size, total_elements_per_unit_
     num_elemental_partitions = np.sum(partition_length_ratio)
     num_partitions = len(partition_length_ratio)
     bin_edges = [0]
+    layer_wise_residence = np.zeros((n_traj, num_partitions), int)
     for partition_index in range(num_partitions):
         bin_edges.append(bin_edges[-1] + system_size[gradient_ld] // num_elemental_partitions * partition_length_ratio[partition_index])
+    for traj_index in range(n_traj):
+        layer_wise_residence[traj_index] = np.histogram(unit_cell_index_data[traj_index+1][:, 0], bin_edges)[0]
+    mean_layer_wise_residence = np.mean(layer_wise_residence, axis=0)
+    std_layer_wise_residence = np.std(layer_wise_residence, axis=0)
     return None
