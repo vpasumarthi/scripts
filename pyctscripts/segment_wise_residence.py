@@ -86,6 +86,8 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax2.set_xticks(segment_index_list)
     ax2.set_xticklabels(segmentwise_doping_level)
     ax2.set_xlabel('Doping level (%)')
+    ax1.set_xticks(segment_index_list)
+    ax1.set_xticklabels(segment_index_list)
     ax1.set_xlabel('Segment Index')
     ax1.set_ylabel('Frequency')
     plt.tight_layout()
