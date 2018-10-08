@@ -5,6 +5,28 @@ import matplotlib.pyplot as plt
 
 from PyCT import constants
 
+def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
+                    max_hop_dist):
+    report_file_name = 'traj_analysis.log'
+    num_kmc_steps = sum(counts_hops[hop_proc_indices])
+    total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
+    [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
+                                                 return_counts=True)
+    escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
+    escape_dist_list = list(uni_escape_dist[escape_proc_indices])
+    with open(report_file_name, 'w') as report_file:
+        report_file.write(f'Total number of kmc steps in simulation: '
+                          f'{num_kmc_steps}\n')
+        report_file.write(f'Cumulative number of kmc steps in rattling: '
+                          f'{total_rattle_steps}\n')
+        report_file.write(
+                        f'Average number of rattles per rattle event:'
+                        f'{np.mean(rattle_event_array[:, 0]):{7}.{5}}\n')
+        report_file.write(
+                    f'List of escape distances: '
+                    f'{", ".join(str(dist) for dist in escape_dist_list)}\n')
+    return (uni_escape_dist, escape_proc_indices, escape_counts)
+
 def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
                           dst_path):
     # analysis on choice among available processes
@@ -160,27 +182,8 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     (counts_hops, hop_proc_indices) = plot_process_analysis(
                                                 disp_array_prec, max_hop_dist,
                                                 bar_color, annotate, dst_path)
-
-    # report
-    report_file_name = 'traj_analysis.log'
-    num_kmc_steps = sum(counts_hops[hop_proc_indices])
-    total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
-    [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
-                                                 return_counts=True)
-    escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
-    escape_dist_list = list(uni_escape_dist[escape_proc_indices])
-    with open(report_file_name, 'w') as report_file:
-        report_file.write(f'Total number of kmc steps in simulation: '
-                          f'{num_kmc_steps}\n')
-        report_file.write(f'Cumulative number of kmc steps in rattling: '
-                          f'{total_rattle_steps}\n')
-        report_file.write(
-                        f'Average number of rattles per rattle event:'
-                        f'{np.mean(rattle_event_array[:, 0]):{7}.{5}}\n')
-        report_file.write(
-                    f'List of escape distances: '
-                    f'{", ".join(str(dist) for dist in escape_dist_list)}\n')
-
+    (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
+                counts_hops, hop_proc_indices, rattle_event_array, max_hop_dist)
     plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path)
     plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
