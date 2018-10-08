@@ -5,6 +5,33 @@ import matplotlib.pyplot as plt
 
 from PyCT import constants
 
+def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path):
+    # analysis on hopping distance contributing to rattling
+    [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
+                                        rattle_dist_array, return_counts=True)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rattle_dist_indices = np.arange(len(unique_rattle_hop_dist))
+    xtick_items = ['%1.4f' % item for item in unique_rattle_hop_dist]
+    plt.bar(rattle_dist_indices, counts_rattle_hops, align='center', alpha=0.5,
+            edgecolor='black', color=bar_color)
+    plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
+
+    if annotate:
+        for i, v in enumerate(counts_rattle_hops):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
+    ax.set_xlabel('Hop Distance')
+    ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
+    ax.set_title('Histogram of Hop Distances contributing to rattling')
+    filename = 'rattle_hop_distance_histogram'
+    figure_name = filename + '.png'
+    figure_path = dst_path / figure_name
+    plt.tight_layout()
+    plt.savefig(str(figure_path))
+    return None
 
 def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                   annotate, bar_color):
@@ -141,29 +168,5 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     plt.tight_layout()
     plt.savefig(str(figure_path))
 
-    # analysis on hopping distance contributing to rattling
-    [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
-                                        rattle_dist_array, return_counts=True)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    rattle_dist_indices = np.arange(len(unique_rattle_hop_dist))
-    xtick_items = ['%1.4f' % item for item in unique_rattle_hop_dist]
-    plt.bar(rattle_dist_indices, counts_rattle_hops, align='center', alpha=0.5,
-            edgecolor='black', color=bar_color)
-    plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
-
-    if annotate:
-        for i, v in enumerate(counts_rattle_hops):
-            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                    fontweight='bold')
-    ax.set_xlabel('Hop Distance')
-    ax.set_ylabel('Frequency')
-    ax.set_yscale('log')
-    ax.set_title('Histogram of Hop Distances contributing to rattling')
-    filename = 'rattle_hop_distance_histogram'
-    figure_name = filename + '.png'
-    figure_path = dst_path / figure_name
-    plt.tight_layout()
-    plt.savefig(str(figure_path))
+    plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path)
     return None
