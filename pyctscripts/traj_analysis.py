@@ -5,6 +5,35 @@ import matplotlib.pyplot as plt
 
 from PyCT import constants
 
+def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
+                           annotate, dst_path):
+    # analysis on hopping distance contributing to mobility
+    [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
+                                                           return_counts=True)
+    mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
+    xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist[mobil_proc_indices]]
+    plt.bar(mobil_dist_indices, counts_mobil_hops[mobil_proc_indices], align='center', alpha=0.5,
+            edgecolor='black', color=bar_color)
+    plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
+
+    if annotate:
+        for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
+    ax.set_xlabel('Hop Distance')
+    ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
+    ax.set_title('Histogram of Hop Distances contributing to mobility')
+    filename = 'mobil_hop_distance_histogram'
+    figure_name = filename + '.png'
+    figure_path = dst_path / figure_name
+    plt.tight_layout()
+    plt.savefig(str(figure_path))
+    return None
+
 def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path):
     # analysis on hopping distance contributing to rattling
     [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
@@ -142,31 +171,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     plt.tight_layout()
     plt.savefig(str(figure_path))
 
-    # analysis on hopping distance contributing to mobility
-    [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
-                                                           return_counts=True)
-    mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
-    xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist[mobil_proc_indices]]
-    plt.bar(mobil_dist_indices, counts_mobil_hops[mobil_proc_indices], align='center', alpha=0.5,
-            edgecolor='black', color=bar_color)
-    plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
-
-    if annotate:
-        for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
-            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                    fontweight='bold')
-    ax.set_xlabel('Hop Distance')
-    ax.set_ylabel('Frequency')
-    ax.set_yscale('log')
-    ax.set_title('Histogram of Hop Distances contributing to mobility')
-    filename = 'mobil_hop_distance_histogram'
-    figure_name = filename + '.png'
-    figure_path = dst_path / figure_name
-    plt.tight_layout()
-    plt.savefig(str(figure_path))
-
+    plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
+                           annotate, dst_path)
     plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path)
     return None
