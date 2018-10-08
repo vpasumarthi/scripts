@@ -5,6 +5,32 @@ import matplotlib.pyplot as plt
 
 from PyCT import constants
 
+def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
+                              escape_counts, bar_color, annotate, dst_path):
+    # analysis on escape distances
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
+    xtick_items = ['%1.4f' % item for item in uni_escape_dist[escape_proc_indices]]
+    plt.bar(escape_dist_indices, escape_counts[escape_proc_indices], align='center', alpha=0.5,
+            edgecolor='black', color=bar_color)
+    plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
+
+    if annotate:
+        for i, v in enumerate(escape_counts[escape_proc_indices]):
+            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
+    ax.set_xlabel('Escape Distance')
+    ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
+    ax.set_title('Histogram of Escape Distances')
+    filename = 'escape_distance_histogram'
+    figure_name = filename + '.png'
+    figure_path = dst_path / figure_name
+    plt.tight_layout()
+    plt.savefig(str(figure_path))
+    return None
+
 def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
                            annotate, dst_path):
     # analysis on hopping distance contributing to mobility
@@ -148,29 +174,8 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     f'List of escape distances: '
                     f'{", ".join(str(dist) for dist in escape_dist_list)}\n')
 
-    # analysis on escape distances
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
-    xtick_items = ['%1.4f' % item for item in uni_escape_dist[escape_proc_indices]]
-    plt.bar(escape_dist_indices, escape_counts[escape_proc_indices], align='center', alpha=0.5,
-            edgecolor='black', color=bar_color)
-    plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
-
-    if annotate:
-        for i, v in enumerate(escape_counts[escape_proc_indices]):
-            ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
-                    fontweight='bold')
-    ax.set_xlabel('Escape Distance')
-    ax.set_ylabel('Frequency')
-    ax.set_yscale('log')
-    ax.set_title('Histogram of Escape Distances')
-    filename = 'escape_distance_histogram'
-    figure_name = filename + '.png'
-    figure_path = dst_path / figure_name
-    plt.tight_layout()
-    plt.savefig(str(figure_path))
-
+    plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
+                              escape_counts, bar_color, annotate, dst_path)
     plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
                            annotate, dst_path)
     plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path)
