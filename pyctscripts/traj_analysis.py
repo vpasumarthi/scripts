@@ -64,6 +64,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
 
     ax.set_xlabel('Hopping Distance')
     ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
     ax.set_title('Histogram of processes')
     filename = 'process_histogram'
     figure_name = filename + '.png'
@@ -106,6 +107,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     fontweight='bold')
     ax.set_xlabel('Escape Distance')
     ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
     ax.set_title('Histogram of Escape Distances')
     filename = 'escape_distance_histogram'
     figure_name = filename + '.png'
@@ -131,6 +133,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     fontweight='bold')
     ax.set_xlabel('Hop Distance')
     ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
     ax.set_title('Histogram of Hop Distances contributing to mobility')
     filename = 'mobil_hop_distance_histogram'
     figure_name = filename + '.png'
@@ -156,6 +159,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     fontweight='bold')
     ax.set_xlabel('Hop Distance')
     ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
     ax.set_title('Histogram of Hop Distances contributing to rattling')
     filename = 'rattle_hop_distance_histogram'
     figure_name = filename + '.png'
