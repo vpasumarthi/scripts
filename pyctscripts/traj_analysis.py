@@ -5,6 +5,36 @@ import matplotlib.pyplot as plt
 
 from PyCT import constants
 
+def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
+                          dst_path):
+    # analysis on choice among available processes
+    [unique_hop_dist, counts_hops] = np.unique(disp_array_prec,
+                                               return_counts=True)
+    plt.switch_backend('Agg')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
+    xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
+    plt.bar(hop_proc_indices, counts_hops[hop_proc_indices], align='center', alpha=0.5,
+            edgecolor='black', color=bar_color)
+    plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
+
+    if annotate:
+        for i, v in enumerate(counts_hops[hop_proc_indices]):
+            ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
+                    fontweight='bold')
+
+    ax.set_xlabel('Hopping Distance')
+    ax.set_ylabel('Frequency')
+    ax.set_yscale('log')
+    ax.set_title('Histogram of processes')
+    filename = 'process_histogram'
+    figure_name = filename + '.png'
+    figure_path = dst_path / figure_name
+    plt.tight_layout()
+    plt.savefig(str(figure_path))
+    return (counts_hops, hop_proc_indices)
+
 def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path):
     # analysis on escape distances
@@ -127,32 +157,9 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     rattle_dist_array = np.asarray(rattle_dist_list)
     mobility_dist_array = np.asarray(mobility_dist_list)
 
-    # analysis on choice among available processes
-    [unique_hop_dist, counts_hops] = np.unique(disp_array_prec,
-                                               return_counts=True)
-    plt.switch_backend('Agg')
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
-    xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
-    plt.bar(hop_proc_indices, counts_hops[hop_proc_indices], align='center', alpha=0.5,
-            edgecolor='black', color=bar_color)
-    plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
-
-    if annotate:
-        for i, v in enumerate(counts_hops[hop_proc_indices]):
-            ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
-                    fontweight='bold')
-
-    ax.set_xlabel('Hopping Distance')
-    ax.set_ylabel('Frequency')
-    ax.set_yscale('log')
-    ax.set_title('Histogram of processes')
-    filename = 'process_histogram'
-    figure_name = filename + '.png'
-    figure_path = dst_path / figure_name
-    plt.tight_layout()
-    plt.savefig(str(figure_path))
+    (counts_hops, hop_proc_indices) = plot_process_analysis(
+                                                disp_array_prec, max_hop_dist,
+                                                bar_color, annotate, dst_path)
 
     # report
     report_file_name = 'traj_analysis.log'
