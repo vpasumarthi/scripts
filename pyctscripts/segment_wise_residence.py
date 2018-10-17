@@ -92,4 +92,29 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax1.set_ylabel('Frequency')
     plt.tight_layout()
     plt.savefig(str(src_path / 'Segment-wise Residence.png'))
+
+    segment_wise_relative_residence = segment_wise_residence / np.sum(segment_wise_residence, axis=1)[:, None]
+    mean_segment_wise_relative_residence = np.mean(segment_wise_relative_residence, axis=0)
+    std_segment_wise_relative_residence = np.std(segment_wise_relative_residence, axis=0)
+    
+    plt.switch_backend('Agg')
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax2 = ax1.twiny()
+    segment_index_list = range(1, num_segments+1)
+    ax1.plot(segment_index_list, mean_segment_wise_relative_residence, 'o-',
+             c='#0504aa', mfc='#0504aa', mec='black')
+    ax1.errorbar(segment_index_list, mean_segment_wise_relative_residence,
+                 yerr=std_segment_wise_relative_residence, fmt='o', capsize=3,
+                 c='#0504aa', mfc='none', mec='none')
+    ax2.set_xlim(ax1.get_xlim())
+    ax2.set_xticks(segment_index_list)
+    ax2.set_xticklabels(segmentwise_doping_level)
+    ax2.set_xlabel('Doping level (%)')
+    ax1.set_xticks(segment_index_list)
+    ax1.set_xticklabels(segment_index_list)
+    ax1.set_xlabel('Segment Index')
+    ax1.set_ylabel('Relative Frequency')
+    plt.tight_layout()
+    plt.savefig(str(src_path / 'Segment-wise Relative Residence.png'))
     return None
