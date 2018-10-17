@@ -96,7 +96,18 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     segment_wise_relative_residence = segment_wise_residence / np.sum(segment_wise_residence, axis=1)[:, None]
     mean_segment_wise_relative_residence = np.mean(segment_wise_relative_residence, axis=0)
     std_segment_wise_relative_residence = np.std(segment_wise_relative_residence, axis=0)
-    
+
+    kBT = 0.0259
+    sites_per_unit_cell = 4
+    segment_size = np.array([5, 5, 4])
+    num_unit_cells = np.prod(segment_size)
+    num_sites_per_segment = num_unit_cells * sites_per_unit_cell
+    num_sites_per_shell = np.array([1, 8, 28])
+    shell_wise_relative_energy = np.array([0.6596, -0.0168, -0.0154])
+    population_factors = np.exp(-shell_wise_relative_energy / kBT)
+    segment_wise_contribution = np.asarray(segmentwise_num_dopants) * np.dot(num_sites_per_shell, population_factors) + (num_sites_per_segment - np.asarray(segmentwise_num_dopants) * np.sum(num_sites_per_shell))
+    segment_wise_probability = segment_wise_contribution / np.sum(segment_wise_contribution)
+
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
