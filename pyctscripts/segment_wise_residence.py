@@ -115,6 +115,11 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     segment_index_list = range(1, num_segments+1)
     ax1.plot(segment_index_list, mean_segment_wise_relative_residence, 'o-',
              c='#0504aa', mfc='#0504aa', mec='black')
+    for index in range(num_segments):
+        ax1.plot([segment_index_list[index] - 0.1, segment_index_list[index] + 0.1],
+                 [segment_wise_probability[index], segment_wise_probability[index]],
+                 '-', c='#d62728')
+
     ax1.errorbar(segment_index_list, mean_segment_wise_relative_residence,
                  yerr=std_segment_wise_relative_residence, fmt='o', capsize=3,
                  c='#0504aa', mfc='none', mec='none')
