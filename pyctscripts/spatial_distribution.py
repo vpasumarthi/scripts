@@ -24,12 +24,11 @@ def compute_distance(cartesian_coords, system_translational_vector_list,
     return np.append(rel_pos_vector, displacement)
 
 
-def penalty_wise_spatial_distribution():
+def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest,
+                                      dopant_site_number):
     pbc = [1, 1, 1]
     system_size = np.array([1, 1, 1])  #pseudo
-    element_of_interest = 'V'
-    dopant_site_number = 36
-    system_data = np.loadtxt('W_552.dat')
+    system_data = np.loadtxt(system_data_file_name)
     poscar_info = read_poscar('POSCAR')
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
