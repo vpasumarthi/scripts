@@ -66,7 +66,6 @@ def main():
                             cartesian_coords, system_translational_vector_list,
                             dopant_site_index, cell_site_index)
     distribution_data[:, 5] = system_data[:, 3]
-    import pdb; pdb.set_trace()
 
     plt.switch_backend('Agg')
     fig = plt.figure()
@@ -112,6 +111,3 @@ def main():
 
     plt.savefig('Color_by_Relative_Energy_552.png', dpi=1200)
     return None
-
-if __name__ == '__main__':
-    main()
