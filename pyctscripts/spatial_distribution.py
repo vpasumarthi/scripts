@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from itertools import combinations
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -110,3 +112,66 @@ def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest
 
     plt.savefig('Color_by_Relative_Energy_552.png', dpi=1200)
     return None
+
+def three_distant_sites(system_data_file_name, element_of_interest,
+                        dopant_site_number):
+    pbc = [1, 1, 1]
+    system_size = np.array([1, 1, 1])  #pseudo
+    system_data = np.loadtxt(system_data_file_name)
+    poscar_info = read_poscar('POSCAR')
+    lattice_matrix = poscar_info['lattice_matrix']
+    element_types = poscar_info['element_types']
+    num_elements = poscar_info['num_elements']
+    coordinate_type = poscar_info['coordinate_type']
+    coords = poscar_info['coordinates']
+    if coordinate_type == 'Direct':
+        fractional_coords = np.copy(coords)
+        cartesian_coords = np.dot(fractional_coords, lattice_matrix)
+    
+    x_range = range(-1, 2) if pbc[0] == 1 else [0]
+    y_range = range(-1, 2) if pbc[1] == 1 else [0]
+    z_range = range(-1, 2) if pbc[2] == 1 else [0]
+    system_translational_vector_list = np.zeros((3**sum(pbc), 3))
+    index = 0
+    for x_offset in x_range:
+        for y_offset in y_range:
+            for z_offset in z_range:
+                system_translational_vector_list[index] = (
+                    np.dot(np.multiply(
+                            np.array([x_offset, y_offset, z_offset]),
+                            system_size), lattice_matrix))
+                index += 1
+
+    site_index_of_interest = element_types.index(element_of_interest)
+    num_sites_of_interest = num_elements[site_index_of_interest]
+    dopant_site_index = sum(num_elements[:site_index_of_interest]) + dopant_site_number - 1
+    available_sites = list(range(sum(num_elements[:site_index_of_interest]), sum(num_elements[:site_index_of_interest]) + num_sites_of_interest))
+    available_sites.remove(sum(num_elements[:site_index_of_interest]) + dopant_site_number - 1)
+    num_available_sites = len(available_sites)
+    site_combinations = list(combinations(available_sites, 2))
+    num_combinations = len(site_combinations)
+    # (d12, d23, d13)
+    dist_array = np.zeros((num_combinations, 3))
+    for index, site_indices in enumerate(site_combinations):
+        dist_array[index, 0] = compute_distance(
+                            cartesian_coords, system_translational_vector_list,
+                            dopant_site_index, site_indices[0])[-1]
+        dist_array[index, 1] = compute_distance(
+                            cartesian_coords, system_translational_vector_list,
+                            site_indices[0], site_indices[1])[-1]
+        dist_array[index, 2] = compute_distance(
+                            cartesian_coords, system_translational_vector_list,
+                            dopant_site_index, site_indices[1])[-1]
+    mean_dist_array = np.mean(dist_array, axis=1)
+    std_dist_array = np.std(dist_array, axis=1)
+    sort_indices = np.argsort(mean_dist_array)[::-1]
+    sorted_site_combinations = np.asarray(site_combinations)[sort_indices]
+    sorted_mean_dist_array = mean_dist_array[sort_indices]
+    sorted_std_dist_array = std_dist_array[sort_indices]
+    # (site_index2, site_index3, d12, d23, d13, mean_dist, std_dist)
+    compiled_array = np.hstack((sorted_site_combinations,
+                                dist_array[sort_indices],
+                                sorted_mean_dist_array[:, None],
+                                sorted_std_dist_array[:, None]))
+    print(compiled_array[:20])
+    return compiled_array
