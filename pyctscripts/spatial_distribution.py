@@ -24,7 +24,7 @@ def compute_distance(cartesian_coords, system_translational_vector_list,
     return np.append(rel_pos_vector, displacement)
 
 
-def main():
+def penalty_wise_spatial_distribution():
     pbc = [1, 1, 1]
     system_size = np.array([1, 1, 1])  #pseudo
     element_of_interest = 'V'
