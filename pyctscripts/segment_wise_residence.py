@@ -18,6 +18,20 @@ def read_occupancy(src_path, n_traj):
         occupancy_data[traj_index+1] = np.load(traj_dir_path / occupancy_file_name)
     return occupancy_data
 
+def read_time_data(src_path, n_traj):
+    """Reads the occupancy data from traj-level directories and return a 
+       dictionary of trajectory-wise occupancy data, each as a numpy array
+    :param src_path:
+    :param n_traj:
+    :return: occupancy_data:
+    """
+    time_data_file_name = 'time_data.npy'
+    time_data = {}
+    for traj_index in range(n_traj):
+        traj_dir_path = src_path / f'traj{traj_index+1}'
+        time_data[traj_index+1] = np.load(traj_dir_path / time_data_file_name)
+    return time_data
+
 def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
                           occupancy_data):
     """Returns the unit cell indices of the element
@@ -52,6 +66,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     :return:
     """
     occupancy_data = read_occupancy(src_path, n_traj)
+    time_data = read_time_data(src_path, n_traj)
     unit_cell_index_data = get_unit_cell_indices(
             system_size, total_elements_per_unit_cell, n_traj, occupancy_data)
     num_elemental_segments = np.sum(segment_length_ratio)
