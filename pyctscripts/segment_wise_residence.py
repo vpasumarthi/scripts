@@ -67,6 +67,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     :return:
     """
     occupancy_data = read_occupancy(src_path, n_traj)
+    num_species = occupancy_data[1].shape[1]
     time_data = read_time_data(src_path, n_traj)
     unit_cell_index_data = get_unit_cell_indices(
             system_size, total_elements_per_unit_cell, n_traj, occupancy_data)
@@ -76,7 +77,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     num_segments = len(segment_length_ratio)
     bin_edges = [0]
     segmentwise_doping_level = []
-    segment_wise_residence = np.zeros((n_traj, num_segments))
+    species_wise_segment_wise_residence = np.zeros((n_traj, num_species, num_segments))
     for segment_index in range(num_segments):
         segment_system_size = elemental_segment_system_size * segment_length_ratio[segment_index]
         bin_edges.append(bin_edges[-1] + segment_system_size[gradient_ld])
@@ -84,9 +85,12 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
         segmentwise_doping_level.append(segmentwise_num_dopants[segment_index] / segmentwise_num_acceptor_sites * 100)
     for traj_index in range(n_traj):
         trajwise_unit_cell_index_data = unit_cell_index_data[traj_index+1]
-        segment_wise_residence[traj_index] = np.histogram(
-            trajwise_unit_cell_index_data[:-1, :, gradient_ld], bin_edges,
-            weights=np.tile(np.diff(time_data[traj_index+1])[:, None], trajwise_unit_cell_index_data[:-1,:,gradient_ld].shape[1]))[0]
+        for species_index in range(num_species):
+            species_wise_segment_wise_residence[traj_index, species_index] = np.histogram(
+                trajwise_unit_cell_index_data[:-1, species_index, gradient_ld],
+                bin_edges, weights=np.diff(time_data[traj_index+1]))[0]
+
+    segment_wise_residence = np.mean(species_wise_segment_wise_residence, axis=1)
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
     std_segment_wise_residence = np.std(segment_wise_residence, axis=0)
     
