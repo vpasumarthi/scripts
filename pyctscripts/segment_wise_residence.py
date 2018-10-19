@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from PyCT.constants import AUTIME2NS
 
 
 def read_occupancy(src_path, n_traj):
@@ -29,7 +30,7 @@ def read_time_data(src_path, n_traj):
     time_data = {}
     for traj_index in range(n_traj):
         traj_dir_path = src_path / f'traj{traj_index+1}'
-        time_data[traj_index+1] = np.load(traj_dir_path / time_data_file_name)
+        time_data[traj_index+1] = np.load(traj_dir_path / time_data_file_name) * AUTIME2NS
     return time_data
 
 def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
@@ -75,7 +76,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     num_segments = len(segment_length_ratio)
     bin_edges = [0]
     segmentwise_doping_level = []
-    segment_wise_residence = np.zeros((n_traj, num_segments), int)
+    segment_wise_residence = np.zeros((n_traj, num_segments))
     for segment_index in range(num_segments):
         segment_system_size = elemental_segment_system_size * segment_length_ratio[segment_index]
         bin_edges.append(bin_edges[-1] + segment_system_size[gradient_ld])
@@ -83,7 +84,9 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
         segmentwise_doping_level.append(segmentwise_num_dopants[segment_index] / segmentwise_num_acceptor_sites * 100)
     for traj_index in range(n_traj):
         trajwise_unit_cell_index_data = unit_cell_index_data[traj_index+1]
-        segment_wise_residence[traj_index] = np.histogram(trajwise_unit_cell_index_data[:, :, gradient_ld], bin_edges)[0]
+        segment_wise_residence[traj_index] = np.histogram(
+            trajwise_unit_cell_index_data[:-1, :, gradient_ld], bin_edges,
+            weights=np.tile(np.diff(time_data[traj_index+1])[:, None], trajwise_unit_cell_index_data[:-1,:,gradient_ld].shape[1]))[0]
     mean_segment_wise_residence = np.mean(segment_wise_residence, axis=0)
     std_segment_wise_residence = np.std(segment_wise_residence, axis=0)
     
@@ -104,7 +107,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax1.set_xticks(segment_index_list)
     ax1.set_xticklabels(segment_index_list)
     ax1.set_xlabel('Segment Index')
-    ax1.set_ylabel('Frequency')
+    ax1.set_ylabel('Residence (ns)')
     plt.tight_layout()
     plt.savefig(str(src_path / 'Segment-wise Residence.png'))
 
@@ -145,7 +148,7 @@ def compute_segment_wise_residence(src_path, system_size, total_elements_per_uni
     ax1.set_xticks(segment_index_list)
     ax1.set_xticklabels(segment_index_list)
     ax1.set_xlabel('Segment Index')
-    ax1.set_ylabel('Relative Frequency')
+    ax1.set_ylabel('Relative Residence')
     plt.tight_layout()
     plt.savefig(str(src_path / 'Segment-wise Relative Residence.png'))
     return None
