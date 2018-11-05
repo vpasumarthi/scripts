@@ -84,6 +84,7 @@ if [ $TimeLimitStrLen -gt 8 ]; then
     TimeLimitDays=${TimeLimit:0:$DayStringLen}
 else
     TimeLimitDays=0
+    TimeLimitHrStrStartIndex=2
 fi
 TimeLimitHr=$(($TimeLimitDays * 24 + ${TimeLimit:$TimeLimitHrStrStartIndex:2}))
 TimeLimitSec=$(($TimeLimitHr * 3600))
