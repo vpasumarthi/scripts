@@ -81,6 +81,10 @@ def shell_data(src_path, element_of_interest, dopant_site_number):
             next_shell_site_indices.extend(
                 np.where((cumulative_distance_list[site_index, :] > nn_dist_range[0]) &
                          (cumulative_distance_list[site_index, :] < nn_dist_range[1]))[0].tolist())
+        next_shell_site_indices = np.unique(next_shell_site_indices).tolist()
+        for site_index in inner_shell_site_indices:
+            if site_index in next_shell_site_indices:
+                next_shell_site_indices.remove(site_index)
         current_shell_index += 1
         distribution_data[next_shell_site_indices, 1] = current_shell_index
         degeneracy_list.append(len(next_shell_site_indices))
