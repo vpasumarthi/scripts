@@ -64,6 +64,28 @@ def shell_data(src_path, element_of_interest, dopant_site_number):
             cumulative_distance_list[site_index1, site_index2] = compute_distance(
                             cartesian_coords, system_translational_vector_list,
                             cell_site_index1, cell_site_index2)[-1]
+
+    # (site_index, shell_index, dist_from_site_of_interest)
+    distribution_data =  np.zeros((num_sites_of_interest, 3))
+    distribution_data[:, 0] = np.arange(num_sites_of_interest)
+    distribution_data[:, 2] = cumulative_distance_list[dopant_site_number-1, :]
+    shell_index_to_site_index = {0: dopant_site_number - 1}
+    nn_dist_range = (3.84, 5.20)
+    current_shell_index = 0
+    current_shell_site_indices = [dopant_site_number - 1]
+    inner_shell_site_indices = [dopant_site_number - 1]
+    degeneracy_list = [len(inner_shell_site_indices)]
+    while len(np.where(distribution_data[:, 1]==0)[0]) > 1:
+        next_shell_site_indices = []
+        for site_index in current_shell_site_indices:
+            next_shell_site_indices.extend(
+                np.where((cumulative_distance_list[site_index, :] > nn_dist_range[0]) &
+                         (cumulative_distance_list[site_index, :] < nn_dist_range[1]))[0].tolist())
+        current_shell_index += 1
+        distribution_data[next_shell_site_indices, 1] = current_shell_index
+        degeneracy_list.append(len(next_shell_site_indices))
+        inner_shell_site_indices.extend(next_shell_site_indices)
+        current_shell_site_indices = next_shell_site_indices[:]
     return None
 
 def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest,
