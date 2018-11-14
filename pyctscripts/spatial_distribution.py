@@ -25,6 +25,31 @@ def compute_distance(cartesian_coords, system_translational_vector_list,
     rel_pos_vector = neighbor_image_displacement_vectors[min_index]
     return np.append(rel_pos_vector, displacement)
 
+def shell_data(src_path):
+    poscar_info = read_poscar(src_path)
+    lattice_matrix = poscar_info['lattice_matrix']
+    element_types = poscar_info['element_types']
+    num_elements = poscar_info['num_elements']
+    coordinate_type = poscar_info['coordinate_type']
+    coords = poscar_info['coordinates']
+    if coordinate_type == 'Direct':
+        fractional_coords = np.copy(coords)
+        cartesian_coords = np.dot(fractional_coords, lattice_matrix)
+    
+    x_range = range(-1, 2) if pbc[0] == 1 else [0]
+    y_range = range(-1, 2) if pbc[1] == 1 else [0]
+    z_range = range(-1, 2) if pbc[2] == 1 else [0]
+    system_translational_vector_list = np.zeros((3**sum(pbc), 3))
+    index = 0
+    for x_offset in x_range:
+        for y_offset in y_range:
+            for z_offset in z_range:
+                system_translational_vector_list[index] = (
+                    np.dot(np.multiply(
+                            np.array([x_offset, y_offset, z_offset]),
+                            system_size), lattice_matrix))
+                index += 1
+    return None
 
 def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest,
                                       dopant_site_number):
