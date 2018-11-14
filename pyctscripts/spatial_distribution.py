@@ -25,7 +25,9 @@ def compute_distance(cartesian_coords, system_translational_vector_list,
     rel_pos_vector = neighbor_image_displacement_vectors[min_index]
     return np.append(rel_pos_vector, displacement)
 
-def shell_data(src_path):
+def shell_data(src_path, element_of_interest, dopant_site_number):
+    pbc = [1, 1, 1]
+    system_size = np.array([1, 1, 1])  #pseudo
     poscar_info = read_poscar(src_path)
     lattice_matrix = poscar_info['lattice_matrix']
     element_types = poscar_info['element_types']
@@ -49,6 +51,19 @@ def shell_data(src_path):
                             np.array([x_offset, y_offset, z_offset]),
                             system_size), lattice_matrix))
                 index += 1
+
+    site_index_of_interest = element_types.index(element_of_interest)
+    cell_index_prefix = sum(num_elements[:site_index_of_interest])
+    num_sites_of_interest = num_elements[site_index_of_interest]
+    dopant_site_index = cell_index_prefix + dopant_site_number - 1
+    cumulative_distance_list = np.zeros((num_sites_of_interest, num_sites_of_interest))
+    for site_index1 in range(num_sites_of_interest):
+        cell_site_index1 = site_index1 + cell_index_prefix
+        for site_index2 in range(num_sites_of_interest):
+            cell_site_index2 = site_index2 + cell_index_prefix
+            cumulative_distance_list[site_index1, site_index2] = compute_distance(
+                            cartesian_coords, system_translational_vector_list,
+                            cell_site_index1, cell_site_index2)[-1]
     return None
 
 def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest,
