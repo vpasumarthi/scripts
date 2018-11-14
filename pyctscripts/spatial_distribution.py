@@ -69,7 +69,6 @@ def shell_data(src_path, element_of_interest, dopant_site_number):
     distribution_data =  np.zeros((num_sites_of_interest, 3))
     distribution_data[:, 0] = np.arange(num_sites_of_interest)
     distribution_data[:, 2] = cumulative_distance_list[dopant_site_number-1, :]
-    shell_index_to_site_index = {0: dopant_site_number - 1}
     nn_dist_range = (3.84, 5.20)
     current_shell_index = 0
     current_shell_site_indices = [dopant_site_number - 1]
@@ -90,7 +89,18 @@ def shell_data(src_path, element_of_interest, dopant_site_number):
         degeneracy_list.append(len(next_shell_site_indices))
         inner_shell_site_indices.extend(next_shell_site_indices)
         current_shell_site_indices = next_shell_site_indices[:]
-    return None
+    num_shells = current_shell_index
+    shell_wise_dist_range = np.zeros((num_shells+1, 3))
+    shell_wise_dist_range[:, 0] = np.arange(num_shells+1)
+    for shell_index in range(num_shells+1):
+        shell_site_indices = np.where(distribution_data[:, 1]==shell_index)[0]
+        shell_wise_dist_range[shell_index, 1] = np.min(distribution_data[shell_site_indices, 2])
+        shell_wise_dist_range[shell_index, 2] = np.max(distribution_data[shell_site_indices, 2])
+    shell_data = {'num_shells': num_shells,
+                  'shell_wise_dist_range': shell_wise_dist_range,
+                  'degeneracy_list': degeneracy_list,
+                  'distribution_data': distribution_data}
+    return shell_data
 
 def penalty_wise_spatial_distribution(system_data_file_name, element_of_interest,
                                       dopant_site_number):
