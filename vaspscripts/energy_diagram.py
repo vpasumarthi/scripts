@@ -52,4 +52,4 @@ def plot_energy_diagram(input_data_file_path, color_info, marker_info,
     plt.yticks(fontsize=font_size)
     plt.show()
     figure_path = input_data_file_path.with_suffix('.png')
-    plt.savefig(str(figure_path))
+    plt.savefig(str(figure_path), dpi=600)
