@@ -28,4 +28,13 @@ def get_species_distribution(src_path):
     np.set_printoptions(precision=4, suppress=True)
     print('shell_wise_occupancy_data:')
     print(shell_wise_occupancy_data)
+    print()
+    
+    bulk_shell_wise_occupancy_data = np.copy(shell_wise_occupancy_data[:4])
+    bulk_shell_wise_occupancy_data[3, 1] = np.sum(shell_wise_occupancy_data[3:, 1])
+    bulk_shell_wise_occupancy_data[3, 2] = np.min(shell_wise_occupancy_data[3:, 2])
+    bulk_shell_wise_occupancy_data[3, 3] = np.min(shell_wise_occupancy_data[3:, 3])
+    print('bulk_shell_wise_occupancy_data: (assume shell index 3. to be 3+)')
+    print(bulk_shell_wise_occupancy_data)
+    print()
     return None
