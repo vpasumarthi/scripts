@@ -3,9 +3,7 @@
 import numpy as np
 
 
-def get_species_distribution(src_path):
-    occupancy = np.load(src_path / 'occupancy.npy')[()]
-    time = np.load(src_path / 'time_data.npy')[()]
+def occupancy_analysis(src_path, occupancy, time):
     unique_occupancies = np.unique(occupancy)
     bin_edges = np.hstack((unique_occupancies[0], unique_occupancies[:-1] + np.diff(unique_occupancies) / 2, unique_occupancies[-1]))
     hist = np.histogram(occupancy[:-1], bins=bin_edges, weights=np.diff(time)[:, None])[0]
@@ -37,4 +35,10 @@ def get_species_distribution(src_path):
     print('bulk_shell_wise_occupancy_data: (assume shell index 3. to be 3+)')
     print(bulk_shell_wise_occupancy_data)
     print()
+    return None
+
+def get_species_distribution(src_path):
+    occupancy = np.load(src_path / 'occupancy.npy')[()]
+    time = np.load(src_path / 'time_data.npy')[()]
+    occupancy_analysis(src_path, occupancy, time)
     return None
