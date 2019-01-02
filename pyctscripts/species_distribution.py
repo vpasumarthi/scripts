@@ -59,7 +59,8 @@ def occupancy_analysis(src_path, occupancy, time_data):
     print()
     return None
 
-def get_species_distribution(src_path):
+def get_species_distribution(src_path, system_size, total_elements_per_unit_cell,
+                             n_traj, gradient_ld):
     occupancy = np.load(src_path / 'occupancy.npy')[()]
     time = np.load(src_path / 'time_data.npy')[()]
     time_data = np.diff(time)[:, None]
