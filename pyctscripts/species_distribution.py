@@ -64,5 +64,33 @@ def get_species_distribution(src_path, system_size, total_elements_per_unit_cell
     time = np.load(src_path / 'time_data.npy')[()]
     time_data = np.diff(time)[:, None]
     site_indices = np.load(src_path / 'site_indices.npy')[()]
+    print('full system:')
     occupancy_analysis(src_path, occupancy, time_data, site_indices)
+    
+    occupancy_data = {1: occupancy}
+    unit_cell_index_data = get_unit_cell_indices(
+            system_size, total_elements_per_unit_cell, n_traj, occupancy_data)
+    gradient_unit_cell_index = unit_cell_index_data[1][:, 0, 0]
+    site_indices_data = {1: site_indices[:, 0][:, None]}
+    site_indices_unit_cell_index_data = get_unit_cell_indices(
+            system_size, total_elements_per_unit_cell, n_traj, site_indices_data)
+    gradient_site_indices_unit_cell_index = site_indices_unit_cell_index_data[1][:, 0, 0]
+    
+    first_segment_indices = np.where(gradient_unit_cell_index < 5)[0]
+    first_segment_occupancy = occupancy[first_segment_indices]
+    first_segment_time_data = time_data[first_segment_indices]
+    gradient_unit_cell_index = unit_cell_index_data[1][:, 0, 0]
+    first_segment_site_indices = site_indices[np.where(gradient_site_indices_unit_cell_index < 5)[0]]
+    print()
+    print('first segment:')
+    occupancy_analysis(src_path, first_segment_occupancy, first_segment_time_data, first_segment_site_indices)
+
+    second_segment_indices = np.where(gradient_unit_cell_index >= 5)[0]
+    second_segment_occupancy = occupancy[second_segment_indices]
+    second_segment_time_data = time_data[second_segment_indices]
+    gradient_unit_cell_index = unit_cell_index_data[1][:, 0, 0]
+    second_segment_site_indices = site_indices[np.where(gradient_site_indices_unit_cell_index >= 5)[0]]
+    print()
+    print('second segment:')
+    occupancy_analysis(src_path, second_segment_occupancy, second_segment_time_data, second_segment_site_indices)
     return None
