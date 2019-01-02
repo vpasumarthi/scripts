@@ -25,12 +25,11 @@ def get_unit_cell_indices(system_size, total_elements_per_unit_cell, n_traj,
         unit_cell_index_data[traj_index+1] = traj_unit_cell_indices
     return unit_cell_index_data
 
-def occupancy_analysis(src_path, occupancy, time_data):
+def occupancy_analysis(src_path, occupancy, time_data, site_indices):
     unique_occupancies = np.unique(occupancy)
     bin_edges = np.hstack((unique_occupancies[0], unique_occupancies[:-1] + np.diff(unique_occupancies) / 2, unique_occupancies[-1]))
     hist = np.histogram(occupancy[:-1], bins=bin_edges, weights=time_data)[0]
     relative_residence_data = hist / np.sum(hist)
-    site_indices = np.load(src_path / 'site_indices.npy')[()]
     num_shells = np.max(site_indices[:, 2])
     intersection_indices = np.in1d(site_indices[:, 0], unique_occupancies)
     intersection_site_indices = site_indices[intersection_indices]
@@ -64,5 +63,6 @@ def get_species_distribution(src_path, system_size, total_elements_per_unit_cell
     occupancy = np.load(src_path / 'occupancy.npy')[()]
     time = np.load(src_path / 'time_data.npy')[()]
     time_data = np.diff(time)[:, None]
-    occupancy_analysis(src_path, occupancy, time_data)
+    site_indices = np.load(src_path / 'site_indices.npy')[()]
+    occupancy_analysis(src_path, occupancy, time_data, site_indices)
     return None
