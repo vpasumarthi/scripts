@@ -31,3 +31,8 @@ def get_element_spd_dos(dos_data, desired_orbitals):
         element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
     return element_spd_dos_data
 
+def plot_dos(dos_data, desired_orbitals):
+    if desired_orbitals != ["total"]:
+        element_spd_dos_data = get_element_spd_dos(dos_data, desired_orbitals)
+    return None
+
