@@ -31,6 +31,21 @@ def get_element_spd_dos(dos_data, desired_orbitals):
         element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
     return element_spd_dos_data
 
+def get_orbital_density_data(spd_dos, orbital_type, spin_type):
+    if orbital_type == "s":
+        orbital_projected_dos = spd_dos[OrbitalType.s]
+    elif orbital_type = "p":
+        orbital_projected_dos = spd_dos[OrbitalType.p]
+    elif orbital_type = "d":
+        orbital_projected_dos = spd_dos[OrbitalType.d]
+
+    if spin_type == "up":
+        orbial_density = orbital_projected_dos.densities[Spin.up]
+    else
+        orbial_density = -orbital_projected_dos.densities[Spin.down]
+
+    return orbial_density
+
 def plot_dos(dos_data, desired_orbitals):
     if desired_orbitals != ["total"]:
         element_spd_dos_data = get_element_spd_dos(dos_data, desired_orbitals)
