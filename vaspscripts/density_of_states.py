@@ -49,5 +49,11 @@ def get_orbital_density_data(spd_dos, orbital_type, spin_type):
 def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     if desired_orbitals != ["total"]:
         element_spd_dos_data = get_element_spd_dos(dos_data, desired_orbitals)
+
+    # setup matplotlib plot
+    plt.switch_backend('Agg')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
     return None
 
