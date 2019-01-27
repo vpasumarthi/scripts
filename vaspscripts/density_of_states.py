@@ -17,13 +17,17 @@ def read_dos(src_path):
     tdos = dosrun.tdos
     # fermi energy
     efermi = dosrun.efermi
-    return (dosrun, cdos, tdos, efermi)
+    dos_data = {"dosrun" : dosrun,
+                "cdos"   : cdos,
+                "tdos"   : tdos,
+                "efermi" : efermi}
+    return dos_data
 
 def get_element_spd_dos(dos_data, desired_orbitals):
     unique_elements = set([orbital.split("_")[0] for orbital in desired_orbitals])
     element_spd_dos_data = {}
     for element in unique_elements:
         atomic_number = Element(element).number
-        element_spd_dos_data[element] = dos_data[1].get_element_spd_dos(atomic_number)
+        element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
     return element_spd_dos_data
 
