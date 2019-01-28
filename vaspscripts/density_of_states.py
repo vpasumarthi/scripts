@@ -34,14 +34,14 @@ def get_element_spd_dos(dos_data, desired_orbitals):
 def get_orbital_density_data(spd_dos, orbital_type, spin_type):
     if orbital_type == "s":
         orbital_projected_dos = spd_dos[OrbitalType.s]
-    elif orbital_type = "p":
+    elif orbital_type == "p":
         orbital_projected_dos = spd_dos[OrbitalType.p]
-    elif orbital_type = "d":
+    elif orbital_type == "d":
         orbital_projected_dos = spd_dos[OrbitalType.d]
 
     if spin_type == "up":
         orbial_density = orbital_projected_dos.densities[Spin.up]
-    else
+    else:
         orbial_density = -orbital_projected_dos.densities[Spin.down]
 
     return orbial_density
@@ -54,7 +54,7 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    font = {'family': plot_properties["font_family",
+    font = {'family': plot_properties["font_family"],
             'size': plot_properties["font_size"]}
     plt.rc('font', **font)
 
@@ -95,11 +95,12 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
                     lw=plot_properties["line_width"])
     
     if plot_properties["zero_at_fermi"] == "yes":
-        ax.xlabel(plot_properties["x_label_fermi0"]
+        ax.set_xlabel(plot_properties["x_label_fermi0"])
     else:
-        ax.xlabel(plot_properties["x_label"]
-    ax.ylabel(plot_properties["y_label"])
+        ax.set_xlabel(plot_properties["x_label"])
+    ax.set_ylabel(plot_properties["y_label"])
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
-    plt.savefig(dst_path / plot_properties["output_file_name"] / "." / plot_properties["output_file_type"], format=plot_properties["output_file_type"])
+    output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
+    plt.savefig(output_path, format=plot_properties["output_file_type"])
     return None
 
