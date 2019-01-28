@@ -54,6 +54,9 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    font = {'family': plot_properties["font_family",
+            'size': plot_properties["font_size"]}
+    plt.rc('font', **font)
 
     if plot_properties["zero_at_fermi"] == "yes":
         energy_data = dos_data["tdos"].energies - dos_data["efermi"]
@@ -90,6 +93,7 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
                     get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
                     color=plot_properties["color_list"][index],
                     lw=plot_properties["line_width"])
+    
 
     return None
 
