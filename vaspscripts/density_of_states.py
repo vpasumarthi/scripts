@@ -122,6 +122,15 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
                         get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
                         color=plot_properties["color_list"][index],
                         lw=plot_properties["line_width"])
+
+    if plot_properties["indicate_fermi"]:
+        ylim = ax.get_ylim()
+        if plot_properties["zero_at_fermi"] == "yes":
+            fermi_data = [0] * 2
+        else:
+            fermi_data = [dos_data["efermi"]] * 2
+        ax.plot(fermi_data, [ylim[0], ylim[1]], '--', color='black', lw=plot_properties["line_width"])
+        ax.set_ylim(ylim[0], ylim[1])
     
     if plot_properties["zero_at_fermi"] == "yes":
         ax.set_xlabel(plot_properties["x_label_fermi0"])
