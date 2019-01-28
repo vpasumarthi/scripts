@@ -101,6 +101,6 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     ax.set_ylabel(plot_properties["y_label"])
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
     output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
-    plt.savefig(output_path, format=plot_properties["output_file_type"])
+    plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
     return None
 
