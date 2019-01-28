@@ -55,5 +55,10 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
+    if plot_properties["zero_at_fermi"] == "yes":
+        energy_data = dos_data["tdos"].energies - dos_data["efermi"]
+    else:
+        energy_data = dos_data["tdos"].energies
+
     return None
 
