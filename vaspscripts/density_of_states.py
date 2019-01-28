@@ -27,8 +27,12 @@ def get_element_spd_dos(dos_data, desired_orbitals):
     unique_elements = set([orbital.split("_")[0] for orbital in desired_orbitals])
     element_spd_dos_data = {}
     for element in unique_elements:
-        atomic_number = Element(element).number
-        element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
+        if element == "total":
+            element_spd_dos_data[element] = ''
+        else:
+            atomic_number = Element(element).number
+            element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
+        
     return element_spd_dos_data
 
 def get_orbital_density_data(spd_dos, orbital_type, spin_type):
@@ -64,35 +68,60 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
         energy_data = dos_data["tdos"].energies
 
     for index, orbital in enumerate(desired_orbitals):
-        element = orbital.split("_")[0]
-        orbital_type = orbital.split("_")[1][-1]
-        
-        if plot_properties["spin_type"] == "up":
-            spin_type = "up"
-            ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
-                    color=plot_properties["color_list"][index],
-                    label=orbital,
-                    lw=plot_properties["line_width"])
-        elif plot_properties["spin_type"] == "down":
-            spin_type = "down"
-            ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
-                    color=plot_properties["color_list"][index],
-                    label=orbital,
-                    lw=plot_properties["line_width"])
-        elif plot_properties["spin_type"] == "both":
-            spin_type = "up"
-            ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
-                    color=plot_properties["color_list"][index],
-                    label=orbital,
-                    lw=plot_properties["line_width"])
-            spin_type = "down"
-            ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
-                    color=plot_properties["color_list"][index],
-                    lw=plot_properties["line_width"])
+        if orbital == "total":
+            if plot_properties["spin_type"] == "up":
+                ax.plot(energy_data,
+                        dos_data["tdos"].densities[Spin.up],
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+            elif plot_properties["spin_type"] == "down":
+                ax.plot(energy_data,
+                        -dos_data["tdos"].densities[Spin.down],
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+            elif plot_properties["spin_type"] == "both":
+                ax.plot(energy_data,
+                        dos_data["tdos"].densities[Spin.up],
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+                ax.plot(energy_data,
+                        -dos_data["tdos"].densities[Spin.down],
+                        color=plot_properties["color_list"][index],
+                        lw=plot_properties["line_width"])
+            
+        else:
+            element = orbital.split("_")[0]
+            orbital_type = orbital.split("_")[1][-1]
+            
+            if plot_properties["spin_type"] == "up":
+                spin_type = "up"
+                ax.plot(energy_data,
+                        get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+            elif plot_properties["spin_type"] == "down":
+                spin_type = "down"
+                ax.plot(energy_data,
+                        get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+            elif plot_properties["spin_type"] == "both":
+                spin_type = "up"
+                ax.plot(energy_data,
+                        get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                        color=plot_properties["color_list"][index],
+                        label=orbital,
+                        lw=plot_properties["line_width"])
+                spin_type = "down"
+                ax.plot(energy_data,
+                        get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                        color=plot_properties["color_list"][index],
+                        lw=plot_properties["line_width"])
     
     if plot_properties["zero_at_fermi"] == "yes":
         ax.set_xlabel(plot_properties["x_label_fermi0"])
