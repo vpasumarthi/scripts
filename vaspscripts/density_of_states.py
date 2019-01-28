@@ -94,6 +94,12 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
                     color=plot_properties["color_list"][index],
                     lw=plot_properties["line_width"])
     
-
+    if plot_properties["zero_at_fermi"] == "yes":
+        ax.xlabel(plot_properties["x_label_fermi0"]
+    else:
+        ax.xlabel(plot_properties["x_label"]
+    ax.ylabel(plot_properties["y_label"])
+    ax.legend(prop={'size': plot_properties["legend_font_size"]})
+    plt.savefig(dst_path / plot_properties["output_file_name"] / "." / plot_properties["output_file_type"], format=plot_properties["output_file_type"])
     return None
 
