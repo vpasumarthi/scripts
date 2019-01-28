@@ -60,5 +60,36 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     else:
         energy_data = dos_data["tdos"].energies
 
+    for index, orbital in enumerate(desired_orbitals):
+        element = orbital.split("_")[0]
+        orbital_type = orbital.split("_")[1][-1]
+        
+        if plot_properties["spin_type"] == "up":
+            spin_type = "up"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][index],
+                    label=orbital,
+                    lw=plot_properties["line_width"])
+        elif plot_properties["spin_type"] == "down":
+            spin_type = "down"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][index],
+                    label=orbital,
+                    lw=plot_properties["line_width"])
+        elif plot_properties["spin_type"] == "both":
+            spin_type = "up"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][index],
+                    label=orbital,
+                    lw=plot_properties["line_width"])
+            spin_type = "down"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][index],
+                    lw=plot_properties["line_width"])
+
     return None
 
