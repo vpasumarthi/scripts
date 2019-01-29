@@ -50,7 +50,7 @@ def get_orbital_density_data(spd_dos, orbital_type, spin_type):
 
     return orbial_density
 
-def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
+def plot_element_spd_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     if desired_orbitals != ["total"]:
         element_spd_dos_data = get_element_spd_dos(dos_data, desired_orbitals)
 
