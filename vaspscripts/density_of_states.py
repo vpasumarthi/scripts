@@ -123,6 +123,13 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
                         color=plot_properties["color_list"][index],
                         lw=plot_properties["line_width"])
 
+    x_axis_lims = plot_properties["x_axis_lims"]
+    y_axis_lims = plot_properties["y_axis_lims"]
+    if len(x_axis_lims):
+        ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
+    if len(y_axis_lims):
+        ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
+
     if plot_properties["indicate_fermi"]:
         ylim = ax.get_ylim()
         if plot_properties["zero_at_fermi"] == "yes":
@@ -140,12 +147,6 @@ def plot_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     ax.set_title(plot_properties["title"])
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
     output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
-    output_axis_lims = plot_properties["output_axis_lims"]
-    if len(output_axis_lims):
-        xlim = output_axis_lims["x"]
-        ylim = output_axis_lims["y"]
-        ax.set_xlim(xlim[0], xlim[1])
-        ax.set_ylim(ylim[0], ylim[1])
     plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
     return None
 
