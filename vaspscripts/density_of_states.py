@@ -151,8 +151,11 @@ def plot_element_spd_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     return None
 
 def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
-    site = dos_data["dosrun"].initial_structure[site_index]
-    spd_dos_data = dos_data["cdos"].get_site_spd_dos(site)
+    if site_index == "total":
+        spd_dos_data = dos_data["cdos"].get_spd_dos()
+    else:
+        site = dos_data["dosrun"].initial_structure[site_index]
+        spd_dos_data = dos_data["cdos"].get_site_spd_dos(site)
 
     # setup matplotlib plot
     plt.switch_backend('Agg')
@@ -188,13 +191,13 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
         elif plot_properties["spin_type"] == "both":
             spin_type = "up"
             ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    get_orbital_density_data(spd_dos_data, orbital_type, spin_type),
                     color=plot_properties["color_list"][orbital_index],
-                    label=orbital,
+                    label=orbital_type,
                     lw=plot_properties["line_width"])
             spin_type = "down"
             ax.plot(energy_data,
-                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    get_orbital_density_data(spd_dos_data, orbital_type, spin_type),
                     color=plot_properties["color_list"][orbital_index],
                     lw=plot_properties["line_width"])
         
