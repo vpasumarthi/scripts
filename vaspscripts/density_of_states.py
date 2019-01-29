@@ -150,3 +150,78 @@ def plot_element_spd_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
     return None
 
+def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
+    site = dos_data["dosrun"].initial_structure[site_index]
+    spd_dos_data = dos_data["cdos"].get_site_spd_dos(site)
+
+    # setup matplotlib plot
+    plt.switch_backend('Agg')
+    font = {'family': plot_properties["font_family"],
+            'size': plot_properties["font_size"]}
+    plt.rc('font', **font)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    if plot_properties["zero_at_fermi"] == "yes":
+        energy_data = dos_data["tdos"].energies - dos_data["efermi"]
+    else:
+        energy_data = dos_data["tdos"].energies
+
+    base_orbital_types = ["s", "p", "d", "f"]
+    num_orbitals = len(spd_dos_data)
+    for orbital_index in range(num_orbitals):
+        orbital_type = base_orbital_types[orbital_index]
+        if plot_properties["spin_type"] == "up":
+            spin_type = "up"
+            ax.plot(energy_data,
+                    get_orbital_density_data(spd_dos_data, orbital_type, spin_type),
+                    color=plot_properties["color_list"][orbital_index],
+                    label=orbital_type,
+                    lw=plot_properties["line_width"])
+        elif plot_properties["spin_type"] == "down":
+            spin_type = "down"
+            ax.plot(energy_data,
+                    get_orbital_density_data(spd_dos_data, orbital_type, spin_type),
+                    color=plot_properties["color_list"][orbital_index],
+                    label=orbital_type,
+                    lw=plot_properties["line_width"])
+        elif plot_properties["spin_type"] == "both":
+            spin_type = "up"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][orbital_index],
+                    label=orbital,
+                    lw=plot_properties["line_width"])
+            spin_type = "down"
+            ax.plot(energy_data,
+                    get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
+                    color=plot_properties["color_list"][orbital_index],
+                    lw=plot_properties["line_width"])
+        
+    x_axis_lims = plot_properties["x_axis_lims"]
+    y_axis_lims = plot_properties["y_axis_lims"]
+    if len(x_axis_lims):
+        ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
+    if len(y_axis_lims):
+        ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
+
+    if plot_properties["indicate_fermi"]:
+        ylim = ax.get_ylim()
+        if plot_properties["zero_at_fermi"] == "yes":
+            fermi_data = [0] * 2
+        else:
+            fermi_data = [dos_data["efermi"]] * 2
+        ax.plot(fermi_data, [ylim[0], ylim[1]], '--', color='black', lw=plot_properties["line_width"])
+        ax.set_ylim(ylim[0], ylim[1])
+    
+    if plot_properties["zero_at_fermi"] == "yes":
+        ax.set_xlabel(plot_properties["x_label_fermi0"])
+    else:
+        ax.set_xlabel(plot_properties["x_label"])
+    ax.set_ylabel(plot_properties["y_label"])
+    ax.set_title(plot_properties["title"])
+    ax.legend(prop={'size': plot_properties["legend_font_size"]})
+    output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
+    plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
+    return None
+
