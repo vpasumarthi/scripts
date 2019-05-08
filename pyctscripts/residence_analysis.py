@@ -22,6 +22,30 @@ def traj_shell_wise_residence(src_path, traj_index):
     num_bulk_sites = len(bulk_site_indices)
     shell_wise_num_sites = [num_first_shell_sites, num_second_shell_sites, num_third_shell_sites, num_bulk_sites]
 
+    for index, site_index in enumerate(first_shell_site_indices):
+        if index == 0:
+            first_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+        else:
+            first_shell_occupancy_data = np.hstack((first_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+
+    for index, site_index in enumerate(second_shell_site_indices):
+        if index == 0:
+            second_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+        else:
+            second_shell_occupancy_data = np.hstack((second_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+
+    for index, site_index in enumerate(third_shell_site_indices):
+        if index == 0:
+            third_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+        else:
+            third_shell_occupancy_data = np.hstack((third_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+
+    for index, site_index in enumerate(bulk_site_indices):
+        if index == 0:
+            bulk_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+        else:
+            bulk_occupancy_data = np.hstack((bulk_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+
     return None
 
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
