@@ -73,3 +73,6 @@ def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
     np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
     return None
+
+def plot_shell_wise_residence(src_path):
+    return None
