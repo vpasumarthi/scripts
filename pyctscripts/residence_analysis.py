@@ -67,4 +67,8 @@ def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
     mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
     sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
+
+    np.save(abs_relative_residence, str(f'{src_path}/abs_relative_residence.npy'))
+    np.save(mean_relative_residence_data, str(f'{src_path}/mean_relative_residence_data.npy'))
+    np.save(sem_relative_residence_data, str(f'{src_path}/sem_relative_residence_data.npy'))
     return None
