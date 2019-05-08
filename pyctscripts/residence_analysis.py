@@ -51,12 +51,14 @@ def traj_shell_wise_residence(src_path, traj_index):
     third_site_time = np.sum(time_step_data[third_shell_occupancy_data])
     bulk_site_time = np.sum(time_step_data[bulk_occupancy_data])
 
-    return None
+    site_times = np.array([first_site_time, second_site_time, third_site_time, bulk_site_time])
+    traj_relative_residence_data = site_times / np.sum(site_times)
+    return (traj_relative_residence_data, shell_wise_num_sites)
 
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     # TODO: parse yaml file to reduce number of inputs
     num_shells = len(shell_wise_penalties)
     relative_residence_data = np.zeros((n_traj, num_shells))
     for traj_index in range(n_traj):
-        relative_residence_data[traj_index, :] = traj_shell_wise_residence(src_path, traj_index+1)
+        relative_residence_data[traj_index, :] = traj_shell_wise_residence(src_path, traj_index+1)[0]
     return None
