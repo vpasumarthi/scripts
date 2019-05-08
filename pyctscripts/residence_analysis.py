@@ -58,17 +58,18 @@ def traj_shell_wise_residence(src_path, traj_index):
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     # TODO: parse yaml file to reduce number of inputs
     num_shells = len(shell_wise_penalties)
+    shell_wise_pop_factors = np.exp(-shell_wise_penalties / kBT)
     relative_residence_data = np.zeros((n_traj, num_shells))
     for traj_index in range(n_traj):
         relative_residence_data[traj_index, :] = traj_shell_wise_residence(src_path, traj_index+1)[0]
-    shell_wise_num_sites = traj_analysis(cwd, traj_index+1)[1]
+    shell_wise_num_sites = traj_shell_wise_residence(src_path, traj_index+1)[1]
 
     # TODO: Change abs to exact
     abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
     mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
     sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
 
-    np.save(abs_relative_residence, str(f'{src_path}/abs_relative_residence.npy'))
-    np.save(mean_relative_residence_data, str(f'{src_path}/mean_relative_residence_data.npy'))
-    np.save(sem_relative_residence_data, str(f'{src_path}/sem_relative_residence_data.npy'))
+    np.save(src_path / 'abs_relative_residence.npy', abs_relative_residence)
+    np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
+    np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
     return None
