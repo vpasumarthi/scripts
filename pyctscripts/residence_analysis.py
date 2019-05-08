@@ -10,6 +10,12 @@ def traj_shell_wise_residence(src_path, traj_index):
     time = np.load(f'{src_path}/traj{traj_index}/time_data.npy')[()]
     time_step_data = np.diff(time)
 
+    # TODO: change the following hard-code for 2-shell implementation to any number of shells
+    first_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 0][:, 0]
+    second_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 1][:, 0]
+    third_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 2][:, 0]
+    bulk_site_indices = site_indices_data[site_indices_data[:, 2] > 2][:, 0]
+
     return None
 
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
