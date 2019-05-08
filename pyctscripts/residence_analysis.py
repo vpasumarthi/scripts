@@ -78,4 +78,24 @@ def plot_shell_wise_residence(src_path):
     abs_relative_residence = np.load(src_path / 'abs_relative_residence.npy')
     mean_relative_residence_data = np.load(src_path / 'mean_relative_residence_data.npy')
     sem_relative_residence_data = np.load(src_path / 'sem_relative_residence_data.npy')
+
+    plt.switch_backend('Agg')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    # TODO: Avoid all hard-coding
+    shell_index_list = np.arange(num_shells)
+    ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
+             c='#0504aa', mfc='#0504aa', mec='black')
+    ax.errorbar(shell_index_list, mean_relative_residence_data,
+                 yerr=sem_relative_residence_data, fmt='o', capsize=3,
+                 c='#0504aa', mfc='none', mec='none')
+    for shell_index in shell_index_list:
+        ax.plot([shell_index - 0.1, shell_index + 0.1], [abs_relative_residence[shell_index]] * 2,
+                 '-', c='#d62728')
+    ax.set_xlabel('Shell Index')
+    ax.set_ylabel('Relative Residence')
+    ax.set_title('W10: [0.6596 eV, -0.0168 eV, -0.0154 eV, 0.0000 eV]')
+    plt.tight_layout()
+    plt.savefig(str(src_path / 'Relative Residence_Shell_wise.png'))
     return None
