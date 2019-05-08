@@ -16,6 +16,12 @@ def traj_shell_wise_residence(src_path, traj_index):
     third_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 2][:, 0]
     bulk_site_indices = site_indices_data[site_indices_data[:, 2] > 2][:, 0]
 
+    num_first_shell_sites = len(first_shell_site_indices)
+    num_second_shell_sites = len(second_shell_site_indices)
+    num_third_shell_sites = len(third_shell_site_indices)
+    num_bulk_sites = len(bulk_site_indices)
+    shell_wise_num_sites = [num_first_shell_sites, num_second_shell_sites, num_third_shell_sites, num_bulk_sites]
+
     return None
 
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
