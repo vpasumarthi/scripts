@@ -46,6 +46,11 @@ def traj_shell_wise_residence(src_path, traj_index):
         else:
             bulk_occupancy_data = np.hstack((bulk_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
 
+    first_site_time = np.sum(time_step_data[first_shell_occupancy_data])
+    second_site_time = np.sum(time_step_data[second_shell_occupancy_data])
+    third_site_time = np.sum(time_step_data[third_shell_occupancy_data])
+    bulk_site_time = np.sum(time_step_data[bulk_occupancy_data])
+
     return None
 
 def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
