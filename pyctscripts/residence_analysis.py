@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def traj_shell_wise_residence(src_path, traj_index):
@@ -74,7 +75,7 @@ def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
     return None
 
-def plot_shell_wise_residence(src_path):
+def plot_shell_wise_residence(src_path, shell_wise_penalties):
     abs_relative_residence = np.load(src_path / 'abs_relative_residence.npy')
     mean_relative_residence_data = np.load(src_path / 'mean_relative_residence_data.npy')
     sem_relative_residence_data = np.load(src_path / 'sem_relative_residence_data.npy')
@@ -84,6 +85,7 @@ def plot_shell_wise_residence(src_path):
     ax = fig.add_subplot(111)
 
     # TODO: Avoid all hard-coding
+    num_shells = len(shell_wise_penalties)
     shell_index_list = np.arange(num_shells)
     ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
              c='#0504aa', mfc='#0504aa', mec='black')
