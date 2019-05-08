@@ -61,4 +61,9 @@ def shell_wise_residence(src_path, n_traj, kBT, shell_wise_penalties):
     relative_residence_data = np.zeros((n_traj, num_shells))
     for traj_index in range(n_traj):
         relative_residence_data[traj_index, :] = traj_shell_wise_residence(src_path, traj_index+1)[0]
+    shell_wise_num_sites = traj_analysis(cwd, traj_index+1)[1]
+
+    abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
+    mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
+    sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
     return None
