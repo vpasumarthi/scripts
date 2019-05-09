@@ -2,9 +2,19 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import yaml
 
-class Residence():
-    def __init__(self):
+
+class Residence(object):
+    def __init__(self, src_path):
+        # Load simulation parameters
+        sim_param_file_name = 'simulation_parameters.yml'
+        sim_param_file_path = src_path / sim_param_file_name
+        with open(sim_param_file_path, 'r') as stream:
+            try:
+                self.sim_params = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
         return None
 
     def traj_shell_wise_residence(self, src_path, traj_index):
