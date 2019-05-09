@@ -97,9 +97,10 @@ class Residence(object):
         for map_index, relative_energies in enumerate(self.relative_energies):
             if self.num_dopants[map_index]:
                 # append relative energies for bulk sites as 0
-                relative_energies.append(bulk_site_relative_energies)
-
-                shell_wise_pop_factors = np.exp(- np.asarray(relative_energies) / self.kBT)
+                map_index_relative_energies = relative_energies[:]
+                map_index_relative_energies.append(bulk_site_relative_energies)
+                
+                shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
                 relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
                 for traj_index in range(n_traj):
                     relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
