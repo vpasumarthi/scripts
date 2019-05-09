@@ -105,18 +105,17 @@ class Residence(object):
                     relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
                 shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1)[1]
             
-                # TODO: Change abs to exact
-                abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
+                exact_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
             
-                np.save(src_path / 'abs_relative_residence.npy', abs_relative_residence)
+                np.save(src_path / 'exact_relative_residence.npy', exact_relative_residence)
                 np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
                 np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
         return None
     
     def plot_shell_wise_residence(self, src_path, shell_wise_penalties):
-        abs_relative_residence = np.load(src_path / 'abs_relative_residence.npy')
+        exact_relative_residence = np.load(src_path / 'exact_relative_residence.npy')
         mean_relative_residence_data = np.load(src_path / 'mean_relative_residence_data.npy')
         sem_relative_residence_data = np.load(src_path / 'sem_relative_residence_data.npy')
     
@@ -133,7 +132,7 @@ class Residence(object):
                      yerr=sem_relative_residence_data, fmt='o', capsize=3,
                      c='#0504aa', mfc='none', mec='none')
         for shell_index in shell_index_list:
-            ax.plot([shell_index - 0.1, shell_index + 0.1], [abs_relative_residence[shell_index]] * 2,
+            ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
                      '-', c='#d62728')
         ax.set_xlabel('Shell Index')
         ax.set_ylabel('Relative Residence')
