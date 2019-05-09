@@ -92,23 +92,27 @@ class Residence(object):
         traj_relative_residence_data = site_times / np.sum(site_times)
         return (traj_relative_residence_data, shell_wise_num_sites)
     
-    def shell_wise_residence(self, src_path, n_traj, shell_wise_penalties):
-        # TODO: parse yaml file to reduce number of inputs
-        num_shells = len(shell_wise_penalties)
-        shell_wise_pop_factors = np.exp(-shell_wise_penalties / self.kBT)
-        relative_residence_data = np.zeros((n_traj, num_shells))
-        for traj_index in range(n_traj):
-            relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
-        shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1)[1]
-    
-        # TODO: Change abs to exact
-        abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
-        mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
-        sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
-    
-        np.save(src_path / 'abs_relative_residence.npy', abs_relative_residence)
-        np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
-        np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
+    def shell_wise_residence(self, src_path, n_traj):
+        for map_index, relative_energies in enumerate(self.relative_energies):
+            if self.num_dopants[map_index]:
+                # append relative energies for bulk sites as 0
+                bulk_site_relative_energies = 0.000
+                relative_energies.append(bulk_site_relative_energies)
+
+                shell_wise_pop_factors = np.exp(- np.asarray(relative_energies) / self.kBT)
+                relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
+                for traj_index in range(n_traj):
+                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
+                shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1)[1]
+            
+                # TODO: Change abs to exact
+                abs_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
+                mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
+                sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
+            
+                np.save(src_path / 'abs_relative_residence.npy', abs_relative_residence)
+                np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
+                np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
         return None
     
     def plot_shell_wise_residence(self, src_path, shell_wise_penalties):
