@@ -44,56 +44,29 @@ class Residence(object):
             self.num_shells.append(len(self.relative_energies[-1]) - 2)
         return None
 
-    def traj_shell_wise_residence(self, src_path, traj_index):
+    def traj_shell_wise_residence(self, src_path, traj_index, num_shells):
         site_indices_data = np.load(f'{src_path}/traj{traj_index}/site_indices.npy')[()]
         occupancy = np.load(f'{src_path}/traj{traj_index}/occupancy.npy')[()]
         time = np.load(f'{src_path}/traj{traj_index}/time_data.npy')[()]
         time_step_data = np.diff(time)
 
-        # TODO: change the following hard-code for 2-shell implementation to any number of shells
-        first_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 0][:, 0]
-        second_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 1][:, 0]
-        third_shell_site_indices = site_indices_data[site_indices_data[:, 2] == 2][:, 0]
-        bulk_site_indices = site_indices_data[site_indices_data[:, 2] > 2][:, 0]
-    
-        num_first_shell_sites = len(first_shell_site_indices)
-        num_second_shell_sites = len(second_shell_site_indices)
-        num_third_shell_sites = len(third_shell_site_indices)
-        num_bulk_sites = len(bulk_site_indices)
-        shell_wise_num_sites = [num_first_shell_sites, num_second_shell_sites, num_third_shell_sites, num_bulk_sites]
-    
-        for index, site_index in enumerate(first_shell_site_indices):
-            if index == 0:
-                first_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+        shell_wise_site_count = np.zeros(num_shells+2)
+        shell_wise_residence_time = np.zeros(num_shells+2)
+        for shell_index in range(num_shells+2):
+            if shell_index == num_shells + 1:
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] > shell_index - 1][:, 0]
             else:
-                first_shell_occupancy_data = np.hstack((first_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
-    
-        for index, site_index in enumerate(second_shell_site_indices):
-            if index == 0:
-                second_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
-            else:
-                second_shell_occupancy_data = np.hstack((second_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
-    
-        for index, site_index in enumerate(third_shell_site_indices):
-            if index == 0:
-                third_shell_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
-            else:
-                third_shell_occupancy_data = np.hstack((third_shell_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
-    
-        for index, site_index in enumerate(bulk_site_indices):
-            if index == 0:
-                bulk_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
-            else:
-                bulk_occupancy_data = np.hstack((bulk_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
-    
-        first_site_time = np.sum(time_step_data[first_shell_occupancy_data])
-        second_site_time = np.sum(time_step_data[second_shell_occupancy_data])
-        third_site_time = np.sum(time_step_data[third_shell_occupancy_data])
-        bulk_site_time = np.sum(time_step_data[bulk_occupancy_data])
-    
-        site_times = np.array([first_site_time, second_site_time, third_site_time, bulk_site_time])
-        traj_relative_residence_data = site_times / np.sum(site_times)
-        return (traj_relative_residence_data, shell_wise_num_sites)
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
+            shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
+            for index, site_index in enumerate(shell_wise_site_indices_data):
+                if index == 0:
+                    shell_wise_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
+                else:
+                    shell_wise_occupancy_data = np.hstack((shell_wise_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+            shell_wise_residence_time[shell_index] = np.sum(time_step_data[shell_wise_occupancy_data])
+
+        relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
+        return (relative_residence_data, shell_wise_site_count)
     
     def shell_wise_residence(self, src_path, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
@@ -103,8 +76,8 @@ class Residence(object):
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
                 relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
                 for traj_index in range(n_traj):
-                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
-                shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1)[1]
+                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1, self.num_shells[map_index])[0]
+                shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1, self.num_shells[map_index])[1]
             
                 exact_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
