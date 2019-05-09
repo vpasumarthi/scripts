@@ -116,8 +116,13 @@ class Residence(object):
         return None
     
     def plot_shell_wise_residence(self, src_path):
+        bulk_site_relative_energies = 0.000
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
+                # append relative energies for bulk sites as 0
+                map_index_relative_energies = self.relative_energies[map_index][:]
+                map_index_relative_energies.append(bulk_site_relative_energies)
+
                 exact_relative_residence = np.load(src_path / f'exact_relative_residence_{dopant_element_type}.npy')
                 mean_relative_residence_data = np.load(src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
                 sem_relative_residence_data = np.load(src_path / f'sem_relative_residence_data_{dopant_element_type}.npy')
@@ -126,8 +131,7 @@ class Residence(object):
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
             
-                # TODO: Avoid all hard-coding
-                shell_index_list = np.arange(len(self.relative_energies[map_index]))
+                shell_index_list = np.arange(len(self.relative_energies[map_index]) + 1)
                 ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
                          c='#0504aa', mfc='#0504aa', mec='black')
                 ax.errorbar(shell_index_list, mean_relative_residence_data,
@@ -138,7 +142,8 @@ class Residence(object):
                              '-', c='#d62728')
                 ax.set_xlabel('Shell Index')
                 ax.set_ylabel('Relative Residence')
-                ax.set_title('W10: [0.6596 eV, -0.0168 eV, -0.0154 eV, 0.0000 eV]')
+                relative_energy_string = ', '.join(f'{x:.4f} eV' for x in map_index_relative_energies)
+                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]}: {relative_energy_string}')
                 plt.tight_layout()
                 plt.savefig(str(src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'))
         return None
