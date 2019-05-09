@@ -4,9 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import yaml
 
+from PyCT import constants
+
 
 class Residence(object):
-    def __init__(self, src_path):
+    def __init__(self, src_path, temp):
         # Load simulation parameters
         sim_param_file_name = 'simulation_parameters.yml'
         sim_param_file_path = src_path / sim_param_file_name
@@ -15,6 +17,8 @@ class Residence(object):
                 self.sim_params = yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
+
+        self.kBT = constants.KB / constants.EV2J * temp  # kBT in eV
         return None
 
     def traj_shell_wise_residence(self, src_path, traj_index):
@@ -68,10 +72,10 @@ class Residence(object):
         traj_relative_residence_data = site_times / np.sum(site_times)
         return (traj_relative_residence_data, shell_wise_num_sites)
     
-    def shell_wise_residence(self, src_path, n_traj, kBT, shell_wise_penalties):
+    def shell_wise_residence(self, src_path, n_traj, shell_wise_penalties):
         # TODO: parse yaml file to reduce number of inputs
         num_shells = len(shell_wise_penalties)
-        shell_wise_pop_factors = np.exp(-shell_wise_penalties / kBT)
+        shell_wise_pop_factors = np.exp(-shell_wise_penalties / self.kBT)
         relative_residence_data = np.zeros((n_traj, num_shells))
         for traj_index in range(n_traj):
             relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1)[0]
