@@ -9,9 +9,10 @@ from PyCT import constants
 
 class Residence(object):
     def __init__(self, src_path, temp):
+        self.src_path = src_path
         # Load simulation parameters
         sim_param_file_name = 'simulation_parameters.yml'
-        sim_param_file_path = src_path / sim_param_file_name
+        sim_param_file_path = self.src_path / sim_param_file_name
         with open(sim_param_file_path, 'r') as stream:
             try:
                 self.sim_params = yaml.load(stream)
@@ -44,10 +45,10 @@ class Residence(object):
             self.num_shells.append(len(self.relative_energies[-1]) - 2)
         return None
 
-    def traj_shell_wise_residence(self, src_path, traj_index, num_shells):
-        site_indices_data = np.load(f'{src_path}/traj{traj_index}/site_indices.npy')[()]
-        occupancy = np.load(f'{src_path}/traj{traj_index}/occupancy.npy')[()]
-        time = np.load(f'{src_path}/traj{traj_index}/time_data.npy')[()]
+    def traj_shell_wise_residence(self, traj_index, num_shells):
+        site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
+        occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
+        time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
         time_step_data = np.diff(time)
 
         shell_wise_site_count = np.zeros(num_shells+2)
@@ -68,7 +69,7 @@ class Residence(object):
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
         return (relative_residence_data, shell_wise_site_count)
     
-    def shell_wise_residence(self, src_path, n_traj):
+    def shell_wise_residence(self, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = relative_energies[:]
@@ -76,26 +77,26 @@ class Residence(object):
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
                 relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
                 for traj_index in range(n_traj):
-                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(src_path, traj_index+1, self.num_shells[map_index])[0]
-                shell_wise_num_sites = self.traj_shell_wise_residence(src_path, traj_index+1, self.num_shells[map_index])[1]
+                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])[0]
+                shell_wise_num_sites = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])[1]
             
                 exact_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
             
-                np.save(src_path / f'exact_relative_residence_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence)
-                np.save(src_path / f'mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-                np.save(src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+                np.save(self.src_path / f'exact_relative_residence_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence)
+                np.save(self.src_path / f'mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+                np.save(self.src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
     
-    def plot_shell_wise_residence(self, src_path):
+    def plot_shell_wise_residence(self):
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = self.relative_energies[map_index][:]
 
-                exact_relative_residence = np.load(src_path / f'exact_relative_residence_{dopant_element_type}.npy')
-                mean_relative_residence_data = np.load(src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
-                sem_relative_residence_data = np.load(src_path / f'sem_relative_residence_data_{dopant_element_type}.npy')
+                exact_relative_residence = np.load(self.src_path / f'exact_relative_residence_{dopant_element_type}.npy')
+                mean_relative_residence_data = np.load(self.src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
+                sem_relative_residence_data = np.load(self.src_path / f'sem_relative_residence_data_{dopant_element_type}.npy')
             
                 plt.switch_backend('Agg')
                 fig = plt.figure()
@@ -115,5 +116,5 @@ class Residence(object):
                 relative_energy_string = ', '.join(f'{x:.4f} eV' for x in map_index_relative_energies)
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]}: {relative_energy_string}')
                 plt.tight_layout()
-                plt.savefig(str(src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'))
+                plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'))
         return None
