@@ -19,6 +19,26 @@ class Residence(object):
                 print(exc)
 
         self.kBT = constants.KB / constants.EV2J * temp  # kBT in eV
+
+        # doping parameters
+        doping_params = self.sim_params['doping']
+        self.num_dopants = doping_params['num_dopants']
+        self.relative_energies = []
+        self.num_shells = []
+        self.substitution_element_type_list = []
+        substitution_element_type_count = {}
+        self.dopant_element_type_list = []
+        for element_map in doping_params['doping_element_map']:
+            substitution_element_type, dopant_element_type = element_map.split(':')
+            self.substitution_element_type_list.append(substitution_element_type)
+            self.dopant_element_type_list.append(dopant_element_type)
+            if substitution_element_type in substitution_element_type_count:
+                substitution_element_type_count[substitution_element_type] += 1
+            else:
+                substitution_element_type_count[substitution_element_type] = 1
+            count_index = substitution_element_type_count[substitution_element_type] - 1
+            self.relative_energies.append(self.sim_params['relative_energies']['doping'][substitution_element_type][count_index])
+            self.num_shells.append(len(self.relative_energies[-1]) - 1)
         return None
 
     def traj_shell_wise_residence(self, src_path, traj_index):
