@@ -114,7 +114,7 @@ class Residence(object):
                 np.save(src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
     
-    def plot_shell_wise_residence(self, src_path, shell_wise_penalties):
+    def plot_shell_wise_residence(self, src_path):
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 exact_relative_residence = np.load(src_path / f'exact_relative_residence_{dopant_element_type}.npy')
@@ -126,8 +126,7 @@ class Residence(object):
                 ax = fig.add_subplot(111)
             
                 # TODO: Avoid all hard-coding
-                num_shells = len(shell_wise_penalties)
-                shell_index_list = np.arange(num_shells)
+                shell_index_list = np.arange(len(self.relative_energies[map_index]))
                 ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
                          c='#0504aa', mfc='#0504aa', mec='black')
                 ax.errorbar(shell_index_list, mean_relative_residence_data,
