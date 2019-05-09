@@ -93,10 +93,10 @@ class Residence(object):
         return (traj_relative_residence_data, shell_wise_num_sites)
     
     def shell_wise_residence(self, src_path, n_traj):
+        bulk_site_relative_energies = 0.000
         for map_index, relative_energies in enumerate(self.relative_energies):
             if self.num_dopants[map_index]:
                 # append relative energies for bulk sites as 0
-                bulk_site_relative_energies = 0.000
                 relative_energies.append(bulk_site_relative_energies)
 
                 shell_wise_pop_factors = np.exp(- np.asarray(relative_energies) / self.kBT)
@@ -109,9 +109,9 @@ class Residence(object):
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
             
-                np.save(src_path / 'exact_relative_residence.npy', exact_relative_residence)
-                np.save(src_path / 'mean_relative_residence_data.npy', mean_relative_residence_data)
-                np.save(src_path / 'sem_relative_residence_data.npy', sem_relative_residence_data)
+                np.save(src_path / f'exact_relative_residence_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence)
+                np.save(src_path / f'mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+                np.save(src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
     
     def plot_shell_wise_residence(self, src_path, shell_wise_penalties):
