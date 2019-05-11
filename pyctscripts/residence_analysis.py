@@ -20,6 +20,7 @@ class Residence(object):
                 print(exc)
 
         self.kBT = constants.KB / constants.EV2J * temp  # kBT in eV
+        self.num_total_species = np.sum(self.sim_params['species_count'])
 
         # doping parameters
         doping_params = self.sim_params['doping']
@@ -64,7 +65,7 @@ class Residence(object):
 
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
         return (relative_residence_data, shell_wise_site_count)
-    
+
     def shell_wise_residence(self, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
             if self.num_dopants[map_index]:
@@ -83,7 +84,7 @@ class Residence(object):
                 np.save(self.src_path / f'mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
                 np.save(self.src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
-    
+
     def plot_shell_wise_residence(self):
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
