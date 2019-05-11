@@ -59,11 +59,7 @@ class Residence(object):
             else:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
-            for index, site_index in enumerate(shell_wise_site_indices_data):
-                if index == 0:
-                    shell_wise_occupancy_data = np.where(occupancy[:-1] == site_index)[0]
-                else:
-                    shell_wise_occupancy_data = np.hstack((shell_wise_occupancy_data, np.where(occupancy[:-1] == site_index)[0]))
+            shell_wise_occupancy_data = np.in1d(occupancy[:-1], shell_wise_site_indices_data)
             shell_wise_residence_time[shell_index] = np.sum(time_step_data[shell_wise_occupancy_data])
 
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
