@@ -77,8 +77,7 @@ class Residence(object):
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
                 relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
                 for traj_index in range(n_traj):
-                    relative_residence_data[traj_index, :] = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])[0]
-                shell_wise_num_sites = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])[1]
+                    (relative_residence_data[traj_index, :], shell_wise_num_sites) = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])
             
                 exact_relative_residence = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
