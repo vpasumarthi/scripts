@@ -92,6 +92,16 @@ class Residence(object):
                 np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
+    def get_unit_cell_indices(self, site_index):
+        unit_cell_indices = np.zeros(3, int)
+        unit_cell_element_indices = site_index % self.total_elements_per_unit_cell
+        total_filled_unit_cells = ((site_index - unit_cell_element_indices)
+                                   // self.total_elements_per_unit_cell)
+        for index in range(3):
+            unit_cell_indices[index] = total_filled_unit_cells / self.system_size[index+1:].prod()
+            total_filled_unit_cells -= unit_cell_indices[index] * self.system_size[index+1:].prod()
+        return unit_cell_indices
+
     def traj_layer_wise_residence(self, traj_index, shell_wise_pop_factors):
         site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
         occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
