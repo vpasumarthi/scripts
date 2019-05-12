@@ -85,9 +85,9 @@ class Residence(object):
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
             
-                np.save(self.src_path / f'exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence_data)
-                np.save(self.src_path / f'mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-                np.save(self.src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+                np.save(self.src_path / f'shell_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence_data)
+                np.save(self.src_path / f'shell_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+                np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
     def traj_shell_wise_residence(self, traj_index):
