@@ -118,7 +118,7 @@ class Residence(object):
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
             unit_cell_indices = np.zeros(shell_wise_site_indices_data.shape)
             for index, site_index in enumerate(shell_wise_site_indices_data):
-                unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[0]
+                unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[gradient_direction]
             layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
 
         layer_based_pop_factors = np.zeros(num_layers)
