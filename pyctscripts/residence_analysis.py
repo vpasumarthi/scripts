@@ -30,15 +30,15 @@ class Residence(object):
         self.ndim = len(self.sim_params['pbc'])
 
         # doping parameters
-        doping_params = self.sim_params['doping']
-        self.num_dopants = doping_params['num_dopants']
+        self.doping_params = self.sim_params['doping']
+        self.num_dopants = self.doping_params['num_dopants']
         bulk_site_relative_energies = 0.0
         self.relative_energies = []
         self.num_shells = []
         self.substitution_element_type_list = []
         substitution_element_type_count = {}
         self.dopant_element_type_list = []
-        for element_map in doping_params['doping_element_map']:
+        for element_map in self.doping_params['doping_element_map']:
             substitution_element_type, dopant_element_type = element_map.split(':')
             self.substitution_element_type_list.append(substitution_element_type)
             self.dopant_element_type_list.append(dopant_element_type)
