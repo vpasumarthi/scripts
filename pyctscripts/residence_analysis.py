@@ -92,7 +92,7 @@ class Residence(object):
                 np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
-    def traj_shell_wise_residence(self, traj_index, shell_wise_pop_factors):
+    def traj_layer_wise_residence(self, traj_index, shell_wise_pop_factors):
         return None
 
     def layer_wise_residence(self, n_traj):
