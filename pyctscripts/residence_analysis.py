@@ -123,12 +123,12 @@ class Residence(object):
         layer_based_pop_factors = np.zeros(num_layers)
         for layer_index in range(num_layers):
             layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
-        abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
+        exact_relative_residence_data = layer_based_pop_factors / np.sum(layer_based_pop_factors)
 
         occupancy_unit_cell_indices = self.get_unit_cell_indices(occupancy[:-1])[gradient_direction]
         layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
-        return (traj_relative_residence_data, abs_relative_residence)
+        return (traj_relative_residence_data, exact_relative_residence_data)
 
     def layer_wise_residence(self, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
