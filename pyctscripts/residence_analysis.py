@@ -60,9 +60,9 @@ class Residence(object):
         shell_wise_residence_time = np.zeros(num_shells+2)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] > shell_index - 1][:, 0]
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] > shell_index - 1][:, 0]
             else:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] == shell_index][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
             shell_wise_occupancy_data = np.isin(occupancy[:-1], shell_wise_site_indices_data)
             # NOTE: conslidating shell residence time of all species
@@ -114,9 +114,9 @@ class Residence(object):
         bin_edges = np.append(np.array([0]), bin_edges)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] > shell_index - 1][:, 0]
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] > shell_index - 1][:, 0]
             else:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] == shell_index][:, 0]
             unit_cell_indices = self.get_unit_cell_indices(shell_wise_site_indices_data)[gradient_direction]
             layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
 
