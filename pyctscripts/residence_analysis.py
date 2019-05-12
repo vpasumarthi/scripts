@@ -93,7 +93,36 @@ class Residence(object):
         return None
 
     def traj_layer_wise_residence(self, traj_index, shell_wise_pop_factors):
-        return None
+        site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
+        occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
+        time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
+        time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
+
+        num_shells = len(shell_wise_pop_factors) - 2
+        layer_shell_wise_num_sites = np.zeros((self.num_steps, num_shells+2))
+        bin_edges = np.cumsum(self.step_length_ratio) * self.system_size[self.gradient_direction] / np.sum(self.step_length_ratio)
+        bin_edges = np.append(np.array([0]), bin_edges)
+        for shell_index in range(num_shells+2):
+            if shell_index == num_shells + 1:
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] > shell_index - 1][:, 0]
+            else:
+                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
+            unit_cell_indices = np.zeros(shell_wise_site_indices_data.shape)
+            for index, site_index in enumerate(shell_wise_site_indices_data):
+                unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[0]
+            layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
+
+        layer_based_pop_factors = np.zeros(self.num_steps)
+        for layer_index in range(self.num_steps):
+            layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
+        abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
+            
+        occupancy_unit_cell_indices = np.zeros(len(occupancy[:-1]))
+        for index, site_index in enumerate(occupancy[:-1]):
+            occupancy_unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[self.gradient_direction]
+        layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
+        traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
+        return (traj_relative_residence_data, abs_relative_residence)
 
     def layer_wise_residence(self, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
