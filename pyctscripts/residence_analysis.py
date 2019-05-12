@@ -24,8 +24,8 @@ class Residence(object):
         self.species_count = self.sim_params['species_count']
         self.num_total_species = np.sum(self.species_count)
         self.system_size = np.asarray(self.sim_params['system_size'])
-        self.step_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
-        self.num_steps = len(self.step_length_ratio)
+        self.layer_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
+        self.num_layers = len(self.layer_length_ratio)
         self.gradient_direction = self.sim_params['doping']['gradient']['ld']
 
         # doping parameters
@@ -99,8 +99,8 @@ class Residence(object):
         time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
 
         num_shells = len(shell_wise_pop_factors) - 2
-        layer_shell_wise_num_sites = np.zeros((self.num_steps, num_shells+2))
-        bin_edges = np.cumsum(self.step_length_ratio) * self.system_size[self.gradient_direction] / np.sum(self.step_length_ratio)
+        layer_shell_wise_num_sites = np.zeros((self.num_layers, num_shells+2))
+        bin_edges = np.cumsum(self.layer_length_ratio) * self.system_size[self.gradient_direction] / np.sum(self.layer_length_ratio)
         bin_edges = np.append(np.array([0]), bin_edges)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
@@ -112,8 +112,8 @@ class Residence(object):
                 unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[0]
             layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
 
-        layer_based_pop_factors = np.zeros(self.num_steps)
-        for layer_index in range(self.num_steps):
+        layer_based_pop_factors = np.zeros(self.num_layers)
+        for layer_index in range(self.num_layers):
             layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
         abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
             
@@ -129,8 +129,8 @@ class Residence(object):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = relative_energies[:]
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
-                relative_residence_data = np.zeros((n_traj, self.num_steps))
-                exact_relative_residence_data = np.zeros((n_traj, self.num_steps))
+                relative_residence_data = np.zeros((n_traj, self.num_layers))
+                exact_relative_residence_data = np.zeros((n_traj, self.num_layers))
                 for traj_index in range(n_traj):
                     (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, shell_wise_pop_factors)
             
