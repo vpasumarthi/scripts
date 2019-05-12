@@ -287,8 +287,14 @@ class Residence(object):
                     ax2.errorbar(layer_index_list, mean_percent_deviation,
                                  yerr=sem_percent_deviation, fmt='o', capsize=3,
                                  c='#0504aa', mfc='none', mec='none')
-                    ax2.set_xlabel('Layer Index')
-                    ax2.set_ylabel('Relative Residence Deviation (%)')
+
+                    x_ticks = np.arange(num_layers)
+                    x_tick_labels = [str(tick) for tick in x_ticks]
+                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+                    plt.yticks(fontsize=label_size)
+
+                    ax2.set_xlabel('Layer Index', fontsize=font_size)
+                    ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
                     ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers}', fontsize=title_size)
                     plt.tight_layout()
                     plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{dopant_element_type}.png'), dpi=figure_dpi)
