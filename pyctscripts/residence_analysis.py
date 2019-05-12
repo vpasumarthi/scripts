@@ -129,7 +129,8 @@ class Residence(object):
         occupancy_unit_cell_indices = np.zeros(len(occupancy[:-1]))
         for index, site_index in enumerate(occupancy[:-1]):
             occupancy_unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[gradient_direction]
-        layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
+        # NOTE: used time_step_data[:, 0] applicable only to single species simulations
+        layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data[:, 0])[0]
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return (traj_relative_residence_data, abs_relative_residence)
 
