@@ -90,10 +90,35 @@ class Residence(object):
                 np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
-    def traj_shell_wise_residence(self, traj_index):
+    def traj_shell_wise_residence(self, traj_index, total_elements_per_unit_cell, shell_wise_pop_factors):
         return None
 
-    def layer_wise_residence(self, n_traj):
+    def layer_wise_residence(self, total_elements_per_unit_cell, n_traj):
+        for map_index, relative_energies in enumerate(self.relative_energies):
+            num_steps = len(self.step_length_ratio)
+            if self.num_dopants[map_index]:
+                map_index_relative_energies = relative_energies[:]
+                shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
+                relative_residence_data = np.zeros((n_traj, num_steps))
+                exact_relative_residence_data = np.zeros((n_traj, num_steps))
+                for traj_index in range(n_traj):
+                    (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, total_elements_per_unit_cell, shell_wise_pop_factors)
+            
+                mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
+                sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
+                mean_exact_relative_residence_data = np.mean(exact_relative_residence_data, axis=0)
+                sem_exact_relative_residence_data = np.std(exact_relative_residence_data, axis=0) / np.sqrt(n_traj)
+
+                percent_deviation = np.divide((exact_relative_residence_data - relative_residence_data), exact_relative_residence_data) * 100
+                mean_percent_deviation = np.mean(percent_deviation, axis=0)
+                sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
+
+                np.save(self.src_path / f'layer_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+                np.save(self.src_path / f'layer_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+                np.save(self.src_path / f'layer_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
+                np.save(self.src_path / f'layer_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
+                np.save(self.src_path / f'layer_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
+                np.save(self.src_path / f'layer_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
