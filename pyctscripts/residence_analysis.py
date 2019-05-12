@@ -90,6 +90,12 @@ class Residence(object):
                 np.save(self.src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
+    def traj_shell_wise_residence(self, traj_index):
+        return None
+
+    def layer_wise_residence(self, n_traj):
+        return None
+
     def plot_shell_wise_residence(self, show_exact):
         # Plot specifications
         figure_dpi = 600
@@ -144,4 +150,7 @@ class Residence(object):
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}', fontsize=title_size)
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
+        return None
+
+    def plot_layer_wise_residence(self, show_exact):
         return None
