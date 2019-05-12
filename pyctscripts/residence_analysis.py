@@ -27,6 +27,7 @@ class Residence(object):
         self.layer_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
         self.num_layers = len(self.layer_length_ratio)
         self.gradient_direction = self.sim_params['doping']['gradient']['ld']
+        self.ndim = len(self.sim_params['pbc'])
 
         # doping parameters
         doping_params = self.sim_params['doping']
@@ -93,11 +94,11 @@ class Residence(object):
         return None
 
     def get_unit_cell_indices(self, site_index):
-        unit_cell_indices = np.zeros(3, int)
+        unit_cell_indices = np.zeros(self.ndim, int)
         unit_cell_element_indices = site_index % self.total_elements_per_unit_cell
         total_filled_unit_cells = ((site_index - unit_cell_element_indices)
                                    // self.total_elements_per_unit_cell)
-        for index in range(3):
+        for index in range(self.ndim):
             unit_cell_indices[index] = total_filled_unit_cells / self.system_size[index+1:].prod()
             total_filled_unit_cells -= unit_cell_indices[index] * self.system_size[index+1:].prod()
         return unit_cell_indices
