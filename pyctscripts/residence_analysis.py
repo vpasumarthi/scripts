@@ -50,7 +50,7 @@ class Residence(object):
         site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
         occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
         time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
-        time_step_data = np.diff(time)
+        time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
 
         shell_wise_site_count = np.zeros(num_shells+2)
         shell_wise_residence_time = np.zeros(num_shells+2)
@@ -60,7 +60,7 @@ class Residence(object):
             else:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
-            shell_wise_occupancy_data = np.in1d(occupancy[:-1], shell_wise_site_indices_data)
+            shell_wise_occupancy_data = np.isin(occupancy[:-1], shell_wise_site_indices_data)
             shell_wise_residence_time[shell_index] = np.sum(time_step_data[shell_wise_occupancy_data])
 
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
