@@ -22,6 +22,9 @@ class Residence(object):
         self.kBT = constants.KB / constants.EV2J * temp  # kBT in eV
         self.species_count = self.sim_params['species_count']
         self.num_total_species = np.sum(self.species_count)
+        self.system_size = np.asarray(self.sim_params['system_size'])
+        self.step_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
+        self.gradient_direction = self.sim_params['doping']['gradient']['ld']
 
         # doping parameters
         doping_params = self.sim_params['doping']
