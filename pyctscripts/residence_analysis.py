@@ -61,6 +61,7 @@ class Residence(object):
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
             shell_wise_occupancy_data = np.isin(occupancy[:-1], shell_wise_site_indices_data)
+            # NOTE: conslidating shell residence time of all species
             shell_wise_residence_time[shell_index] = np.sum(time_step_data[shell_wise_occupancy_data])
 
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
