@@ -88,6 +88,9 @@ class Residence(object):
         return None
 
     def plot_shell_wise_residence(self, show_exact):
+        # plot specifications
+        figure_dpi = 600
+
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = self.relative_energies[map_index][:]
@@ -126,5 +129,5 @@ class Residence(object):
                 ax.set_ylabel('Relative Residence')
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}')
                 plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'))
+                plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
