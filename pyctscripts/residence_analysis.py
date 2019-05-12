@@ -87,13 +87,15 @@ class Residence(object):
                 np.save(self.src_path / f'sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
-    def plot_shell_wise_residence(self):
+    def plot_shell_wise_residence(self, show_exact):
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = self.relative_energies[map_index][:]
                 num_shells = len(map_index_relative_energies) - 2
 
-                exact_relative_residence = np.load(self.src_path / f'exact_relative_residence_{dopant_element_type}.npy')
+                # show exact relative residence values for single species
+                if show_exact:
+                    exact_relative_residence = np.load(self.src_path / f'exact_relative_residence_{dopant_element_type}.npy')
                 mean_relative_residence_data = np.load(self.src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
                 sem_relative_residence_data = np.load(self.src_path / f'sem_relative_residence_data_{dopant_element_type}.npy')
             
@@ -107,9 +109,10 @@ class Residence(object):
                 ax.errorbar(shell_index_list, mean_relative_residence_data,
                              yerr=sem_relative_residence_data, fmt='o', capsize=3,
                              c='#0504aa', mfc='none', mec='none')
-                for shell_index in shell_index_list:
-                    ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
-                             '-', c='#d62728')
+                if show_exact:
+                    for shell_index in shell_index_list:
+                        ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
+                                 '-', c='#d62728')
                 ax.set_xlabel('Shell Index')
                 ax.set_ylabel('Relative Residence')
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}')
