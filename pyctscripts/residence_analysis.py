@@ -24,9 +24,6 @@ class Residence(object):
         self.species_count = self.sim_params['species_count']
         self.num_total_species = np.sum(self.species_count)
         self.system_size = np.asarray(self.sim_params['system_size'])
-        self.layer_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
-        self.num_layers = len(self.layer_length_ratio)
-        self.gradient_direction = self.sim_params['doping']['gradient']['ld']
         self.ndim = len(self.sim_params['pbc'])
 
         # doping parameters
