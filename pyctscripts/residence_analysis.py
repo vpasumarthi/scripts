@@ -20,7 +20,8 @@ class Residence(object):
                 print(exc)
 
         self.kBT = constants.KB / constants.EV2J * temp  # kBT in eV
-        self.num_total_species = np.sum(self.sim_params['species_count'])
+        self.species_count = self.sim_params['species_count']
+        self.num_total_species = np.sum(self.species_count)
 
         # doping parameters
         doping_params = self.sim_params['doping']
@@ -90,6 +91,7 @@ class Residence(object):
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = self.relative_energies[map_index][:]
+                num_shells = len(map_index_relative_energies) - 2
 
                 exact_relative_residence = np.load(self.src_path / f'exact_relative_residence_{dopant_element_type}.npy')
                 mean_relative_residence_data = np.load(self.src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
@@ -110,8 +112,7 @@ class Residence(object):
                              '-', c='#d62728')
                 ax.set_xlabel('Shell Index')
                 ax.set_ylabel('Relative Residence')
-                relative_energy_string = ', '.join(f'{x:.4f} eV' for x in map_index_relative_energies)
-                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]}: {relative_energy_string}')
+                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}')
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'))
         return None
