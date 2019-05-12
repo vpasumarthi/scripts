@@ -105,14 +105,20 @@ class Residence(object):
             
                 shell_index_list = np.arange(len(self.relative_energies[map_index]))
                 ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
-                         c='#0504aa', mfc='#0504aa', mec='black')
+                         c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
                 ax.errorbar(shell_index_list, mean_relative_residence_data,
                              yerr=sem_relative_residence_data, fmt='o', capsize=3,
                              c='#0504aa', mfc='none', mec='none')
                 if show_exact:
                     for shell_index in shell_index_list:
-                        ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
-                                 '-', c='#d62728')
+                        if shell_index == shell_index_list[0]:
+                            ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
+                                     '-', c='#d62728', label='exact')
+                        else:
+                            ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
+                                     '-', c='#d62728')
+
+                ax.legend()
                 ax.set_xlabel('Shell Index')
                 ax.set_ylabel('Relative Residence')
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}')
