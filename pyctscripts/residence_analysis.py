@@ -90,10 +90,11 @@ class Residence(object):
                 np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
         return None
 
-    def get_unit_cell_indices(self, site_index):
-        unit_cell_indices = np.zeros(self.ndim, int)
-        unit_cell_element_indices = site_index % self.total_elements_per_unit_cell
-        total_filled_unit_cells = ((site_index - unit_cell_element_indices)
+    def get_unit_cell_indices(self, site_indices):
+        unit_cell_indices_shape = np.append(self.ndim, site_indices.shape)
+        unit_cell_indices = np.zeros(unit_cell_indices_shape, int)
+        unit_cell_element_indices = site_indices % self.total_elements_per_unit_cell
+        total_filled_unit_cells = ((site_indices - unit_cell_element_indices)
                                    // self.total_elements_per_unit_cell)
         for index in range(self.ndim):
             unit_cell_indices[index] = total_filled_unit_cells / self.system_size[index+1:].prod()
@@ -116,9 +117,7 @@ class Residence(object):
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] > shell_index - 1][:, 0]
             else:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 2] == shell_index][:, 0]
-            unit_cell_indices = np.zeros(shell_wise_site_indices_data.shape)
-            for index, site_index in enumerate(shell_wise_site_indices_data):
-                unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[gradient_direction]
+            unit_cell_indices = self.get_unit_cell_indices(shell_wise_site_indices_data)[gradient_direction]
             layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
 
         layer_based_pop_factors = np.zeros(num_layers)
@@ -126,11 +125,7 @@ class Residence(object):
             layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
         abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
 
-        occupancy_unit_cell_indices = np.zeros(occupancy[:-1].shape)
-        for index1, site_indices in enumerate(occupancy[:-1]):
-            for index2, site_index in enumerate(site_indices):
-                occupancy_unit_cell_indices[index1, index2] = self.get_unit_cell_indices(site_index)[gradient_direction]
-
+        occupancy_unit_cell_indices = self.get_unit_cell_indices(occupancy[:-1])[gradient_direction]
         layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return (traj_relative_residence_data, abs_relative_residence)
