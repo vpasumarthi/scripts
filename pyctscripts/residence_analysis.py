@@ -118,6 +118,9 @@ class Residence(object):
                             ax.plot([shell_index - 0.1, shell_index + 0.1], [exact_relative_residence[shell_index]] * 2,
                                      '-', c='#d62728')
 
+                x_ticks = np.arange(num_shells+2)
+                x_tick_labels = [str(tick) for tick in x_ticks]
+                plt.xticks(x_ticks, x_tick_labels)
                 ax.legend()
                 ax.set_xlabel('Shell Index')
                 ax.set_ylabel('Relative Residence')
