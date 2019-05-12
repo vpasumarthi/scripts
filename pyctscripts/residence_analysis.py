@@ -24,6 +24,7 @@ class Residence(object):
         self.num_total_species = np.sum(self.species_count)
         self.system_size = np.asarray(self.sim_params['system_size'])
         self.step_length_ratio = np.asarray(self.sim_params['doping']['step_length_ratio'])
+        self.num_steps = len(self.step_length_ratio)
         self.gradient_direction = self.sim_params['doping']['gradient']['ld']
 
         # doping parameters
@@ -95,12 +96,11 @@ class Residence(object):
 
     def layer_wise_residence(self, total_elements_per_unit_cell, n_traj):
         for map_index, relative_energies in enumerate(self.relative_energies):
-            num_steps = len(self.step_length_ratio)
             if self.num_dopants[map_index]:
                 map_index_relative_energies = relative_energies[:]
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
-                relative_residence_data = np.zeros((n_traj, num_steps))
-                exact_relative_residence_data = np.zeros((n_traj, num_steps))
+                relative_residence_data = np.zeros((n_traj, self.num_steps))
+                exact_relative_residence_data = np.zeros((n_traj, self.num_steps))
                 for traj_index in range(n_traj):
                     (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, total_elements_per_unit_cell, shell_wise_pop_factors)
             
