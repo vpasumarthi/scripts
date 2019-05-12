@@ -125,14 +125,13 @@ class Residence(object):
         for layer_index in range(num_layers):
             layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
         abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
-            
+
         occupancy_unit_cell_indices = np.zeros(occupancy[:-1].shape)
         for index1, site_indices in enumerate(occupancy[:-1]):
             for index2, site_index in enumerate(site_indices):
                 occupancy_unit_cell_indices[index1, index2] = self.get_unit_cell_indices(site_index)[gradient_direction]
 
-        # NOTE: used time_step_data[:, 0] applicable only to single species simulations
-        layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data[:, 0])[0]
+        layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return (traj_relative_residence_data, abs_relative_residence)
 
