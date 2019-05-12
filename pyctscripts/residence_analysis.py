@@ -100,15 +100,16 @@ class Residence(object):
             total_filled_unit_cells -= unit_cell_indices[index] * self.system_size[index+1:].prod()
         return unit_cell_indices
 
-    def traj_layer_wise_residence(self, traj_index, shell_wise_pop_factors):
+    def traj_layer_wise_residence(self, traj_index, shell_wise_pop_factors, layer_length_ratio, gradient_direction):
         site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
         occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
         time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
         time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
 
         num_shells = len(shell_wise_pop_factors) - 2
-        layer_shell_wise_num_sites = np.zeros((self.num_layers, num_shells+2))
-        bin_edges = np.cumsum(self.layer_length_ratio) * self.system_size[self.gradient_direction] / np.sum(self.layer_length_ratio)
+        num_layers = len(layer_length_ratio)
+        layer_shell_wise_num_sites = np.zeros((num_layers, num_shells+2))
+        bin_edges = np.cumsum(layer_length_ratio) * self.system_size[gradient_direction] / np.sum(layer_length_ratio)
         bin_edges = np.append(np.array([0]), bin_edges)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
@@ -120,14 +121,14 @@ class Residence(object):
                 unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[0]
             layer_shell_wise_num_sites[:, shell_index] = np.histogram(unit_cell_indices, bin_edges)[0]
 
-        layer_based_pop_factors = np.zeros(self.num_layers)
-        for layer_index in range(self.num_layers):
+        layer_based_pop_factors = np.zeros(num_layers)
+        for layer_index in range(num_layers):
             layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
         abs_relative_residence = layer_based_pop_factors / np.sum(layer_based_pop_factors)
             
         occupancy_unit_cell_indices = np.zeros(len(occupancy[:-1]))
         for index, site_index in enumerate(occupancy[:-1]):
-            occupancy_unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[self.gradient_direction]
+            occupancy_unit_cell_indices[index] = self.get_unit_cell_indices(site_index)[gradient_direction]
         layer_wise_residence = np.histogram(occupancy_unit_cell_indices, bin_edges, weights=time_step_data)[0]
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return (traj_relative_residence_data, abs_relative_residence)
@@ -137,10 +138,13 @@ class Residence(object):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = relative_energies[:]
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
-                relative_residence_data = np.zeros((n_traj, self.num_layers))
-                exact_relative_residence_data = np.zeros((n_traj, self.num_layers))
+                layer_length_ratio = self.doping_params['gradient'][map_index]['step_length_ratio']
+                num_layers = len(layer_length_ratio)
+                gradient_direction = self.doping_params['gradient'][map_index]['ld']
+                relative_residence_data = np.zeros((n_traj, num_layers))
+                exact_relative_residence_data = np.zeros((n_traj, num_layers))
                 for traj_index in range(n_traj):
-                    (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, shell_wise_pop_factors)
+                    (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, shell_wise_pop_factors, layer_length_ratio, gradient_direction)
             
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
