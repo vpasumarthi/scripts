@@ -175,12 +175,12 @@ class Residence(object):
                 mean_percent_deviation = np.mean(percent_deviation, axis=0)
                 sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
 
-                np.save(self.src_path / f'layer_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-                np.save(self.src_path / f'layer_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
-                np.save(self.src_path / f'layer_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
-                np.save(self.src_path / f'layer_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
-                np.save(self.src_path / f'layer_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
-                np.save(self.src_path / f'layer_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
+                np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+                np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+                np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
+                np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
+                np.save(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
+                np.save(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
@@ -239,7 +239,7 @@ class Residence(object):
                 plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
 
-    def plot_layer_wise_residence(self, show_exact):
+    def plot_layer_wise_residence(self, interface, show_exact):
         # Plot specifications
         figure_dpi = 600
 
@@ -257,15 +257,15 @@ class Residence(object):
                 map_index_relative_energies = self.relative_energies[map_index][:]
                 num_shells = len(map_index_relative_energies) - 2
 
-                mean_relative_residence_data = np.load(self.src_path / f'layer_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                sem_relative_residence_data = np.load(self.src_path / f'layer_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
 
                 # show exact relative residence values for single species
                 if show_exact:
-                    mean_exact_relative_residence_data = np.load(self.src_path / f'layer_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                    sem_exact_relative_residence_data = np.load(self.src_path / f'layer_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                    mean_percent_deviation = np.load(self.src_path / f'layer_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
-                    sem_percent_deviation = np.load(self.src_path / f'layer_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
+                    mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                    sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                    mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
+                    sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
 
                 plt.switch_backend('Agg')
                 fig = plt.figure()
@@ -294,9 +294,9 @@ class Residence(object):
                 ax.legend(fontsize=label_size)
                 ax.set_xlabel('Layer Index', fontsize=font_size)
                 ax.set_ylabel('Relative Residence', fontsize=font_size)
-                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers}', fontsize=title_size)
+                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                 plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{dopant_element_type}.png'), dpi=figure_dpi)
+                plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
                 
                 if show_exact:
                     fig2 = plt.figure()
@@ -314,7 +314,7 @@ class Residence(object):
 
                     ax2.set_xlabel('Layer Index', fontsize=font_size)
                     ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-                    ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers}', fontsize=title_size)
+                    ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                     plt.tight_layout()
-                    plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{dopant_element_type}.png'), dpi=figure_dpi)
+                    plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
