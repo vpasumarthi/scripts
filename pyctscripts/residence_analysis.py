@@ -281,7 +281,7 @@ class Residence(object):
                              c='#0504aa', mfc='none', mec='none')
                 if show_exact:
                     ax.plot(layer_index_list, mean_exact_relative_residence_data, 'o-',
-                             c='#d62728', mfc='#d62728', mec='black', label='prediction')
+                             c='#d62728', mfc='#d62728', mec='black', label='prediction (1 species)')
                     ax.errorbar(layer_index_list, mean_exact_relative_residence_data,
                                  yerr=sem_exact_relative_residence_data, fmt='o', capsize=3,
                                  c='#d62728', mfc='none', mec='none')
