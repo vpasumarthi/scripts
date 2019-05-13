@@ -112,7 +112,6 @@ class Residence(object):
         layer_wise_shell_site_indices = np.empty(shape=(num_layers, num_shells+2), dtype=object)
         bin_edges = np.cumsum(layer_length_ratio) * self.system_size[gradient_direction] / np.sum(layer_length_ratio)
         bin_edges = np.append(np.array([0]), bin_edges)
-        layer_shell_wise_num_sites = np.zeros((num_layers, num_shells+2))
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] > shell_index - 1][:, 0]
@@ -122,20 +121,22 @@ class Residence(object):
                 unit_cell_indices = self.get_unit_cell_indices(shell_wise_site_indices_data)[gradient_direction]
                 for layer_index in range(num_layers):
                     layer_wise_shell_site_indices[layer_index, shell_index] = shell_wise_site_indices_data[(unit_cell_indices >= bin_edges[layer_index]) & (unit_cell_indices < bin_edges[layer_index+1])]
-                    layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
             elif interface =='bumpy':
                 if shell_index == 0 or shell_index == num_shells+1:
                     unit_cell_indices = self.get_unit_cell_indices(shell_wise_site_indices_data)[gradient_direction]
                     for layer_index in range(num_layers):
                         layer_wise_shell_site_indices[layer_index, shell_index] = shell_wise_site_indices_data[(unit_cell_indices >= bin_edges[layer_index]) & (unit_cell_indices < bin_edges[layer_index+1])]
-                        layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
                 else:
                     dopant_site_shell_index = 0
                     for layer_index in range(num_layers):
                         dopant_site_indices = np.isin(site_indices_data[:, 0], layer_wise_shell_site_indices[layer_index, dopant_site_shell_index])
                         dopant_element_indices = site_indices_data[dopant_site_indices, 2]
                         layer_wise_shell_site_indices[layer_index, shell_index] = site_indices_data[:, 0][np.isin(site_indices_data[:, 1], map_index) & np.isin(site_indices_data[:, 2], dopant_element_indices) & np.isin(site_indices_data[:, 3], shell_index)]
-                        layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
+
+        layer_shell_wise_num_sites = np.zeros((num_layers, num_shells+2))
+        for layer_index in range(num_layers):
+            for shell_index in range(num_shells+2):
+                layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
 
         layer_wise_site_indices = np.empty(num_layers, dtype=object)
         for layer_index in range(num_layers):
