@@ -204,9 +204,9 @@ class Residence(object):
 
                 # show exact relative residence values for single species
                 if show_exact:
-                    exact_relative_residence = np.load(self.src_path / f'exact_relative_residence_{dopant_element_type}.npy')
-                mean_relative_residence_data = np.load(self.src_path / f'mean_relative_residence_data_{dopant_element_type}.npy')
-                sem_relative_residence_data = np.load(self.src_path / f'sem_relative_residence_data_{dopant_element_type}.npy')
+                    exact_relative_residence = np.load(self.src_path / f'shell_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                mean_relative_residence_data = np.load(self.src_path / f'shell_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                sem_relative_residence_data = np.load(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
             
                 plt.switch_backend('Agg')
                 fig = plt.figure()
