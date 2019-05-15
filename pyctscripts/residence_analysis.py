@@ -148,8 +148,9 @@ class Residence(object):
         exact_relative_residence_data = layer_based_pop_factors / np.sum(layer_based_pop_factors)
 
         layer_wise_residence = np.zeros(num_layers)
+        occupant_site_wise_residence = np.bincount(occupancy[:-1].reshape(-1), time_step_data.reshape(-1))
         for layer_index in range(num_layers):
-            layer_wise_residence[layer_index] = np.sum(time_step_data[np.isin(occupancy[:-1], layer_wise_site_indices[layer_index])])
+            layer_wise_residence[layer_index] = occupant_site_wise_residence[np.unique(layer_wise_site_indices[layer_index])].sum()
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return (traj_relative_residence_data, exact_relative_residence_data)
 
