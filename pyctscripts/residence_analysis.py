@@ -139,8 +139,10 @@ class Residence(object):
                 layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
 
         layer_wise_site_indices = np.empty(num_layers, dtype=object)
+        layer_wise_num_sites = np.zeros(num_layers, int)
         for layer_index in range(num_layers):
             layer_wise_site_indices[layer_index] = np.hstack(layer_wise_shell_site_indices[layer_index])
+            layer_wise_num_sites[layer_index] = len(layer_wise_site_indices[layer_index])
 
         layer_based_pop_factors = np.zeros(num_layers)
         for layer_index in range(num_layers):
@@ -153,7 +155,7 @@ class Residence(object):
         for layer_index in range(num_layers):
             layer_wise_residence[layer_index] = occupant_site_wise_residence[np.unique(layer_wise_site_indices[layer_index])].sum()
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
-        return (traj_relative_residence_data, exact_relative_residence_data)
+        return (traj_relative_residence_data, exact_relative_residence_data, layer_wise_num_sites)
 
     def layer_wise_residence(self, n_traj, interface):
         for map_index, relative_energies in enumerate(self.relative_energies):
@@ -165,8 +167,9 @@ class Residence(object):
                 gradient_direction = self.doping_params['gradient'][map_index]['ld']
                 relative_residence_data = np.zeros((n_traj, num_layers))
                 exact_relative_residence_data = np.zeros((n_traj, num_layers))
+                layer_wise_num_sites_data = np.zeros((n_traj, num_layers))
                 for traj_index in range(n_traj):
-                    (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, map_index, interface, shell_wise_pop_factors, layer_length_ratio, gradient_direction)
+                    (relative_residence_data[traj_index, :], exact_relative_residence_data[traj_index, :], layer_wise_num_sites_data[traj_index, :]) = self.traj_layer_wise_residence(traj_index+1, map_index, interface, shell_wise_pop_factors, layer_length_ratio, gradient_direction)
             
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
@@ -177,12 +180,17 @@ class Residence(object):
                 mean_percent_deviation = np.mean(percent_deviation, axis=0)
                 sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
 
+                mean_layer_wise_num_sites_data = np.mean(layer_wise_num_sites_data, axis=0)
+                sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
+
                 np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
                 np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
                 np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
                 np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
                 np.save(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
                 np.save(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
+                np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', mean_layer_wise_num_sites_data)
+                np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', sem_layer_wise_num_sites_data)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
@@ -262,6 +270,9 @@ class Residence(object):
                 mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
                 sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
 
+                mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy')
+                sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy')
+
                 # show exact relative residence values for single species
                 if show_exact:
                     mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
@@ -299,7 +310,29 @@ class Residence(object):
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
-                
+
+                # Layer-wise number of sites
+                fig3 = plt.figure()
+                ax3 = fig3.add_subplot(111)
+
+                ax.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
+                         c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+                ax.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
+                             yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
+                             c='#0504aa', mfc='none', mec='none')
+
+                x_ticks = np.arange(num_layers)
+                x_tick_labels = [str(tick) for tick in x_ticks]
+                plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+                plt.yticks(fontsize=label_size)
+
+                ax.legend(fontsize=label_size)
+                ax.set_xlabel('Layer Index', fontsize=font_size)
+                ax.set_ylabel('Number of accessible sites', fontsize=font_size)
+                ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                plt.tight_layout()
+                plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
+
                 if show_exact:
                     fig2 = plt.figure()
                     ax2 = fig2.add_subplot(111)
