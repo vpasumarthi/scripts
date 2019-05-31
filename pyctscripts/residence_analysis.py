@@ -250,7 +250,7 @@ class Residence(object):
                 plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
 
-    def plot_layer_wise_residence(self, interface, show_exact, plot_accessible_sites):
+    def plot_layer_wise_residence(self, interface, show_exact, plot_num_accessible_sites):
         # Plot specifications
         figure_dpi = 600
 
@@ -312,7 +312,7 @@ class Residence(object):
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
 
-                if plot_accessible_sites:
+                if plot_num_accessible_sites:
                     # Layer-wise number of sites
                     fig2 = plt.figure()
                     ax2 = fig2.add_subplot(111)
