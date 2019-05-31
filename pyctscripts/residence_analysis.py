@@ -249,7 +249,7 @@ class Residence(object):
                 plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
 
-    def plot_layer_wise_residence(self, interface, show_exact):
+    def plot_layer_wise_residence(self, interface, show_exact, plot_accessible_sites):
         # Plot specifications
         figure_dpi = 600
 
@@ -311,27 +311,28 @@ class Residence(object):
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
 
-                # Layer-wise number of sites
-                fig2 = plt.figure()
-                ax2 = fig2.add_subplot(111)
-
-                ax2.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
-                         c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-                ax2.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
-                             yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
-                             c='#0504aa', mfc='none', mec='none')
-
-                x_ticks = np.arange(num_layers)
-                x_tick_labels = [str(tick) for tick in x_ticks]
-                plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-                plt.yticks(fontsize=label_size)
-
-                ax2.legend(fontsize=label_size)
-                ax2.set_xlabel('Layer Index', fontsize=font_size)
-                ax2.set_ylabel('Number of accessible sites', fontsize=font_size)
-                ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-                plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
+                if plot_accessible_sites:
+                    # Layer-wise number of sites
+                    fig2 = plt.figure()
+                    ax2 = fig2.add_subplot(111)
+    
+                    ax2.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
+                             c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+                    ax2.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
+                                 yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
+                                 c='#0504aa', mfc='none', mec='none')
+    
+                    x_ticks = np.arange(num_layers)
+                    x_tick_labels = [str(tick) for tick in x_ticks]
+                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+                    plt.yticks(fontsize=label_size)
+    
+                    ax2.legend(fontsize=label_size)
+                    ax2.set_xlabel('Layer Index', fontsize=font_size)
+                    ax2.set_ylabel('Number of accessible sites', fontsize=font_size)
+                    ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                    plt.tight_layout()
+                    plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
 
                 if show_exact:
                     fig3 = plt.figure()
