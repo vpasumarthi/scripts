@@ -151,12 +151,12 @@ class Residence(object):
         exact_relative_residence_data = layer_based_pop_factors / np.sum(layer_based_pop_factors)
         return exact_relative_residence_data
 
-    def traj_layer_wise_residence(self, traj_index, layer_wise_shell_site_indices, site_indices_data, layer_wise_site_indices):
+    def traj_layer_wise_residence(self, traj_index, site_indices_data, layer_wise_site_indices):
         occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
         time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
         time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
 
-        num_layers = len(layer_wise_shell_site_indices)
+        num_layers = len(layer_wise_site_indices)
         layer_wise_residence = np.zeros(num_layers)
         MINBINS = site_indices_data[-1, 0] + 1
         occupant_site_wise_residence = np.bincount(occupancy[:-1].reshape(-1), time_step_data.reshape(-1), MINBINS)
@@ -179,7 +179,7 @@ class Residence(object):
                 for traj_index in range(n_traj):
                     (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index, :], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, map_index, interface, shell_wise_pop_factors, layer_length_ratio, gradient_direction)
                     exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices, shell_wise_pop_factors)
-                    relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, layer_wise_shell_site_indices, site_indices_data, layer_wise_site_indices)
+                    relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
             
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
