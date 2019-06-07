@@ -178,42 +178,35 @@ class Residence(object):
         num_layers = len(layer_length_ratio)
         gradient_direction = self.doping_params['gradient'][sample_existing_map_index]['ld']
 
-        for map_index, relative_energies in enumerate(self.relative_energies):
-            if self.num_dopants[map_index]:
-                map_index_relative_energies = relative_energies[:]
-                shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
-                layer_length_ratio = self.doping_params['gradient'][map_index]['step_length_ratio']
-                num_layers = len(layer_length_ratio)
-                gradient_direction = self.doping_params['gradient'][map_index]['ld']
-                relative_residence_data = np.zeros((n_traj, num_layers))
-                exact_relative_residence_data = np.zeros((n_traj, num_layers))
-                layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
-                for traj_index in range(n_traj):
-                    (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
-                    exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices)
-                    relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
+        relative_residence_data = np.zeros((n_traj, num_layers))
+        exact_relative_residence_data = np.zeros((n_traj, num_layers))
+        layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
+        for traj_index in range(n_traj):
+            (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
+            exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices)
+            relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
 
-                mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
-                sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
-                mean_exact_relative_residence_data = np.mean(exact_relative_residence_data, axis=0)
-                sem_exact_relative_residence_data = np.std(exact_relative_residence_data, axis=0) / np.sqrt(n_traj)
+        mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
+        sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
+        mean_exact_relative_residence_data = np.mean(exact_relative_residence_data, axis=0)
+        sem_exact_relative_residence_data = np.std(exact_relative_residence_data, axis=0) / np.sqrt(n_traj)
 
-                percent_deviation = np.divide((exact_relative_residence_data - relative_residence_data), exact_relative_residence_data) * 100
-                mean_percent_deviation = np.mean(percent_deviation, axis=0)
-                sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
+        percent_deviation = np.divide((exact_relative_residence_data - relative_residence_data), exact_relative_residence_data) * 100
+        mean_percent_deviation = np.mean(percent_deviation, axis=0)
+        sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
 
-                mean_layer_wise_num_sites_data = np.mean(layer_wise_num_sites_data, axis=0)
-                sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
+        mean_layer_wise_num_sites_data = np.mean(layer_wise_num_sites_data, axis=0)
+        sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
 
-                np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-                np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
-                np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
-                np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
-                np.save(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
-                np.save(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
-                if return_num_accessible_sites:
-                    np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', mean_layer_wise_num_sites_data)
-                    np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', sem_layer_wise_num_sites_data)
+        np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
+        np.save(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
+        if return_num_accessible_sites:
+            np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', mean_layer_wise_num_sites_data)
+            np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', sem_layer_wise_num_sites_data)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
