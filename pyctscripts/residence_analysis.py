@@ -328,35 +328,12 @@ class Residence(object):
                 plt.tight_layout()
                 plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}.png'), dpi=figure_dpi)
 
-                if plot_num_accessible_sites:
-                    # Layer-wise number of sites
+                if show_exact:
                     fig2 = plt.figure()
                     ax2 = fig2.add_subplot(111)
-    
-                    ax2.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
-                             c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-                    ax2.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
-                                 yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
-                                 c='#0504aa', mfc='none', mec='none')
-    
-                    x_ticks = np.arange(num_layers)
-                    x_tick_labels = [str(tick) for tick in x_ticks]
-                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-                    plt.yticks(fontsize=label_size)
-    
-                    ax2.legend(fontsize=label_size)
-                    ax2.set_xlabel('Layer Index', fontsize=font_size)
-                    ax2.set_ylabel('Number of accessible sites', fontsize=font_size)
-                    ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-                    plt.tight_layout()
-                    plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
-
-                if show_exact:
-                    fig3 = plt.figure()
-                    ax3 = fig3.add_subplot(111)
-                    ax3.plot(layer_index_list, mean_percent_deviation, 'o-',
+                    ax2.plot(layer_index_list, mean_percent_deviation, 'o-',
                              c='#0504aa', mfc='#0504aa', mec='black')
-                    ax3.errorbar(layer_index_list, mean_percent_deviation,
+                    ax2.errorbar(layer_index_list, mean_percent_deviation,
                                  yerr=sem_percent_deviation, fmt='o', capsize=3,
                                  c='#0504aa', mfc='none', mec='none')
 
@@ -365,9 +342,32 @@ class Residence(object):
                     plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
                     plt.yticks(fontsize=label_size)
 
-                    ax3.set_xlabel('Layer Index', fontsize=font_size)
-                    ax3.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-                    ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                    ax2.set_xlabel('Layer Index', fontsize=font_size)
+                    ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
+                    ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                     plt.tight_layout()
                     plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
+
+                if plot_num_accessible_sites:
+                    # Layer-wise number of sites
+                    fig3 = plt.figure()
+                    ax3 = fig3.add_subplot(111)
+    
+                    ax3.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
+                             c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+                    ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
+                                 yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
+                                 c='#0504aa', mfc='none', mec='none')
+    
+                    x_ticks = np.arange(num_layers)
+                    x_tick_labels = [str(tick) for tick in x_ticks]
+                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+                    plt.yticks(fontsize=label_size)
+    
+                    ax3.legend(fontsize=label_size)
+                    ax3.set_xlabel('Layer Index', fontsize=font_size)
+                    ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
+                    ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                    plt.tight_layout()
+                    plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
         return None
