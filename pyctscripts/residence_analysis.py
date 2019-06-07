@@ -324,9 +324,9 @@ class Residence(object):
                 ax1.legend(fontsize=label_size)
                 ax1.set_xlabel('Layer Index', fontsize=font_size)
                 ax1.set_ylabel('Relative Residence', fontsize=font_size)
-                ax1.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                ax1.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                 plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
+                plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}.png'), dpi=figure_dpi)
 
                 if plot_num_accessible_sites:
                     # Layer-wise number of sites
@@ -347,7 +347,7 @@ class Residence(object):
                     ax2.legend(fontsize=label_size)
                     ax2.set_xlabel('Layer Index', fontsize=font_size)
                     ax2.set_ylabel('Number of accessible sites', fontsize=font_size)
-                    ax2.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                    ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                     plt.tight_layout()
                     plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
 
@@ -367,7 +367,7 @@ class Residence(object):
 
                     ax3.set_xlabel('Layer Index', fontsize=font_size)
                     ax3.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-                    ax3.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+                    ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
                     plt.tight_layout()
-                    plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}_{dopant_element_type}.png'), dpi=figure_dpi)
+                    plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
         return None
