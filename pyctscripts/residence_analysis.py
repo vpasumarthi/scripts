@@ -350,9 +350,6 @@ class Residence(object):
             # Layer-wise number of sites
             for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
                 if self.num_dopants[map_index]:
-                    map_index_relative_energies = self.relative_energies[map_index][:]
-                    num_shells = len(map_index_relative_energies) - 2
-
                     fig3 = plt.figure()
                     ax3 = fig3.add_subplot(111)
     
