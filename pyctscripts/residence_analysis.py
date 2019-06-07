@@ -198,15 +198,15 @@ class Residence(object):
         mean_layer_wise_num_sites_data = np.mean(layer_wise_num_sites_data, axis=0)
         sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
 
-        np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_exact_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_exact_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', mean_percent_deviation)
-        np.save(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy', sem_percent_deviation)
+        np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy', mean_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy', sem_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy', mean_exact_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy', sem_exact_relative_residence_data)
+        np.save(self.src_path / f'layer_{interface}_mean_percent_deviation.npy', mean_percent_deviation)
+        np.save(self.src_path / f'layer_{interface}_sem_percent_deviation.npy', sem_percent_deviation)
         if return_num_accessible_sites:
-            np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', mean_layer_wise_num_sites_data)
-            np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy', sem_layer_wise_num_sites_data)
+            np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy', mean_layer_wise_num_sites_data)
+            np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy', sem_layer_wise_num_sites_data)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
