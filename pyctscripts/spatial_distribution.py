@@ -25,7 +25,7 @@ def compute_distance(cartesian_coords, system_translational_vector_list,
     rel_pos_vector = neighbor_image_displacement_vectors[min_index]
     return np.append(rel_pos_vector, displacement)
 
-def shell_data(src_path, element_of_interest, dopant_site_number):
+def shell_data(src_path, element_of_interest, dopant_site_number, nn_dist_range):
     pbc = [1, 1, 1]
     system_size = np.array([1, 1, 1])  #pseudo
     poscar_info = read_poscar(src_path)
@@ -69,7 +69,6 @@ def shell_data(src_path, element_of_interest, dopant_site_number):
     distribution_data =  np.zeros((num_sites_of_interest, 3))
     distribution_data[:, 0] = np.arange(num_sites_of_interest)
     distribution_data[:, 2] = cumulative_distance_list[dopant_site_number-1, :]
-    nn_dist_range = (3.84, 5.20)
     current_shell_index = 0
     current_shell_site_indices = [dopant_site_number - 1]
     inner_shell_site_indices = [dopant_site_number - 1]
