@@ -102,7 +102,7 @@ class Residence(object):
             total_filled_unit_cells -= unit_cell_indices[index] * self.system_size[index+1:].prod()
         return unit_cell_indices
 
-    def get_layer_wise_site_indices(self, traj_number, map_index, interface, shell_wise_pop_factors, layer_length_ratio, gradient_direction):
+    def get_layer_wise_site_indices(self, traj_number, interface, layer_length_ratio, gradient_direction):
         site_indices_data = np.load(f'{self.src_path}/traj{traj_number}/site_indices.npy')[()]
 
         num_shells = len(shell_wise_pop_factors) - 2
@@ -176,9 +176,9 @@ class Residence(object):
                 gradient_direction = self.doping_params['gradient'][map_index]['ld']
                 relative_residence_data = np.zeros((n_traj, num_layers))
                 exact_relative_residence_data = np.zeros((n_traj, num_layers))
-                layer_wise_num_sites_data = np.zeros((n_traj, num_layers))
+                layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
                 for traj_index in range(n_traj):
-                    (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index, :], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, map_index, interface, shell_wise_pop_factors, layer_length_ratio, gradient_direction)
+                    (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
                     exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices, shell_wise_pop_factors)
                     relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
 
