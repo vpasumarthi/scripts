@@ -131,12 +131,15 @@ class Residence(object):
                             dopant_element_indices = site_indices_data[dopant_site_indices, 2]
                             layer_wise_shell_site_indices[map_index][layer_index, shell_index] = site_indices_data[:, 0][np.isin(site_indices_data[:, 1], map_index) & np.isin(site_indices_data[:, 2], dopant_element_indices) & np.isin(site_indices_data[:, 3], shell_index)]
 
-        layer_wise_site_indices = np.empty(shape=(self.num_dopant_element_types, num_layers), dtype=object)
+        map_index_layer_wise_site_indices = np.empty(shape=(self.num_dopant_element_types, num_layers), dtype=object)
+        layer_wise_site_indices = np.empty(num_layers, dtype=object)
         layer_wise_num_sites = np.zeros((self.num_dopant_element_types, num_layers), int)
         for map_index in range(self.num_dopant_element_types):
             for layer_index in range(num_layers):
-                layer_wise_site_indices[map_index, layer_index] = np.hstack(layer_wise_shell_site_indices[map_index][layer_index])
-                layer_wise_num_sites[map_index, layer_index] = len(layer_wise_site_indices[map_index, layer_index])
+                map_index_layer_wise_site_indices[map_index, layer_index] = np.hstack(layer_wise_shell_site_indices[map_index][layer_index])
+                layer_wise_num_sites[map_index, layer_index] = len(map_index_layer_wise_site_indices[map_index, layer_index])
+        for layer_index in range(num_layers):
+            layer_wise_site_indices[layer_index] = np.hstack(map_index_layer_wise_site_indices[map_index])
         return (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites, site_indices_data)
 
     def traj_exact_layer_wise_residence(self, layer_wise_shell_site_indices):
