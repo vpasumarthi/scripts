@@ -29,6 +29,7 @@ class Residence(object):
         # doping parameters
         self.doping_params = self.sim_params['doping']
         self.num_dopants = self.doping_params['num_dopants']
+        self.num_dopant_element_types = len(self.num_dopants)
         bulk_site_relative_energies = 0.0
         self.relative_energies = []
         self.num_shells = []
