@@ -172,10 +172,11 @@ class Residence(object):
         return traj_relative_residence_data
 
     def layer_wise_residence(self, n_traj, interface, return_num_accessible_sites):
-        # NOTE: Assuming identical layer_length_ratio for all existing dopant element types
+        # NOTE: Assuming identical gradient direction and layer_length_ratio for all existing dopant element types
         sample_existing_map_index = (np.asarray(self.num_dopants) > 0).tolist().index(True)
         layer_length_ratio = self.doping_params['gradient'][sample_existing_map_index]['step_length_ratio']
         num_layers = len(layer_length_ratio)
+        gradient_direction = self.doping_params['gradient'][sample_existing_map_index]['ld']
 
         for map_index, relative_energies in enumerate(self.relative_energies):
             if self.num_dopants[map_index]:
