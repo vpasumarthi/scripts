@@ -278,78 +278,78 @@ class Residence(object):
         font_size = 16
         label_size = 12
 
-        for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
-            if self.num_dopants[map_index]:
-                map_index_relative_energies = self.relative_energies[map_index][:]
-                num_shells = len(map_index_relative_energies) - 2
+        mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy')
+        sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy')
 
-                mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy')
-                sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy')
-        
-                if plot_num_accessible_sites:
-                    mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy')
-                    sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy')
-        
-                # show exact relative residence values for single species
-                if show_exact:
-                    mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy')
-                    sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy')
-                    mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation.npy')
-                    sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation.npy')
+        if plot_num_accessible_sites:
+            mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy')
+            sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy')
 
-                plt.switch_backend('Agg')
-                fig1 = plt.figure()
-                ax1 = fig1.add_subplot(111)
+        # show exact relative residence values for single species
+        if show_exact:
+            mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy')
+            sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy')
+            mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation.npy')
+            sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation.npy')
 
-                layer_length_ratio = self.doping_params['gradient'][map_index]['step_length_ratio']
-                num_layers = len(layer_length_ratio)
-                layer_index_list = np.arange(num_layers)
-                ax1.plot(layer_index_list, mean_relative_residence_data, 'o-',
-                         c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-                ax1.errorbar(layer_index_list, mean_relative_residence_data,
-                             yerr=sem_relative_residence_data, fmt='o', capsize=3,
-                             c='#0504aa', mfc='none', mec='none')
-                if show_exact:
-                    ax1.plot(layer_index_list, mean_exact_relative_residence_data, 'o-',
-                             c='#d62728', mfc='#d62728', mec='black', label='prediction (1 species)')
-                    ax1.errorbar(layer_index_list, mean_exact_relative_residence_data,
-                                 yerr=sem_exact_relative_residence_data, fmt='o', capsize=3,
-                                 c='#d62728', mfc='none', mec='none')
+        plt.switch_backend('Agg')
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111)
 
-                x_ticks = np.arange(num_layers)
-                x_tick_labels = [str(tick) for tick in x_ticks]
-                plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-                plt.yticks(fontsize=label_size)
+        layer_length_ratio = self.doping_params['gradient'][map_index]['step_length_ratio']
+        num_layers = len(layer_length_ratio)
+        layer_index_list = np.arange(num_layers)
+        ax1.plot(layer_index_list, mean_relative_residence_data, 'o-',
+                 c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+        ax1.errorbar(layer_index_list, mean_relative_residence_data,
+                     yerr=sem_relative_residence_data, fmt='o', capsize=3,
+                     c='#0504aa', mfc='none', mec='none')
+        if show_exact:
+            ax1.plot(layer_index_list, mean_exact_relative_residence_data, 'o-',
+                     c='#d62728', mfc='#d62728', mec='black', label='prediction (1 species)')
+            ax1.errorbar(layer_index_list, mean_exact_relative_residence_data,
+                         yerr=sem_exact_relative_residence_data, fmt='o', capsize=3,
+                         c='#d62728', mfc='none', mec='none')
 
-                ax1.legend(fontsize=label_size)
-                ax1.set_xlabel('Layer Index', fontsize=font_size)
-                ax1.set_ylabel('Relative Residence', fontsize=font_size)
-                ax1.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-                plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}.png'), dpi=figure_dpi)
+        x_ticks = np.arange(num_layers)
+        x_tick_labels = [str(tick) for tick in x_ticks]
+        plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+        plt.yticks(fontsize=label_size)
 
-                if show_exact:
-                    fig2 = plt.figure()
-                    ax2 = fig2.add_subplot(111)
-                    ax2.plot(layer_index_list, mean_percent_deviation, 'o-',
-                             c='#0504aa', mfc='#0504aa', mec='black')
-                    ax2.errorbar(layer_index_list, mean_percent_deviation,
-                                 yerr=sem_percent_deviation, fmt='o', capsize=3,
-                                 c='#0504aa', mfc='none', mec='none')
+        ax1.legend(fontsize=label_size)
+        ax1.set_xlabel('Layer Index', fontsize=font_size)
+        ax1.set_ylabel('Relative Residence', fontsize=font_size)
+        ax1.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+        plt.tight_layout()
+        plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}.png'), dpi=figure_dpi)
 
-                    x_ticks = np.arange(num_layers)
-                    x_tick_labels = [str(tick) for tick in x_ticks]
-                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-                    plt.yticks(fontsize=label_size)
+        if show_exact:
+            fig2 = plt.figure()
+            ax2 = fig2.add_subplot(111)
+            ax2.plot(layer_index_list, mean_percent_deviation, 'o-',
+                     c='#0504aa', mfc='#0504aa', mec='black')
+            ax2.errorbar(layer_index_list, mean_percent_deviation,
+                         yerr=sem_percent_deviation, fmt='o', capsize=3,
+                         c='#0504aa', mfc='none', mec='none')
 
-                    ax2.set_xlabel('Layer Index', fontsize=font_size)
-                    ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-                    ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-                    plt.tight_layout()
-                    plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
+            x_ticks = np.arange(num_layers)
+            x_tick_labels = [str(tick) for tick in x_ticks]
+            plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+            plt.yticks(fontsize=label_size)
 
-                if plot_num_accessible_sites:
-                    # Layer-wise number of sites
+            ax2.set_xlabel('Layer Index', fontsize=font_size)
+            ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
+            ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+            plt.tight_layout()
+            plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
+
+        if plot_num_accessible_sites:
+            # Layer-wise number of sites
+            for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
+                if self.num_dopants[map_index]:
+                    map_index_relative_energies = self.relative_energies[map_index][:]
+                    num_shells = len(map_index_relative_energies) - 2
+
                     fig3 = plt.figure()
                     ax3 = fig3.add_subplot(111)
     
