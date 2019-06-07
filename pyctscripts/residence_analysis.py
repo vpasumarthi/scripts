@@ -139,7 +139,7 @@ class Residence(object):
                 map_index_layer_wise_site_indices[map_index, layer_index] = np.hstack(layer_wise_shell_site_indices[map_index][layer_index])
                 layer_wise_num_sites[map_index, layer_index] = len(map_index_layer_wise_site_indices[map_index, layer_index])
         for layer_index in range(num_layers):
-            layer_wise_site_indices[layer_index] = np.hstack(map_index_layer_wise_site_indices[map_index])
+            layer_wise_site_indices[layer_index] = np.hstack(map_index_layer_wise_site_indices[:, layer_index])
         return (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites, site_indices_data)
 
     def traj_exact_layer_wise_residence(self, layer_wise_shell_site_indices):
