@@ -283,19 +283,19 @@ class Residence(object):
                 map_index_relative_energies = self.relative_energies[map_index][:]
                 num_shells = len(map_index_relative_energies) - 2
 
-                mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-
+                mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy')
+                sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy')
+        
                 if plot_num_accessible_sites:
-                    mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy')
-                    sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data_{self.dopant_element_type_list[map_index]}.npy')
-
+                    mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy')
+                    sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy')
+        
                 # show exact relative residence values for single species
                 if show_exact:
-                    mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                    sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                    mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
-                    sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation_{self.dopant_element_type_list[map_index]}.npy')
+                    mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy')
+                    sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy')
+                    mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation.npy')
+                    sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation.npy')
 
                 plt.switch_backend('Agg')
                 fig1 = plt.figure()
