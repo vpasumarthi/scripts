@@ -296,9 +296,12 @@ class Residence(object):
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111)
 
-        layer_length_ratio = self.doping_params['gradient'][map_index]['step_length_ratio']
+        # NOTE: Assuming identical layer_length_ratio for all existing dopant element types
+        sample_existing_map_index = (np.asarray(self.num_dopants) > 0).tolist().index(True)
+        layer_length_ratio = self.doping_params['gradient'][sample_existing_map_index]['step_length_ratio']
         num_layers = len(layer_length_ratio)
         layer_index_list = np.arange(num_layers)
+
         ax1.plot(layer_index_list, mean_relative_residence_data, 'o-',
                  c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
         ax1.errorbar(layer_index_list, mean_relative_residence_data,
