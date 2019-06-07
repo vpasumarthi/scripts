@@ -146,7 +146,7 @@ class Residence(object):
         layer_shell_wise_num_sites = [np.zeros(layer_wise_shell_site_indices[map_index].shape, int) for map_index in range(self.num_dopant_element_types)]
         map_index_layer_based_pop_factors = []
         for map_index, map_index_relative_energies in enumerate(self.relative_energies):
-            (num_layers, map_index_num_shells) = layer_shell_wise_num_sites[map_index].shape
+            (num_layers, map_index_num_shells) = layer_wise_shell_site_indices[map_index].shape
             map_index_layer_based_pop_factors.append(np.empty(num_layers))
             shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
             for layer_index in range(num_layers):
