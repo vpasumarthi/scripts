@@ -353,9 +353,9 @@ class Residence(object):
                     fig3 = plt.figure()
                     ax3 = fig3.add_subplot(111)
     
-                    ax3.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
+                    ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
                              c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-                    ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
+                    ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
                                  yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
                                  c='#0504aa', mfc='none', mec='none')
     
