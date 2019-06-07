@@ -139,17 +139,18 @@ class Residence(object):
                 layer_wise_num_sites[map_index, layer_index] = len(layer_wise_site_indices[map_index, layer_index])
         return (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites, site_indices_data)
 
-    def traj_exact_layer_wise_residence(self, layer_wise_shell_site_indices, shell_wise_pop_factors):
-        num_layers = len(layer_wise_shell_site_indices)
-        num_shells = len(shell_wise_pop_factors) - 2
-        layer_shell_wise_num_sites = np.zeros((num_layers, num_shells+2))
-        for layer_index in range(num_layers):
-            for shell_index in range(num_shells+2):
-                layer_shell_wise_num_sites[layer_index, shell_index] = len(layer_wise_shell_site_indices[layer_index, shell_index])
-
-        layer_based_pop_factors = np.zeros(num_layers)
-        for layer_index in range(num_layers):
-            layer_based_pop_factors[layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[layer_index, :])
+    def traj_exact_layer_wise_residence(self, layer_wise_shell_site_indices):
+        layer_shell_wise_num_sites = [np.zeros(layer_wise_shell_site_indices[map_index].shape, int) for map_index in range(self.num_dopant_element_types)]
+        map_index_layer_based_pop_factors = []
+        for map_index, map_index_relative_energies in enumerate(self.relative_energies):
+            (num_layers, map_index_num_shells) = layer_shell_wise_num_sites[map_index].shape
+            map_index_layer_based_pop_factors.append(np.empty(num_layers))
+            shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
+            for layer_index in range(num_layers):
+                for shell_index in range(map_index_num_shells):
+                    layer_shell_wise_num_sites[map_index][layer_index][shell_index] = len(layer_wise_shell_site_indices[map_index][layer_index][shell_index])
+                map_index_layer_based_pop_factors[map_index][layer_index] = np.dot(shell_wise_pop_factors, layer_shell_wise_num_sites[map_index][layer_index])
+        layer_based_pop_factors = np.asarray(map_index_layer_based_pop_factors).sum(axis=0)
         exact_relative_residence_data = layer_based_pop_factors / np.sum(layer_based_pop_factors)
         return exact_relative_residence_data
 
@@ -180,7 +181,7 @@ class Residence(object):
                 layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
                 for traj_index in range(n_traj):
                     (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
-                    exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices, shell_wise_pop_factors)
+                    exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices)
                     relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
 
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
