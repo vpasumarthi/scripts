@@ -182,6 +182,7 @@ class Residence(object):
         num_layers = len(layer_length_ratio)
         gradient_direction = self.doping_params['gradient'][sample_existing_map_index]['ld']
 
+        layer_wise_relative_residence_data = {}
         relative_residence_data = np.zeros((n_traj, num_layers))
         exact_relative_residence_data = np.zeros((n_traj, num_layers))
         layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
@@ -202,15 +203,27 @@ class Residence(object):
         mean_layer_wise_num_sites_data = np.mean(layer_wise_num_sites_data, axis=0)
         sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
 
-        np.save(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy', mean_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy', sem_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy', mean_exact_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy', sem_exact_relative_residence_data)
-        np.save(self.src_path / f'layer_{interface}_mean_percent_deviation.npy', mean_percent_deviation)
-        np.save(self.src_path / f'layer_{interface}_sem_percent_deviation.npy', sem_percent_deviation)
+        observed_data = {}
+        observed_data['mean'] = mean_relative_residence_data
+        observed_data['sem'] = sem_relative_residence_data
+        layer_wise_relative_residence_data['observed'] = observed_data
+
+        exact_data = {}
+        exact_data['mean'] = mean_exact_relative_residence_data
+        exact_data['sem'] = sem_exact_relative_residence_data
+        layer_wise_relative_residence_data['exact'] = exact_data
+
+        percent_deviation_data = {}
+        percent_deviation_data['mean'] = mean_percent_deviation
+        percent_deviation_data['sem'] = sem_percent_deviation
+        layer_wise_relative_residence_data['percent_deviation'] = percent_deviation_data
+
         if return_num_accessible_sites:
-            np.save(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy', mean_layer_wise_num_sites_data)
-            np.save(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy', sem_layer_wise_num_sites_data)
+            num_accessible_sites_data = {}
+            num_accessible_sites_data['mean'] = mean_layer_wise_num_sites_data
+            num_accessible_sites_data['sem'] = sem_layer_wise_num_sites_data
+            layer_wise_relative_residence_data['num_accessible_sites'] = num_accessible_sites_data
+        np.save(self.src_path / f'{interface}_layer_wise_relative_residence_data.npy', layer_wise_relative_residence_data)
         return None
 
     def plot_shell_wise_residence(self, show_exact):
@@ -288,19 +301,21 @@ class Residence(object):
         font_size = 16
         label_size = 12
 
-        mean_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_relative_residence_data.npy')
-        sem_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_relative_residence_data.npy')
+        layer_wise_relative_residence_data = np.load(self.src_path / f'{interface}_layer_wise_relative_residence_data.npy')[()]
+
+        mean_relative_residence_data = layer_wise_relative_residence_data['observed']['mean']
+        sem_relative_residence_data = layer_wise_relative_residence_data['observed']['sem']
 
         if plot_num_accessible_sites:
-            mean_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_mean_layer_wise_num_sites_data.npy')
-            sem_layer_wise_num_sites_data = np.load(self.src_path / f'layer_{interface}_sem_layer_wise_num_sites_data.npy')
+            mean_layer_wise_num_sites_data = layer_wise_relative_residence_data['num_accessible_sites']['mean']
+            sem_layer_wise_num_sites_data = layer_wise_relative_residence_data['num_accessible_sites']['sem']
 
         # show exact relative residence values for single species
         if show_exact:
-            mean_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_mean_exact_relative_residence_data.npy')
-            sem_exact_relative_residence_data = np.load(self.src_path / f'layer_{interface}_sem_exact_relative_residence_data.npy')
-            mean_percent_deviation = np.load(self.src_path / f'layer_{interface}_mean_percent_deviation.npy')
-            sem_percent_deviation = np.load(self.src_path / f'layer_{interface}_sem_percent_deviation.npy')
+            mean_exact_relative_residence_data = layer_wise_relative_residence_data['exact']['mean']
+            sem_exact_relative_residence_data = layer_wise_relative_residence_data['exact']['sem']
+            mean_percent_deviation = layer_wise_relative_residence_data['percent_deviation']['mean']
+            sem_percent_deviation = layer_wise_relative_residence_data['percent_deviation']['sem']
 
         plt.switch_backend('Agg')
         fig1 = plt.figure()
