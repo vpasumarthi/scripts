@@ -227,6 +227,12 @@ class Residence(object):
         label_size = 12
 
         shell_wise_relative_residence_data = np.load(self.src_path / f'shell_wise_relative_residence_data.npy')[()]
+        num_subplots = len(np.nonzero(self.num_dopants)[0])
+        num_cols = 2
+        num_rows = (num_subplots + num_cols - 1) // num_cols
+        subplot_index = 1
+        plt.switch_backend('Agg')
+        fig = plt.figure()
         for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
             if self.num_dopants[map_index]:
                 map_index_relative_energies = self.relative_energies[map_index][:]
@@ -238,11 +244,8 @@ class Residence(object):
                     exact_relative_residence = map_index_shell_wise_relative_residence_data['exact']
                 mean_relative_residence_data = map_index_shell_wise_relative_residence_data['mean']
                 sem_relative_residence_data = map_index_shell_wise_relative_residence_data['sem']
-            
-                plt.switch_backend('Agg')
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
-            
+
+                ax = plt.subplot(num_rows, num_cols, subplot_index)
                 shell_index_list = np.arange(len(self.relative_energies[map_index]))
                 ax.plot(shell_index_list, mean_relative_residence_data, 'o-',
                          c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
@@ -268,7 +271,8 @@ class Residence(object):
                 ax.set_ylabel('Relative Residence', fontsize=font_size)
                 ax.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: {num_shells}shells; e{self.species_count[0]}h{self.species_count[1]}', fontsize=title_size)
                 plt.tight_layout()
-                plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise_{dopant_element_type}.png'), dpi=figure_dpi)
+                subplot_index += 1
+        plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise.png'), dpi=figure_dpi)
         return None
 
     def plot_layer_wise_residence(self, interface, show_exact, plot_num_accessible_sites):
