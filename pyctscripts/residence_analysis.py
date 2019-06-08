@@ -85,10 +85,12 @@ class Residence(object):
                 exact_relative_residence_data = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
                 sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
-            
-                np.save(self.src_path / f'shell_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', exact_relative_residence_data)
-                np.save(self.src_path / f'shell_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', mean_relative_residence_data)
-                np.save(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', sem_relative_residence_data)
+
+                shell_wise_relative_residence_data = {}
+                shell_wise_relative_residence_data['exact'] = exact_relative_residence_data
+                shell_wise_relative_residence_data['mean'] = mean_relative_residence_data
+                shell_wise_relative_residence_data['sem'] = sem_relative_residence_data
+                np.save(self.src_path / f'shell_wise_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy', shell_wise_relative_residence_data)
         return None
 
     def get_unit_cell_indices(self, site_indices):
@@ -227,11 +229,12 @@ class Residence(object):
                 map_index_relative_energies = self.relative_energies[map_index][:]
                 num_shells = len(map_index_relative_energies) - 2
 
+                shell_wise_relative_residence_data = np.load(self.src_path / f'shell_wise_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')[()]
                 # show exact relative residence values for single species
                 if show_exact:
-                    exact_relative_residence = np.load(self.src_path / f'shell_exact_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                mean_relative_residence_data = np.load(self.src_path / f'shell_mean_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
-                sem_relative_residence_data = np.load(self.src_path / f'shell_sem_relative_residence_data_{self.dopant_element_type_list[map_index]}.npy')
+                    exact_relative_residence = shell_wise_relative_residence_data['exact']
+                mean_relative_residence_data = shell_wise_relative_residence_data['mean']
+                sem_relative_residence_data = shell_wise_relative_residence_data['sem']
             
                 plt.switch_backend('Agg')
                 fig = plt.figure()
