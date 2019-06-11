@@ -353,7 +353,7 @@ class Residence(object):
             ax1_twin = ax1.twiny()
             ax1_twin.set_xlim(ax1.get_xlim())
             ax1_twin.set_xticks(x_ticks)
-            twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
+            twin_x_tick_labels = [f"{self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100:0.2f}" for layer_index in range(num_layers)]
             ax1_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
             ax1_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
@@ -382,7 +382,6 @@ class Residence(object):
                 ax2_twin = ax2.twiny()
                 ax2_twin.set_xlim(ax2.get_xlim())
                 ax2_twin.set_xticks(x_ticks)
-                twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
                 ax2_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
                 ax2_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
                 plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
@@ -413,7 +412,6 @@ class Residence(object):
             ax3_twin = ax3.twiny()
             ax3_twin.set_xlim(ax3.get_xlim())
             ax3_twin.set_xticks(x_ticks)
-            twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
             ax3_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
             ax3_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
