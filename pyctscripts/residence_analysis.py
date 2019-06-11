@@ -176,7 +176,7 @@ class Residence(object):
         traj_relative_residence_data = layer_wise_residence / np.sum(layer_wise_residence)
         return traj_relative_residence_data
 
-    def layer_wise_residence(self, n_traj, interface, return_num_accessible_sites):
+    def layer_wise_residence(self, n_traj, interface):
         # NOTE: Assuming identical gradient direction and layer_length_ratio for all existing dopant element types
         sample_existing_map_index = (np.asarray(self.num_dopants) > 0).tolist().index(True)
         layer_length_ratio = self.doping_params['gradient'][sample_existing_map_index]['step_length_ratio']
@@ -221,11 +221,10 @@ class Residence(object):
         percent_deviation_data['sem'] = sem_percent_deviation
         layer_wise_relative_residence_data['percent_deviation'] = percent_deviation_data
 
-        if return_num_accessible_sites:
-            num_accessible_sites_data = {}
-            num_accessible_sites_data['mean'] = mean_layer_wise_num_sites_data
-            num_accessible_sites_data['sem'] = sem_layer_wise_num_sites_data
-            layer_wise_relative_residence_data['num_accessible_sites'] = num_accessible_sites_data
+        layer_wise_num_sites_data = {}
+        layer_wise_num_sites_data['mean'] = mean_layer_wise_num_sites_data
+        layer_wise_num_sites_data['sem'] = sem_layer_wise_num_sites_data
+        layer_wise_relative_residence_data['layer_wise_num_sites'] = layer_wise_num_sites_data
         np.save(self.src_path / f'{interface}_layer_wise_relative_residence_data.npy', layer_wise_relative_residence_data)
         return None
 
