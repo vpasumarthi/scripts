@@ -352,7 +352,7 @@ class Residence(object):
         ax1.legend(fontsize=label_size)
         ax1.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
         ax1.set_ylabel('Normalized Relative Residence', fontsize=font_size)
-        if self.num_dopant_element_types > 1:
+        if len(np.asarray(self.num_dopants).nonzero()[0]) > 1:
             ax1_twin = ax1.twiny()
             ax1_twin.set_xlim(ax1.get_xlim())
             ax1_twin.set_xticks(x_ticks)
