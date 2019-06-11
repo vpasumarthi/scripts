@@ -385,7 +385,7 @@ class Residence(object):
             ax2.legend(fontsize=label_size)
             ax2.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
             ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-            if self.num_dopant_element_types > 1:
+            if len(np.asarray(self.num_dopants).nonzero()[0]) > 1:
                 ax2_twin = ax2.twiny()
                 ax2_twin.set_xlim(ax2.get_xlim())
                 ax2_twin.set_xticks(x_ticks)
@@ -419,7 +419,7 @@ class Residence(object):
         ax3.legend(fontsize=label_size)
         ax3.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
         ax3.set_ylabel('Number of sites', fontsize=font_size)
-        if self.num_dopant_element_types > 1:
+        if len(np.asarray(self.num_dopants).nonzero()[0]) > 1:
             ax3_twin = ax3.twiny()
             ax3_twin.set_xlim(ax3.get_xlim())
             ax3_twin.set_xticks(x_ticks)
