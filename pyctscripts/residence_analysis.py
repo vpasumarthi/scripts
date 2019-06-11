@@ -183,20 +183,22 @@ class Residence(object):
         gradient_direction = self.doping_params['gradient'][sample_existing_map_index]['ld']
 
         layer_wise_relative_residence_data = {}
-        relative_residence_data = np.zeros((n_traj, num_layers))
+        normalized_relative_residence_data = np.zeros((n_traj, num_layers))
         exact_relative_residence_data = np.zeros((n_traj, num_layers))
         layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
         for traj_index in range(n_traj):
             (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
             exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices)
-            relative_residence_data[traj_index, :] = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
+            relative_residence_data = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
+            prenormalized_relative_residence_data = relative_residence_data / layer_wise_num_sites_data[traj_index].sum(axis=0)
+            normalized_relative_residence_data[traj_index, :] = prenormalized_relative_residence_data / prenormalized_relative_residence_data.sum()
 
-        mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
-        sem_relative_residence_data = np.std(relative_residence_data, axis=0) / np.sqrt(n_traj)
+        mean_normalized_relative_residence_data = np.mean(normalized_relative_residence_data, axis=0)
+        sem_normalized_relative_residence_data = np.std(normalized_relative_residence_data, axis=0) / np.sqrt(n_traj)
         mean_exact_relative_residence_data = np.mean(exact_relative_residence_data, axis=0)
         sem_exact_relative_residence_data = np.std(exact_relative_residence_data, axis=0) / np.sqrt(n_traj)
 
-        percent_deviation = np.divide((exact_relative_residence_data - relative_residence_data), exact_relative_residence_data) * 100
+        percent_deviation = np.divide((exact_relative_residence_data - normalized_relative_residence_data), exact_relative_residence_data) * 100
         mean_percent_deviation = np.mean(percent_deviation, axis=0)
         sem_percent_deviation = np.std(percent_deviation, axis=0) / np.sqrt(n_traj)
 
@@ -204,8 +206,8 @@ class Residence(object):
         sem_layer_wise_num_sites_data = np.std(layer_wise_num_sites_data, axis=0) / np.sqrt(n_traj)
 
         observed_data = {}
-        observed_data['mean'] = mean_relative_residence_data
-        observed_data['sem'] = sem_relative_residence_data
+        observed_data['mean'] = mean_normalized_relative_residence_data
+        observed_data['sem'] = sem_normalized_relative_residence_data
         layer_wise_relative_residence_data['observed'] = observed_data
 
         exact_data = {}
@@ -346,7 +348,7 @@ class Residence(object):
 
         ax1.legend(fontsize=label_size)
         ax1.set_xlabel('Layer Index', fontsize=font_size)
-        ax1.set_ylabel('Relative Residence', fontsize=font_size)
+        ax1.set_ylabel('Normalized Relative Residence', fontsize=font_size)
         ax1.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
         plt.tight_layout()
         plt.savefig(str(self.src_path / f'Relative Residence_Layer_wise_{interface}.png'), dpi=figure_dpi)
