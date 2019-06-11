@@ -372,13 +372,24 @@ class Residence(object):
                          c='#0504aa', mfc='none', mec='none')
 
             x_ticks = np.arange(num_layers)
-            x_tick_labels = [str(tick) for tick in x_ticks]
-            plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+            ax2.set_xticks(x_ticks)
+            ax2.set_xticklabels(x_tick_labels, fontsize=label_size)
             plt.yticks(fontsize=label_size)
 
-            ax2.set_xlabel('Layer Index', fontsize=font_size)
+            ax2.legend(fontsize=label_size)
+            ax2.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
             ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
-            ax2.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+            if self.num_dopant_element_types > 1:
+                ax2_twin = ax2.twiny()
+                ax2_twin.set_xlim(ax2.get_xlim())
+                ax2_twin.set_xticks(x_ticks)
+                twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
+                ax2_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
+                ax2_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
+                plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
+            else:
+                plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+
             plt.tight_layout()
             plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
 
@@ -392,14 +403,24 @@ class Residence(object):
                      c='#0504aa', mfc='none', mec='none')
 
         x_ticks = np.arange(num_layers)
-        x_tick_labels = [str(tick) for tick in x_ticks]
-        plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+        ax3.set_xticks(x_ticks)
+        ax3.set_xticklabels(x_tick_labels, fontsize=label_size)
         plt.yticks(fontsize=label_size)
 
         ax3.legend(fontsize=label_size)
-        ax3.set_xlabel('Layer Index', fontsize=font_size)
+        ax3.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
         ax3.set_ylabel('Number of sites', fontsize=font_size)
-        ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+        if self.num_dopant_element_types > 1:
+            ax3_twin = ax3.twiny()
+            ax3_twin.set_xlim(ax3.get_xlim())
+            ax3_twin.set_xticks(x_ticks)
+            twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
+            ax3_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
+            ax3_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
+            plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
+        else:
+            plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+
         plt.tight_layout()
         plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}.png'), dpi=figure_dpi)
         return None
