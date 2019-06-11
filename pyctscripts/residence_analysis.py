@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import yaml
 
 from PyCT import constants
@@ -345,6 +346,8 @@ class Residence(object):
         ax1.set_xticks(x_ticks)
         ax1.set_xticklabels(x_tick_labels, fontsize=label_size)
         plt.yticks(fontsize=label_size)
+        ax1.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
         ax1.legend(fontsize=label_size)
         ax1.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
@@ -356,6 +359,7 @@ class Residence(object):
             twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
             ax1_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
             ax1_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
+            ax1_twin.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
         else:
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
@@ -375,6 +379,8 @@ class Residence(object):
             ax2.set_xticks(x_ticks)
             ax2.set_xticklabels(x_tick_labels, fontsize=label_size)
             plt.yticks(fontsize=label_size)
+            ax2.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+            ax2.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
             ax2.legend(fontsize=label_size)
             ax2.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
@@ -386,6 +392,7 @@ class Residence(object):
                 twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
                 ax2_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
                 ax2_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
+                ax2_twin.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
                 plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
             else:
                 plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
@@ -406,6 +413,8 @@ class Residence(object):
         ax3.set_xticks(x_ticks)
         ax3.set_xticklabels(x_tick_labels, fontsize=label_size)
         plt.yticks(fontsize=label_size)
+        ax3.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        ax3.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
         ax3.legend(fontsize=label_size)
         ax3.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
@@ -417,6 +426,7 @@ class Residence(object):
             twin_x_tick_labels = [self.doping_params['gradient'][1]['stepwise_num_dopants'][layer_index] / mean_layer_wise_num_sites_data[layer_index] * 100 for layer_index in range(num_layers)]
             ax3_twin.set_xticklabels(twin_x_tick_labels, fontsize=label_size)
             ax3_twin.set_xlabel(f'% {self.dopant_element_type_list[1]}', fontsize=font_size)
+            ax3_twin.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size, y=1.20)
         else:
             plt.title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
