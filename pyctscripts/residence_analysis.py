@@ -376,7 +376,6 @@ class Residence(object):
             ax2.set_xticklabels(x_tick_labels, fontsize=label_size)
             plt.yticks(fontsize=label_size)
 
-            ax2.legend(fontsize=label_size)
             ax2.set_xlabel(f'% {self.dopant_element_type_list[0]}', fontsize=font_size)
             ax2.set_ylabel('Relative Residence Deviation (%)', fontsize=font_size)
             if len(np.asarray(self.num_dopants).nonzero()[0]) > 1:
