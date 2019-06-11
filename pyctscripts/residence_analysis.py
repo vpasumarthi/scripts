@@ -377,8 +377,11 @@ class Residence(object):
             # Layer-wise number of sites
             fig3 = plt.figure()
             num_subplots = len(np.nonzero(self.num_dopants)[0])
-            num_cols = 2
-            num_rows = (num_subplots + num_cols - 1) // num_cols
+            if num_subplots > 1:
+                num_cols = 2
+                num_rows = (num_subplots + num_cols - 1) // num_cols
+            else:
+                num_rows = num_cols = 1
             subplot_index = 1
 
             for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
