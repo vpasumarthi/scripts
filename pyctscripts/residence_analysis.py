@@ -290,7 +290,7 @@ class Residence(object):
         plt.savefig(str(self.src_path / f'Relative Residence_Shell_wise.png'), dpi=figure_dpi)
         return None
 
-    def plot_layer_wise_residence(self, interface, show_exact, plot_num_accessible_sites):
+    def plot_layer_wise_residence(self, interface, show_exact):
         # Plot specifications
         figure_dpi = 600
 
@@ -308,9 +308,8 @@ class Residence(object):
         mean_relative_residence_data = layer_wise_relative_residence_data['observed']['mean']
         sem_relative_residence_data = layer_wise_relative_residence_data['observed']['sem']
 
-        if plot_num_accessible_sites:
-            mean_layer_wise_num_sites_data = layer_wise_relative_residence_data['num_accessible_sites']['mean']
-            sem_layer_wise_num_sites_data = layer_wise_relative_residence_data['num_accessible_sites']['sem']
+        mean_layer_wise_num_sites_data = layer_wise_relative_residence_data['layer_wise_num_sites']['mean']
+        sem_layer_wise_num_sites_data = layer_wise_relative_residence_data['layer_wise_num_sites']['sem']
 
         # show exact relative residence values for single species
         if show_exact:
@@ -373,25 +372,24 @@ class Residence(object):
             plt.tight_layout()
             plt.savefig(str(self.src_path / f'Relative Residence Deviation_Layer_wise_{interface}.png'), dpi=figure_dpi)
 
-        if plot_num_accessible_sites:
-            # Layer-wise number of sites
-            fig3 = plt.figure()
-            ax3 = plt.subplot(111)
-            ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
-                     c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-            ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
-                         yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
-                         c='#0504aa', mfc='none', mec='none')
+        # Layer-wise number of sites
+        fig3 = plt.figure()
+        ax3 = plt.subplot(111)
+        ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
+                 c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+        ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
+                     yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
+                     c='#0504aa', mfc='none', mec='none')
 
-            x_ticks = np.arange(num_layers)
-            x_tick_labels = [str(tick) for tick in x_ticks]
-            plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-            plt.yticks(fontsize=label_size)
+        x_ticks = np.arange(num_layers)
+        x_tick_labels = [str(tick) for tick in x_ticks]
+        plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+        plt.yticks(fontsize=label_size)
 
-            ax3.legend(fontsize=label_size)
-            ax3.set_xlabel('Layer Index', fontsize=font_size)
-            ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
-            ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-            plt.tight_layout()
-            plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}.png'), dpi=figure_dpi)
+        ax3.legend(fontsize=label_size)
+        ax3.set_xlabel('Layer Index', fontsize=font_size)
+        ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
+        ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+        plt.tight_layout()
+        plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}.png'), dpi=figure_dpi)
         return None
