@@ -377,33 +377,22 @@ class Residence(object):
         if plot_num_accessible_sites:
             # Layer-wise number of sites
             fig3 = plt.figure()
-            num_subplots = len(np.nonzero(self.num_dopants)[0])
-            if num_subplots > 1:
-                num_cols = 2
-                num_rows = (num_subplots + num_cols - 1) // num_cols
-            else:
-                num_rows = num_cols = 1
-            subplot_index = 1
+            ax3 = plt.subplot(111)
+            ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
+                     c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
+            ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
+                         yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
+                         c='#0504aa', mfc='none', mec='none')
 
-            for map_index, dopant_element_type in enumerate(self.dopant_element_type_list):
-                if self.num_dopants[map_index]:
-                    ax3 = plt.subplot(num_rows, num_cols, subplot_index)
-                    ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
-                             c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-                    ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
-                                 yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
-                                 c='#0504aa', mfc='none', mec='none')
-    
-                    x_ticks = np.arange(num_layers)
-                    x_tick_labels = [str(tick) for tick in x_ticks]
-                    plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
-                    plt.yticks(fontsize=label_size)
-    
-                    ax3.legend(fontsize=label_size)
-                    ax3.set_xlabel('Layer Index', fontsize=font_size)
-                    ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
-                    ax3.set_title(f'{dopant_element_type}{self.num_dopants[map_index]:02d}: e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
-                    plt.tight_layout()
-                    subplot_index += 1
+            x_ticks = np.arange(num_layers)
+            x_tick_labels = [str(tick) for tick in x_ticks]
+            plt.xticks(x_ticks, x_tick_labels, fontsize=label_size)
+            plt.yticks(fontsize=label_size)
+
+            ax3.legend(fontsize=label_size)
+            ax3.set_xlabel('Layer Index', fontsize=font_size)
+            ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
+            ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
+            plt.tight_layout()
             plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}.png'), dpi=figure_dpi)
         return None
