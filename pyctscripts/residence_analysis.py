@@ -375,9 +375,9 @@ class Residence(object):
         # Layer-wise number of sites
         fig3 = plt.figure()
         ax3 = plt.subplot(111)
-        ax3.plot(layer_index_list, mean_layer_wise_num_sites_data[map_index], 'o-',
+        ax3.plot(layer_index_list, mean_layer_wise_num_sites_data, 'o-',
                  c='#0504aa', mfc='#0504aa', mec='black', label='simulation')
-        ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data[map_index],
+        ax3.errorbar(layer_index_list, mean_layer_wise_num_sites_data,
                      yerr=sem_layer_wise_num_sites_data, fmt='o', capsize=3,
                      c='#0504aa', mfc='none', mec='none')
 
@@ -388,7 +388,7 @@ class Residence(object):
 
         ax3.legend(fontsize=label_size)
         ax3.set_xlabel('Layer Index', fontsize=font_size)
-        ax3.set_ylabel('Number of accessible sites', fontsize=font_size)
+        ax3.set_ylabel('Number of sites', fontsize=font_size)
         ax3.set_title(f'e{self.species_count[0]}h{self.species_count[1]} in L{num_layers} ({interface})', fontsize=title_size)
         plt.tight_layout()
         plt.savefig(str(self.src_path / f'Layer_wise_Number_of_sites_{interface}.png'), dpi=figure_dpi)
