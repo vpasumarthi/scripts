@@ -137,11 +137,12 @@ class Residence(object):
 
         map_index_layer_wise_site_indices = np.empty(shape=(self.num_dopant_element_types, num_layers), dtype=object)
         layer_wise_site_indices = np.empty(num_layers, dtype=object)
-        layer_wise_num_sites = np.zeros((self.num_dopant_element_types, num_layers), int)
+        map_index_layer_wise_num_sites = np.zeros((self.num_dopant_element_types, num_layers), int)
         for map_index in range(self.num_dopant_element_types):
             for layer_index in range(num_layers):
                 map_index_layer_wise_site_indices[map_index, layer_index] = np.hstack(layer_wise_shell_site_indices[map_index][layer_index])
-                layer_wise_num_sites[map_index, layer_index] = len(map_index_layer_wise_site_indices[map_index, layer_index])
+                map_index_layer_wise_num_sites[map_index, layer_index] = len(map_index_layer_wise_site_indices[map_index, layer_index])
+            layer_wise_num_sites = map_index_layer_wise_num_sites.sum(axis=0)
         for layer_index in range(num_layers):
             layer_wise_site_indices[layer_index] = np.hstack(map_index_layer_wise_site_indices[:, layer_index])
         return (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites, site_indices_data)
@@ -185,12 +186,12 @@ class Residence(object):
         layer_wise_relative_residence_data = {}
         normalized_relative_residence_data = np.zeros((n_traj, num_layers))
         exact_relative_residence_data = np.zeros((n_traj, num_layers))
-        layer_wise_num_sites_data = np.zeros((n_traj, self.num_dopant_element_types, num_layers), int)
+        layer_wise_num_sites_data = np.zeros((n_traj, num_layers), int)
         for traj_index in range(n_traj):
             (layer_wise_shell_site_indices, layer_wise_site_indices, layer_wise_num_sites_data[traj_index], site_indices_data) = self.get_layer_wise_site_indices(traj_index+1, interface, layer_length_ratio, gradient_direction)
             exact_relative_residence_data[traj_index, :] = self.traj_exact_layer_wise_residence(layer_wise_shell_site_indices)
             relative_residence_data = self.traj_layer_wise_residence(traj_index+1, site_indices_data, layer_wise_site_indices)
-            prenormalized_relative_residence_data = relative_residence_data / layer_wise_num_sites_data[traj_index].sum(axis=0)
+            prenormalized_relative_residence_data = relative_residence_data / layer_wise_num_sites_data[traj_index]
             normalized_relative_residence_data[traj_index, :] = prenormalized_relative_residence_data / prenormalized_relative_residence_data.sum()
 
         mean_normalized_relative_residence_data = np.mean(normalized_relative_residence_data, axis=0)
