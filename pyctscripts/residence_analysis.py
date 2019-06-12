@@ -243,8 +243,12 @@ class Residence(object):
 
         shell_wise_relative_residence_data = np.load(self.src_path / f'shell_wise_relative_residence_data.npy')[()]
         num_subplots = len(np.nonzero(self.num_dopants)[0])
-        num_cols = 2
-        num_rows = (num_subplots + num_cols - 1) // num_cols
+        if num_subplots > 1:
+            num_cols = 2
+            num_rows = (num_subplots + num_cols - 1) // num_cols
+        else:
+            num_rows = 1
+            num_cols = 1
         subplot_index = 1
         plt.switch_backend('Agg')
         fig = plt.figure()
