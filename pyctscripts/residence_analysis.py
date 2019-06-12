@@ -59,15 +59,15 @@ class Residence(object):
 
         shell_wise_site_count = np.zeros(num_shells+2)
         shell_wise_residence_time = np.zeros(num_shells+2)
+        MINBINS = site_indices_data[-1, 0] + 1
+        occupant_site_wise_residence = np.bincount(occupancy[:-1].reshape(-1), time_step_data.reshape(-1), MINBINS)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] > shell_index - 1][:, 0]
             else:
                 shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] == shell_index][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
-            shell_wise_occupancy_data = np.isin(occupancy[:-1], shell_wise_site_indices_data)
-            # NOTE: conslidating shell residence time of all species
-            shell_wise_residence_time[shell_index] = np.sum(time_step_data[shell_wise_occupancy_data])
+            shell_wise_residence_time[shell_index] = occupant_site_wise_residence[np.unique(shell_wise_site_indices_data)].sum()
 
         relative_residence_data = shell_wise_residence_time / np.sum(shell_wise_residence_time)
         return (relative_residence_data, shell_wise_site_count)
