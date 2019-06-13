@@ -51,21 +51,22 @@ class Residence(object):
             self.num_shells.append(len(self.relative_energies[-1]) - 2)
         return None
 
-    def traj_shell_wise_residence(self, traj_index, num_shells):
+    def traj_shell_wise_residence(self, traj_index, map_index):
         site_indices_data = np.load(f'{self.src_path}/traj{traj_index}/site_indices.npy')[()]
         occupancy = np.load(f'{self.src_path}/traj{traj_index}/occupancy.npy')[()]
         time = np.load(f'{self.src_path}/traj{traj_index}/time_data.npy')[()]
         time_step_data = np.tile(np.diff(time)[:, None], self.num_total_species)
 
+        num_shells = self.num_shells[map_index]
         shell_wise_site_count = np.zeros(num_shells+2)
         shell_wise_residence_time = np.zeros(num_shells+2)
         MINBINS = site_indices_data[-1, 0] + 1
         occupant_site_wise_residence = np.bincount(occupancy[:-1].reshape(-1), time_step_data.reshape(-1), MINBINS)
         for shell_index in range(num_shells+2):
             if shell_index == num_shells + 1:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] > shell_index - 1][:, 0]
+                shell_wise_site_indices_data = site_indices_data[(site_indices_data[:, 1] == map_index) & (site_indices_data[:, 3] > shell_index - 1)][:, 0]
             else:
-                shell_wise_site_indices_data = site_indices_data[site_indices_data[:, 3] == shell_index][:, 0]
+                shell_wise_site_indices_data = site_indices_data[(site_indices_data[:, 1] == map_index) & (site_indices_data[:, 3] == shell_index)][:, 0]
             shell_wise_site_count[shell_index] = len(shell_wise_site_indices_data)
             shell_wise_residence_time[shell_index] = occupant_site_wise_residence[np.unique(shell_wise_site_indices_data)].sum()
 
@@ -82,7 +83,7 @@ class Residence(object):
                 shell_wise_pop_factors = np.exp(- np.asarray(map_index_relative_energies) / self.kBT)
                 relative_residence_data = np.zeros((n_traj, self.num_shells[map_index] + 2))
                 for traj_index in range(n_traj):
-                    (relative_residence_data[traj_index, :], shell_wise_num_sites) = self.traj_shell_wise_residence(traj_index+1, self.num_shells[map_index])
+                    (relative_residence_data[traj_index, :], shell_wise_num_sites) = self.traj_shell_wise_residence(traj_index+1, map_index)
             
                 exact_relative_residence_data = np.multiply(shell_wise_num_sites, shell_wise_pop_factors) / np.dot(shell_wise_num_sites, shell_wise_pop_factors)
                 mean_relative_residence_data = np.mean(relative_residence_data, axis=0)
