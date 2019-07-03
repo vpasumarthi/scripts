@@ -193,6 +193,7 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
         orbital = plot_properties["reference_orbital"]
         element = orbital.split("_")[0]
         orbital_type = orbital.split("_")[1][-1]
+        element_spd_dos_data = get_element_spd_dos(dos_data, [orbital])
         orbital_density_data = get_orbital_density_data(element_spd_dos_data[element], orbital_type, plot_properties["spin_type"])
         reference_energy_level = raw_energy_data[np.argmax(orbital_density_data)]
     energy_data = raw_energy_data - reference_energy_level
