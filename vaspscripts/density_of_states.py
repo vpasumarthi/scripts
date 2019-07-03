@@ -160,7 +160,7 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
         ax.set_xlabel(r"$E - E_shift$ (eV)")
     ax.set_ylabel(plot_properties["y_label"])
     if plot_properties["band_gap_properties"] == "yes":
-        title_value = f'{plot_properties["title"]}\nBand Gap: {dos_data["band_gap"] - reference_energy_level:.3f} eV, VBM: {dos_data["vbm"] - reference_energy_level:.3f} eV, CBM: {dos_data["cbm"] - reference_energy_level:.3f} eV'
+        title_value = f'{plot_properties["title"]}\nBand Gap: {dos_data["band_gap"]:.3f} eV, VBM: {dos_data["vbm"] - reference_energy_level:.3f} eV, CBM: {dos_data["cbm"] - reference_energy_level:.3f} eV'
     else:
         title_value = plot_properties["title"]
     ax.set_title(title_value)
@@ -252,7 +252,7 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
         ax.set_xlabel(r"$E - E_shift$ (eV)")
     ax.set_ylabel(plot_properties["y_label"])
     if plot_properties["band_gap_properties"] == "yes":
-        title_value = f'{plot_properties["title"]}\nBand Gap: {dos_data["band_gap"] - reference_energy_level:.3f} eV, VBM: {dos_data["vbm"] - reference_energy_level:.3f} eV, CBM: {dos_data["cbm"] - reference_energy_level:.3f} eV'
+        title_value = f'{plot_properties["title"]}\nBand Gap: {dos_data["band_gap"]:.3f} eV, VBM: {dos_data["vbm"] - reference_energy_level:.3f} eV, CBM: {dos_data["cbm"] - reference_energy_level:.3f} eV'
     else:
         title_value = plot_properties["title"]
     ax.set_title(title_value)
