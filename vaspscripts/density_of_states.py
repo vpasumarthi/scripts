@@ -63,7 +63,7 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
 
     if plot_properties["reference_orbital"] == "fermi0":
         energy_data = dos_data["tdos"].energies - dos_data["efermi"]
-    else:
+    elif plot_properties["reference_orbital"] == "raw":
         energy_data = dos_data["tdos"].energies
 
     for index, orbital in enumerate(desired_orbitals):
@@ -133,14 +133,14 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
         ylim = ax.get_ylim()
         if plot_properties["reference_orbital"] == "fermi0":
             fermi_data = [0] * 2
-        else:
+        elif plot_properties["reference_orbital"] == "raw":
             fermi_data = [dos_data["efermi"]] * 2
         ax.plot(fermi_data, [ylim[0], ylim[1]], '--', color='black', lw=plot_properties["line_width"])
         ax.set_ylim(ylim[0], ylim[1])
     
     if plot_properties["reference_orbital"] == "fermi0":
         ax.set_xlabel(plot_properties["x_label_fermi0"])
-    else:
+    elif plot_properties["reference_orbital"] == "raw":
         ax.set_xlabel(plot_properties["x_label"])
     ax.set_ylabel(plot_properties["y_label"])
     ax.set_title(plot_properties["title"])
@@ -166,7 +166,7 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
 
     if plot_properties["reference_orbital"] == "fermi0":
         energy_data = dos_data["tdos"].energies - dos_data["efermi"]
-    else:
+    elif plot_properties["reference_orbital"] == "raw":
         energy_data = dos_data["tdos"].energies
 
     base_orbital_types = ["s", "p", "d", "f"]
@@ -211,14 +211,14 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
         ylim = ax.get_ylim()
         if plot_properties["reference_orbital"] == "fermi0":
             fermi_data = [0] * 2
-        else:
+        elif plot_properties["reference_orbital"] == "raw":
             fermi_data = [dos_data["efermi"]] * 2
         ax.plot(fermi_data, [ylim[0], ylim[1]], '--', color='black', lw=plot_properties["line_width"])
         ax.set_ylim(ylim[0], ylim[1])
     
     if plot_properties["reference_orbital"] == "fermi0":
         ax.set_xlabel(plot_properties["x_label_fermi0"])
-    else:
+    elif plot_properties["reference_orbital"] == "raw":
         ax.set_xlabel(plot_properties["x_label"])
     ax.set_ylabel(plot_properties["y_label"])
     ax.set_title(plot_properties["title"])
