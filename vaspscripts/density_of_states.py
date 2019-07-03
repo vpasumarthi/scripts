@@ -136,12 +136,13 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
                         color=plot_properties["color_list"][index],
                         lw=plot_properties["line_width"])
 
-    x_axis_lims = plot_properties["x_axis_lims"]
-    y_axis_lims = plot_properties["y_axis_lims"]
-    if len(x_axis_lims):
-        ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
-    if len(y_axis_lims):
-        ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
+    if plot_properties["set_axis_lims"] == "yes":
+        x_axis_lims = plot_properties["x_axis_lims"]
+        y_axis_lims = plot_properties["y_axis_lims"]
+        if len(x_axis_lims):
+            ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
+        if len(y_axis_lims):
+            ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
 
     if plot_properties["indicate_vbm"] == "yes":
         ylim = ax.get_ylim()
@@ -228,13 +229,14 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
                     get_orbital_density_data(spd_dos_data, orbital_type, spin_type),
                     color=plot_properties["color_list"][orbital_index],
                     lw=plot_properties["line_width"])
-        
-    x_axis_lims = plot_properties["x_axis_lims"]
-    y_axis_lims = plot_properties["y_axis_lims"]
-    if len(x_axis_lims):
-        ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
-    if len(y_axis_lims):
-        ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
+
+    if plot_properties["set_axis_lims"] == "yes":
+        x_axis_lims = plot_properties["x_axis_lims"]
+        y_axis_lims = plot_properties["y_axis_lims"]
+        if len(x_axis_lims):
+            ax.set_xlim(x_axis_lims[0], x_axis_lims[1])
+        if len(y_axis_lims):
+            ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
 
     if plot_properties["indicate_vbm"] == "yes":
         ylim = ax.get_ylim()
