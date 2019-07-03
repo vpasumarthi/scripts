@@ -129,7 +129,7 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
     if len(y_axis_lims):
         ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
 
-    if plot_properties["indicate_fermi"]:
+    if plot_properties["indicate_fermi"] == "yes":
         ylim = ax.get_ylim()
         if plot_properties["zero_at_fermi"] == "yes":
             fermi_data = [0] * 2
@@ -207,7 +207,7 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
     if len(y_axis_lims):
         ax.set_ylim(y_axis_lims[0], y_axis_lims[1])
 
-    if plot_properties["indicate_fermi"]:
+    if plot_properties["indicate_fermi"] == "yes":
         ylim = ax.get_ylim()
         if plot_properties["zero_at_fermi"] == "yes":
             fermi_data = [0] * 2
