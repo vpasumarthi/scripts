@@ -184,10 +184,18 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
+    raw_energy_data = dos_data["tdos"].energies
     if plot_properties["reference_orbital"] == "fermi0":
-        energy_data = dos_data["tdos"].energies - dos_data["efermi"]
+        reference_energy_level = dos_data["efermi"]
     elif plot_properties["reference_orbital"] == "raw":
-        energy_data = dos_data["tdos"].energies
+        reference_energy_level = 0
+    else:
+        orbital = plot_properties["reference_orbital"]
+        element = orbital.split("_")[0]
+        orbital_type = orbital.split("_")[1][-1]
+        orbital_density_data = get_orbital_density_data(element_spd_dos_data[element], orbital_type, plot_properties["spin_type"])
+        reference_energy_level = raw_energy_data[np.argmax(orbital_density_data)]
+    energy_data = raw_energy_data - reference_energy_level
 
     base_orbital_types = ["s", "p", "d", "f"]
     num_orbitals = len(spd_dos_data)
