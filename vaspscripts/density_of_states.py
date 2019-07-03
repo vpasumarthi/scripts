@@ -17,10 +17,16 @@ def read_dos(src_path):
     tdos = dosrun.tdos
     # fermi energy
     efermi = dosrun.efermi
-    dos_data = {"dosrun" : dosrun,
-                "cdos"   : cdos,
-                "tdos"   : tdos,
-                "efermi" : efermi}
+    # band properties
+    band_gap, cbm, vbm, is_band_gap_direct = dosrun.eigenvalue_band_properties
+    dos_data = {"dosrun"            : dosrun,
+                "cdos"              : cdos,
+                "tdos"              : tdos,
+                "efermi"            : efermi,
+                "band_gap"          : band_gap,
+                "cbm"               : cbm,
+                "vbm"               : vbm,
+                "is_band_gap_direct": is_band_gap_direct}
     return dos_data
 
 def get_element_spd_dos(dos_data, desired_orbitals):
