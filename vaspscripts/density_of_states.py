@@ -32,7 +32,6 @@ def get_element_spd_dos(dos_data, desired_orbitals):
         else:
             atomic_number = Element(element).number
             element_spd_dos_data[element] = dos_data["cdos"].get_element_spd_dos(atomic_number)
-        
     return element_spd_dos_data
 
 def get_orbital_density_data(spd_dos, orbital_type, spin_type):
@@ -50,7 +49,7 @@ def get_orbital_density_data(spd_dos, orbital_type, spin_type):
 
     return orbial_density
 
-def plot_element_spd_dos(dos_data, desired_orbitals, dst_path, plot_properties):
+def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plot_properties):
     if desired_orbitals != ["total"]:
         element_spd_dos_data = get_element_spd_dos(dos_data, desired_orbitals)
 
@@ -227,4 +226,3 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
     output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
     plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
     return None
-
