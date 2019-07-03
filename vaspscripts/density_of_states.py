@@ -147,9 +147,11 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
         ax.set_ylim(ylim[0], ylim[1])
     
     if plot_properties["reference_orbital"] == "fermi0":
-        ax.set_xlabel(plot_properties["x_label_fermi0"])
+        ax.set_xlabel(r"$E - E_f$ (eV)")
     elif plot_properties["reference_orbital"] == "raw":
-        ax.set_xlabel(plot_properties["x_label"])
+        ax.set_xlabel("Energy (eV)")
+    else:
+        ax.set_xlabel(r"$E - E_shift$ (eV)")
     ax.set_ylabel(plot_properties["y_label"])
     ax.set_title(plot_properties["title"])
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
@@ -225,9 +227,11 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
         ax.set_ylim(ylim[0], ylim[1])
     
     if plot_properties["reference_orbital"] == "fermi0":
-        ax.set_xlabel(plot_properties["x_label_fermi0"])
+        ax.set_xlabel(r"$E - E_f$ (eV)")
     elif plot_properties["reference_orbital"] == "raw":
-        ax.set_xlabel(plot_properties["x_label"])
+        ax.set_xlabel("Energy (eV)")
+    else:
+        ax.set_xlabel(r"$E - E_shift$ (eV)")
     ax.set_ylabel(plot_properties["y_label"])
     ax.set_title(plot_properties["title"])
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
