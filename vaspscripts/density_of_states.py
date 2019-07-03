@@ -256,11 +256,11 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
     ax.set_ylabel(plot_properties["y_label"])
     title_value = f'{plot_properties["title"]}'
     if plot_properties["show_band_values"] == "yes":
-        title_value = f'{title_value}\nBand Gap: {dos_data["band_gap"]:.3f} eV, VBM: {dos_data["vbm"] - reference_energy_level:.3f} eV, CBM: {dos_data["cbm"] - reference_energy_level:.3f} eV'
+        gap = dos_data["band_gap"]
+        vbm = dos_data["vbm"]
+        cbm = dos_data["cbm"]
+        title_value = f'{title_value}\nBand Gap: {gap:.3f} eV, VBM: {vbm - reference_energy_level:.3f} eV, CBM: {cbm - reference_energy_level:.3f} eV'
         if plot_properties["label_band_edges"] == "yes":
-            gap = dos_data["band_gap"]
-            vbm = dos_data["vbm"]
-            cbm = dos_data["cbm"]
             orbital_density_data_s = get_orbital_density_data(spd_dos_data, 's', spin_type)
             orbital_density_data_p = get_orbital_density_data(spd_dos_data, 'p', spin_type)
             orbital_density_data_d = get_orbital_density_data(spd_dos_data, 'd', spin_type)
