@@ -265,15 +265,15 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
             orbital_density_data_p = get_orbital_density_data(spd_dos_data, 'p', spin_type)
             orbital_density_data_d = get_orbital_density_data(spd_dos_data, 'd', spin_type)
 
-            vbm_top = max(energy_data[(energy_data > vbm - gap / 2) & (energy_data <= vbm)][
-                (orbital_density_data_s[(energy_data > vbm - gap / 2) & (energy_data <= vbm)] != 0) &
-                (orbital_density_data_p[(energy_data > vbm - gap / 2) & (energy_data <= vbm)] != 0) &
-                (orbital_density_data_d[(energy_data > vbm - gap / 2) & (energy_data <= vbm)] != 0)])
+            vbm_top = max(energy_data[energy_data <= vbm][
+                (orbital_density_data_s[energy_data <= vbm] != 0) &
+                (orbital_density_data_p[energy_data <= vbm] != 0) &
+                (orbital_density_data_d[energy_data <= vbm] != 0)])
 
-            cbm_bottom = min(energy_data[(energy_data < cbm + gap / 2) & (energy_data >= cbm)][
-                (orbital_density_data_s[(energy_data < cbm + gap / 2) & (energy_data >= cbm)] != 0) &
-                (orbital_density_data_p[(energy_data < cbm + gap / 2) & (energy_data >= cbm)] != 0) &
-                (orbital_density_data_d[(energy_data < cbm + gap / 2) & (energy_data >= cbm)] != 0)])
+            cbm_bottom = min(energy_data[energy_data >= cbm][
+                (orbital_density_data_s[energy_data >= cbm] != 0) &
+                (orbital_density_data_p[energy_data >= cbm] != 0) &
+                (orbital_density_data_d[energy_data >= cbm] != 0)])
 
             title_value = f'{title_value}\nVBM-Top: {vbm_top - reference_energy_level:.3f} eV, CBM-Bottom: {cbm_bottom - reference_energy_level:.3f} eV'
 
