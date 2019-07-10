@@ -265,7 +265,7 @@ class SimulationFiles(object):
                     "echo \"working directory = \"$SLURM_SUBMIT_DIR\n\n"
                     "HOSTFILE=hosts.$SLURM_JOB_ID\n"
                     "srun hostname -s | sort > $HOSTFILE\n"
-                    "module load python\n")
+                    "module load python/anaconda-4.3.1\n")
                 dst_file.write(f"source activate {self.slurm['conda_env']}\n")
                 dst_file.write(
                     "module list\n"
