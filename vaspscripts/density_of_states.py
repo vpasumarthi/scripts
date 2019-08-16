@@ -270,6 +270,18 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
                 (orbital_density_data_p[energy_data <= vbm] != 0) &
                 (orbital_density_data_d[energy_data <= vbm] != 0)])
 
+            if plot_properties['max_gap_state_width']:
+                test_energy = vbm_top - plot_properties['max_gap_state_width']
+                test_density = max([
+                    abs(orbital_density_data_s[energy_data <= test_energy][-1]),
+                    abs(orbital_density_data_p[energy_data <= test_energy][-1]),
+                    abs(orbital_density_data_d[energy_data <= test_energy][-1])])
+                if test_density == 0:
+                    vbm_top = max(energy_data[energy_data <= test_energy][
+                        (orbital_density_data_s[energy_data <= test_energy] != 0) &
+                        (orbital_density_data_p[energy_data <= test_energy] != 0) &
+                        (orbital_density_data_d[energy_data <= test_energy] != 0)])
+
             cbm_bottom = min(energy_data[energy_data >= cbm][
                 (orbital_density_data_s[energy_data >= cbm] != 0) &
                 (orbital_density_data_p[energy_data >= cbm] != 0) &
