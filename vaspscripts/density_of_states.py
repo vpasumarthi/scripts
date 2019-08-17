@@ -261,9 +261,9 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
     title_value = f'{plot_properties["title"]}'
     if plot_properties["show_band_values"] == "yes":
         gap = dos_data["band_gap"]
-        vbm = dos_data["vbm"]
-        cbm = dos_data["cbm"]
-        title_value = f'{title_value}\nBand Gap: {gap:.3f} eV, VBM: {vbm - reference_energy_level:.3f} eV, CBM: {cbm - reference_energy_level:.3f} eV'
+        vbm = dos_data["vbm"] - reference_energy_level
+        cbm = dos_data["cbm"] - reference_energy_level
+        title_value = f'{title_value}\nBand Gap: {gap:.3f} eV, VBM: {vbm:.3f} eV, CBM: {cbm:.3f} eV'
         if plot_properties["label_band_edges"] == "yes":
             orbital_density_data_s = get_orbital_density_data(spd_dos_data, 's', spin_type)
             orbital_density_data_p = get_orbital_density_data(spd_dos_data, 'p', spin_type)
@@ -291,7 +291,7 @@ def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
                 (orbital_density_data_p[energy_data >= cbm] != 0) &
                 (orbital_density_data_d[energy_data >= cbm] != 0)])
 
-            title_value = f'{title_value}\nVBM-Top: {vbm_top - reference_energy_level:.3f} eV, CBM-Bottom: {cbm_bottom - reference_energy_level:.3f} eV'
+            title_value = f'{title_value}\nVBM-Top: {vbm_top:.3f} eV, CBM-Bottom: {cbm_bottom:.3f} eV'
 
     ax.set_title(title_value)
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
