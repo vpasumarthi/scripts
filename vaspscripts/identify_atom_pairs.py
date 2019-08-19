@@ -54,5 +54,15 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
     min_std_pairwise_distance = std_midpoint_pairwise_distances[min_std_pair_index]
     best_well_dispersed_config = atom_pair_combinations[min_std_pair_index]
     print(f'Mean distance is {best_mean_pairwise_distance:.3f} at the minimum standard deviation of {min_std_pairwise_distance:.3f}')
+    best_well_dispersed_fstring = [f'Pair-wise atomic indices (starting with 0) for the well-dispersed config are: ']
+    atom_index = 0 
+    for pair_index in range(num_pairs_to_be_selected):
+        best_well_dispersed_fstring.append(f'({best_well_dispersed_config[atom_index]}, {best_well_dispersed_config[atom_index+1]})')
+        atom_index += 2
+        if pair_index != num_pairs_to_be_selected-1:
+            best_well_dispersed_fstring.append(', ')
+        else:
+            best_well_dispersed_fstring.append('.')
+    print("".join(best_well_dispersed_fstring))
     return None
 
