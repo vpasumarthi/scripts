@@ -47,5 +47,10 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
 
     mean_midpoint_pairwise_distances = midpoint_pairwise_distances_array.mean(axis=1)
     std_midpoint_pairwise_distances = midpoint_pairwise_distances_array.std(axis=1)
+
+    # Identify well-dispersed configuration
+    min_std_pair_index = np.argmin(std_midpoint_pairwise_distances)
+    best_mean_pairwise_distance = mean_midpoint_pairwise_distances[min_std_pair_index]
+    min_std_pairwise_distance = std_midpoint_pairwise_distances[min_std_pair_index]
     return None
 
