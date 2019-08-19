@@ -44,5 +44,8 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
         atom_pair_combinations[combination_index] = [desired_pairs[pair_index][atom_index] for pair_index in combination for atom_index in range(2)]
         midpoint_pairwise_distances = cell_with_midpoints.__getitem__(list(combination)).get_all_distances(mic=True)
         midpoint_pairwise_distances_array[combination_index, :] = midpoint_pairwise_distances[extract_indices]
+
+    mean_midpoint_pairwise_distances = midpoint_pairwise_distances_array.mean(axis=1)
+    std_midpoint_pairwise_distances = midpoint_pairwise_distances_array.std(axis=1)
     return None
 
