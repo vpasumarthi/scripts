@@ -70,5 +70,9 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
         input_config_index = np.where((atom_pair_combinations == input_config).all(axis=1))[0][0]
         print(f'Mean distance for the input configuration: {mean_midpoint_pairwise_distances[input_config_index]:.3f}')
         print(f'Standard deviation for the input configuraiton: {std_midpoint_pairwise_distances[input_config_index]:.3f}')
+
+    # Save data arrays to dst path
+    np.save(src_file_path.parent / 'midpoint_pairwise_distances_array.npy', midpoint_pairwise_distances_array)
+    np.save(src_file_path.parent / 'atom_pair_combinations.npy', atom_pair_combinations)
     return None
 
