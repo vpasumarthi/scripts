@@ -52,5 +52,7 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
     min_std_pair_index = np.argmin(std_midpoint_pairwise_distances)
     best_mean_pairwise_distance = mean_midpoint_pairwise_distances[min_std_pair_index]
     min_std_pairwise_distance = std_midpoint_pairwise_distances[min_std_pair_index]
+    best_well_dispersed_config = atom_pair_combinations[min_std_pair_index]
+    print(f'Mean distance is {best_mean_pairwise_distance:.3f} at the minimum standard deviation of {min_std_pairwise_distance:.3f}')
     return None
 
