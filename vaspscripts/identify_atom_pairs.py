@@ -36,5 +36,8 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
     # Analyze all possible comibinations among the midpoints
     all_combinations = list(combinations(range(num_desired_pairs), num_pairs_to_be_selected)) 
     num_combinations = len(all_combinations)
+    atom_pair_combinations = np.zeros((num_combinations, 2 * num_pairs_to_be_selected), int)
+    num_distances = len(combinations(num_pairs_to_be_selected, 2))
+    distances_list = np.zeros((num_combinations, num_distances)) 
     return None
 
