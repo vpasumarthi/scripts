@@ -18,5 +18,11 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance):
     desired_pairs_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
     desired_pairs = np.hstack((desired_pairs_temp[0][:, None], desired_pairs_temp[1][:, None]))
     num_desired_pairs = len(desired_pairs)
+
+    # Identify mid-points of desired atomic pairs
+    translation_vectors = np.zeros((num_desired_pairs, 3))
+    for index in range(num_desired_pairs):
+        atom1, atom2 = desired_pairs[index]
+        translation_vectors[index, :] = cell.get_distance(atom1, atom2, mic=True, vector=True) / 2 
     return None
 
