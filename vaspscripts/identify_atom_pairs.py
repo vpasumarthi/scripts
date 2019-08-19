@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
+from itertools import combinations
+
 import ase.io.vasp
 from ase.atoms import symbols2numbers
 import numpy as np
 
-def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance):
+
+def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected):
     cell = ase.io.vasp.read_vasp(str(src_file_path))
     atomic_pairwise_distances = cell.get_all_distances(mic=True)
     atomic_number = symbols2numbers(element_type)[0]
@@ -29,5 +32,9 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance):
     cell_with_midpoints.translate(translation_vectors)
     cell_with_midpoints.wrap()
     midpoint_pair_distances = cell_with_midpoints.get_all_distances(mic=True)
+
+    # Analyze all possible comibinations among the midpoints
+    all_combinations = list(combinations(range(num_desired_pairs), num_pairs_to_be_selected)) 
+    num_combinations = len(all_combinations)
     return None
 
