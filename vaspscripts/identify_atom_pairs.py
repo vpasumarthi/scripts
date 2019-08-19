@@ -7,7 +7,7 @@ from ase.atoms import symbols2numbers
 import numpy as np
 
 
-def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected):
+def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
     cell = ase.io.vasp.read_vasp(str(src_file_path))
     atomic_pairwise_distances = cell.get_all_distances(mic=True)
     atomic_number = symbols2numbers(element_type)[0]
@@ -64,5 +64,11 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
         else:
             best_well_dispersed_fstring.append('.')
     print("".join(best_well_dispersed_fstring))
+
+    # Input configuration
+    if input_config:
+        input_config_index = np.where((atom_pair_combinations == input_config).all(axis=1))[0][0]
+        print(f'Mean distance for the input configuration: {mean_midpoint_pairwise_distances[input_config_index]:.3f}')
+        print(f'Standard deviation for the input configuraiton: {std_midpoint_pairwise_distances[input_config_index]:.3f}')
     return None
 
