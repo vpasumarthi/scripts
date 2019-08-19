@@ -24,5 +24,8 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance):
     for index in range(num_desired_pairs):
         atom1, atom2 = desired_pairs[index]
         translation_vectors[index, :] = cell.get_distance(atom1, atom2, mic=True, vector=True) / 2 
+
+    cell_with_midpoints = cell.__getitem__(desired_pairs[:, 0].tolist())
+    cell_with_midpoints.translate(translation_vectors)
     return None
 
