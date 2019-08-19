@@ -27,5 +27,6 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance):
 
     cell_with_midpoints = cell.__getitem__(desired_pairs[:, 0].tolist())
     cell_with_midpoints.translate(translation_vectors)
+    cell_with_midpoints.wrap()
     return None
 
