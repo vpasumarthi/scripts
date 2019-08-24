@@ -79,38 +79,45 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
         orbital_density_data = get_orbital_density_data(element_spd_dos_data[element], orbital_type, plot_properties["spin_type"])
         reference_energy_level = raw_energy_data[np.argmax(orbital_density_data)]
     energy_data = raw_energy_data - reference_energy_level
+    density_data = {}
     fermi_energy_level = dos_data["efermi"] - reference_energy_level
     print(f'Fermi energy level: {fermi_energy_level:.3e} eV\n')
 
     for index, orbital in enumerate(desired_orbitals):
         if orbital == "total":
+            density_data[orbital] = {}
             if plot_properties["spin_type"] == "up":
                 ax.plot(energy_data,
                         dos_data["tdos"].densities[Spin.up],
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_up"] = dos_data["tdos"].densities[Spin.up]
             elif plot_properties["spin_type"] == "down":
                 ax.plot(energy_data,
                         -dos_data["tdos"].densities[Spin.down],
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_down"] = -dos_data["tdos"].densities[Spin.down]
             elif plot_properties["spin_type"] == "both":
                 ax.plot(energy_data,
                         dos_data["tdos"].densities[Spin.up],
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_up"] = dos_data["tdos"].densities[Spin.up]
                 ax.plot(energy_data,
                         -dos_data["tdos"].densities[Spin.down],
                         color=plot_properties["color_list"][index],
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_down"] = -dos_data["tdos"].densities[Spin.down]
             
         else:
             element = orbital.split("_")[0]
             orbital_type = orbital.split("_")[1][-1]
             
+            density_data[orbital] = {}
             if plot_properties["spin_type"] == "up":
                 spin_type = "up"
                 ax.plot(energy_data,
@@ -118,6 +125,7 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_up"] = get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type)
             elif plot_properties["spin_type"] == "down":
                 spin_type = "down"
                 ax.plot(energy_data,
@@ -125,6 +133,7 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_down"] = get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type)
             elif plot_properties["spin_type"] == "both":
                 spin_type = "up"
                 ax.plot(energy_data,
@@ -132,11 +141,13 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
                         color=plot_properties["color_list"][index],
                         label=orbital,
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_up"] = get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type)
                 spin_type = "down"
                 ax.plot(energy_data,
                         get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type),
                         color=plot_properties["color_list"][index],
                         lw=plot_properties["line_width"])
+                density_data[orbital]["spin_down"] = get_orbital_density_data(element_spd_dos_data[element], orbital_type, spin_type)
 
     if plot_properties["set_axis_lims"] == "yes":
         x_axis_lims = plot_properties["x_axis_lims"]
@@ -170,6 +181,12 @@ def plot_orbital_projected_element_dos(dos_data, desired_orbitals, dst_path, plo
     ax.legend(prop={'size': plot_properties["legend_font_size"]})
     output_path = str(dst_path / f'{plot_properties["output_file_name"]}.{plot_properties["output_file_type"]}')
     plt.savefig(output_path, format=plot_properties["output_file_type"], dpi=plot_properties["dpi"])
+
+    if plot_properties["save_data"]:
+        output_path = dst_path / 'energy_data.npy'
+        np.save(output_path, energy_data)
+        output_path = dst_path / 'density_data.npy'
+        np.save(output_path, density_data)
     return None
 
 def plot_site_spd_dos(dos_data, site_index, dst_path, plot_properties):
