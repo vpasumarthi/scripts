@@ -83,19 +83,5 @@ def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_dista
     return None
 
 def plane_analysis(src_file_path, element_type, desired_pairwise_distance):
-    cell = ase.io.vasp.read_vasp(str(src_file_path))
-    atomic_number = symbols2numbers(element_type)[0]
-    atomic_indices = np.where(cell.numbers == symbols2numbers('O')[0])[0]
-    start_index = atomic_indices[0]
-    end_index = atomic_indices[-1] + 1
-    num_element_type_atoms = len(atomic_indices)
-    element_pairwise_distances = np.zeros((num_element_type_atoms, num_element_type_atoms))
-    element_type_atomic_indices = np.arange(start_index, end_index)
-    for atomic_index in element_type_atomic_indices:
-        element_pairwise_distances[atomic_index, :] = cell.get_distances(atomic_index, element_type_atomic_indices, mic=True)
-    
-    rounding_digits = len(desired_pairwise_distance.split(".")[1])
-    desired_pairwise_distance = float(desired_pairwise_distance)
-    desired_pair_indices_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
-    desired_pair_indices = np.hstack((desired_pair_indices_temp[0][:, None], desired_pair_indices_temp[1][:, None]))
+    (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     return None
