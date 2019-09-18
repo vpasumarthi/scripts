@@ -20,9 +20,9 @@ def identify_desired_atom_pair_indices(src_file_path, element_type, desired_pair
 
     rounding_digits = len(desired_pairwise_distance.split(".")[1])
     desired_pairwise_distance = float(desired_pairwise_distance)
-    desired_pair_indices_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
-    desired_pair_indices = np.hstack((desired_pair_indices_temp[0][:, None], desired_pair_indices_temp[1][:, None]))
-    return (cell, desired_pair_indices)
+    desired_pair_internal_indices_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
+    desired_pair_internal_indices = np.hstack((desired_pair_internal_indices_temp[0][:, None], desired_pair_internal_indices_temp[1][:, None]))
+    return (cell, desired_pair_internal_indices)
 
 def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
     (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
