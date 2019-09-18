@@ -26,10 +26,10 @@ def identify_desired_atom_pair_indices(src_file_path, element_type, desired_pair
     # avoiding duplicate pairs
     desired_pair_internal_indices = desired_pair_internal_indices[desired_pair_internal_indices[:, 1] > desired_pair_internal_indices[:, 0]]
     desired_pair_indices = atomic_indices[desired_pair_internal_indices]
-    return (cell, desired_pair_indices)
+    return (cell, atomic_indices, desired_pair_indices)
 
 def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
-    (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
+    (cell, _, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     num_desired_pairs = len(desired_pair_indices)
 
     # Identify mid-points of desired atomic pairs
@@ -87,5 +87,5 @@ def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_dista
     return None
 
 def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
-    (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
+    (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     return None
