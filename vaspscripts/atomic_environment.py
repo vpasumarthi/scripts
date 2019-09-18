@@ -88,4 +88,27 @@ def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_dista
 
 def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
+
+    # plane contributions of all points
+    cell_lengths = np.linalg.norm(cell.cell, axis=1)
+    element_positions = cell.positions[atomic_indices]
+    # planes parallel to x/a + y/b = 1
+    plane_contributions = element_positions[:, 0] / cell_lengths[0] + element_positions[:, 1] / cell_lengths[1]
+    num_planes = 32  # identified from visual observation
+    bins = np.linspace(0, 2, num_planes+1)  # 0 through one corner, 1 through diagonal, 2 through diagonally opposite corner
+    atoms_sorted_by_plane = np.empty(num_planes, object)
+    pair_atoms_in_plane = np.empty(num_planes, object)
+    num_atoms_by_plane = np.zeros(num_planes)
+    for plane_index in np.arange(num_planes):
+        atoms_sorted_by_plane[plane_index] = atomic_indices[np.where((plane_contributions >= bins[plane_index]) & (plane_contributions < bins[plane_index+1]))[0]]
+        num_atoms_by_plane[plane_index] = len(atoms_sorted_by_plane[plane_index])
+    
+        # identify pair atoms in plane
+        pair_element_index_list = []
+        for atom_index in atoms_sorted_by_plane[plane_index]:
+            pair_element_index_tuple = np.where(desired_pair_indices == atom_index)
+            if pair_element_index_tuple[0].shape[0]:
+                pair_element_index_list.append([pair_element_index_tuple[0][0], pair_element_index_tuple[1][0]])
+        pair_element_index_array = np.asarray(pair_element_index_list)
+        pair_atoms_in_plane[plane_index] = desired_pair_indices[pair_element_index_array[:, 0], pair_element_index_array[:, 1]]
     return None
