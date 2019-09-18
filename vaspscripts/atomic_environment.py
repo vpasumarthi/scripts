@@ -24,7 +24,7 @@ def identify_desired_atom_pair_indices(src_file_path, element_type, desired_pair
     desired_pair_indices = np.hstack((desired_pair_indices_temp[0][:, None], desired_pair_indices_temp[1][:, None]))
     return (cell, desired_pair_indices)
 
-def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
+def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
     (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     num_desired_pairs = len(desired_pair_indices)
 
