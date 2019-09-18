@@ -82,6 +82,6 @@ def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_dista
     np.save(src_file_path.parent / 'atom_pair_combinations.npy', atom_pair_combinations)
     return None
 
-def plane_analysis(src_file_path, element_type, desired_pairwise_distance):
+def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     return None
