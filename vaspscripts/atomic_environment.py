@@ -113,11 +113,12 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
         pair_atoms_in_plane[plane_index] = desired_pair_indices[pair_element_index_array[:, 0], pair_element_index_array[:, 1]]
 
     # select one pair atoms from plane of interest
-    plane_index_of_interest = 15
+    plane_index_of_interest_01 = int(num_planes / 2 - 1)
+    plane_index_of_interest_02 = int(num_planes / 2)
     xmin = ymin = 0.45
     xmax = ymax = 0.55
-    positions_pair_atoms_in_plane = cell.positions[pair_atoms_in_plane[plane_index_of_interest]]
-    selected_pair_atoms_in_plane = pair_atoms_in_plane[plane_index_of_interest][(positions_pair_atoms_in_plane[:, 0] / cell_lengths[0] > xmin) & (positions_pair_atoms_in_plane[:, 0] / cell_lengths[0] < xmax) & (positions_pair_atoms_in_plane[:, 1] / cell_lengths[1] > ymin) & (positions_pair_atoms_in_plane[:, 1] / cell_lengths[1] < ymax)]
+    positions_pair_atoms_in_plane = cell.positions[pair_atoms_in_plane[plane_index_of_interest_01]]
+    selected_pair_atoms_in_plane = pair_atoms_in_plane[plane_index_of_interest_01][(positions_pair_atoms_in_plane[:, 0] / cell_lengths[0] > xmin) & (positions_pair_atoms_in_plane[:, 0] / cell_lengths[0] < xmax) & (positions_pair_atoms_in_plane[:, 1] / cell_lengths[1] > ymin) & (positions_pair_atoms_in_plane[:, 1] / cell_lengths[1] < ymax)]
     selected_one_pair_atom = selected_pair_atoms_in_plane[0]
     pair_index_of_selected_atom = np.where(desired_pair_indices == selected_one_pair_atom)[0][0]
     selected_one_pair_atoms = desired_pair_indices[pair_index_of_selected_atom, :]
