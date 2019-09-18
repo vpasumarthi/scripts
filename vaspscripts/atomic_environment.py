@@ -21,17 +21,17 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
 
     rounding_digits = len(desired_pairwise_distance.split(".")[1])
     desired_pairwise_distance = float(desired_pairwise_distance)
-    desired_pairs_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
-    desired_pairs = np.hstack((desired_pairs_temp[0][:, None], desired_pairs_temp[1][:, None]))
-    num_desired_pairs = len(desired_pairs)
+    desired_pair_indices_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
+    desired_pair_indices = np.hstack((desired_pair_indices_temp[0][:, None], desired_pair_indices_temp[1][:, None]))
+    num_desired_pairs = len(desired_pair_indices)
 
     # Identify mid-points of desired atomic pairs
     translation_vectors = np.zeros((num_desired_pairs, 3))
     for index in range(num_desired_pairs):
-        atom1, atom2 = desired_pairs[index]
+        atom1, atom2 = desired_pair_indices[index]
         translation_vectors[index, :] = cell.get_distance(atom1, atom2, mic=True, vector=True) / 2 
 
-    cell_with_midpoints = cell.__getitem__(desired_pairs[:, 0].tolist())
+    cell_with_midpoints = cell.__getitem__(desired_pair_indices[:, 0].tolist())
     cell_with_midpoints.translate(translation_vectors)
     cell_with_midpoints.wrap()
     midpoint_pair_distances = cell_with_midpoints.get_all_distances(mic=True)
@@ -44,7 +44,7 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
     midpoint_pairwise_distances_array = np.zeros((num_combinations, num_distances)) 
     extract_indices = np.triu_indices(num_pairs_to_be_selected, 1)
     for combination_index, combination in enumerate(all_combinations):
-        atom_pair_combinations[combination_index] = [desired_pairs[pair_index][atom_index] for pair_index in combination for atom_index in range(2)]
+        atom_pair_combinations[combination_index] = [desired_pair_indices[pair_index][atom_index] for pair_index in combination for atom_index in range(2)]
         midpoint_pairwise_distances = cell_with_midpoints.__getitem__(list(combination)).get_all_distances(mic=True)
         midpoint_pairwise_distances_array[combination_index, :] = midpoint_pairwise_distances[extract_indices]
 
