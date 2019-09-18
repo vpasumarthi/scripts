@@ -6,8 +6,7 @@ import ase.io.vasp
 from ase.atoms import symbols2numbers
 import numpy as np
 
-
-def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
+def identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance):
     cell = ase.io.vasp.read_vasp(str(src_file_path))
     atomic_number = symbols2numbers(element_type)[0]
     atomic_indices = np.where(cell.numbers == symbols2numbers('O')[0])[0]
@@ -23,6 +22,10 @@ def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, 
     desired_pairwise_distance = float(desired_pairwise_distance)
     desired_pair_indices_temp = np.where(element_pairwise_distances.round(rounding_digits) == desired_pairwise_distance)
     desired_pair_indices = np.hstack((desired_pair_indices_temp[0][:, None], desired_pair_indices_temp[1][:, None]))
+    return (cell, desired_pair_indices)
+
+def identify_atom_pairs(src_file_path, element_type, desired_pairwise_distance, num_pairs_to_be_selected, input_config=None):
+    (cell, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
     num_desired_pairs = len(desired_pair_indices)
 
     # Identify mid-points of desired atomic pairs
