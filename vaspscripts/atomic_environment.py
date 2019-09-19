@@ -218,4 +218,10 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               neihgbor_distance_vectors_from_pair_atom2,
                                               neighbor_distances_from_pair_atom2[:, None]))
     compiled_in_plane_pathways = np.vstack((compiled_in_plane_pathways_pair_atom1, compiled_in_plane_pathways_pair_atom2))
+
+    ## find out-of-plane transport pathways
+
+    # upper-plane
+    upper_plane_atom_indices = pair_atoms_in_plane[upper_plane_index]
+    num_upper_plane_atoms = len(upper_plane_atom_indices)
     return (cell, compiled_in_plane_pathways)
