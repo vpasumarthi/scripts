@@ -137,12 +137,12 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     relative_plane_contributions = central_pair_plane_contributions[1] / central_pair_plane_contributions[0]
     if (relative_plane_contributions[0] < 1) & (relative_plane_contributions[1] > 1):
         pair_atom_index_up_the_plane = atom_indices_of_central_pair[1]
-        pair_atom_index_low_the_plane = atom_indices_of_central_pair[0]
+        pair_atom_index_down_the_plane = atom_indices_of_central_pair[0]
         plane_contribution_up_the_plane = central_pair_plane_contributions[1]
         plane_contribution_down_the_plane = central_pair_plane_contributions[0]
     elif (relative_plane_contributions[0] > 1) & (relative_plane_contributions[1] < 1):
         pair_atom_index_up_the_plane = atom_indices_of_central_pair[0]
-        pair_atom_index_low_the_plane = atom_indices_of_central_pair[1]
+        pair_atom_index_down_the_plane = atom_indices_of_central_pair[1]
         plane_contribution_up_the_plane = central_pair_plane_contributions[0]
         plane_contribution_down_the_plane = central_pair_plane_contributions[1]
     else:
@@ -164,5 +164,5 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
 
     # compute relative distances from the pair atoms
     neighbor_distances_up_the_plane = cell.get_distances(pair_atom_index_up_the_plane, neighbors_up_the_plane, mic=True)
-    neighbor_distances_down_the_plane = cell.get_distances(pair_atom_index_low_the_plane, neighbors_down_the_plane, mic=True)
+    neighbor_distances_down_the_plane = cell.get_distances(pair_atom_index_down_the_plane, neighbors_down_the_plane, mic=True)
     return (cell, pair_atoms_within_bounds)
