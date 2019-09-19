@@ -231,4 +231,8 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
         new_column_index = 1 if column_index[0] == 0 else 0
         pair_atoms_in_upper_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
     compiled_upper_plane_pair_atoms = pair_atoms_in_upper_plane.flatten()
+    upper_plane_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_upper_plane_pair_atoms, mic=True, vector=True)
+    upper_plane_distances_pair_atom1 = np.linalg.norm(upper_plane_distance_vectors_pair_atom1, axis=1)
+    upper_plane_distance_vectors_pair_atom2 = cell.get_distances(pair_atom2, compiled_upper_plane_pair_atoms, mic=True, vector=True)
+    upper_plane_distances_pair_atom2 = np.linalg.norm(upper_plane_distance_vectors_pair_atom2, axis=1)
     return (cell, compiled_in_plane_pathways)
