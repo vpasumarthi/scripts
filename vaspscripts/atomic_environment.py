@@ -171,4 +171,15 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     pair_atoms_up_the_plane = desired_pair_indices[pair_index_up_the_plane, :]
     pair_index_down_the_plane = np.where(desired_pair_indices == neighbor_pair_atom_down_the_plane)[0][0]
     pair_atoms_down_the_plane = desired_pair_indices[pair_index_down_the_plane, :]
+
+    # compute inter-pair distances with central pair atoms: [(0, 0), (0, 1), (1, 0), (1, 1)]
+    up_the_plane_distance_vectors_with_central_pair = np.zeros((4, 3))
+    up_the_plane_distance_vectors_with_central_pair[:2, :] = cell.get_distances(atom_indices_of_central_pair[0], pair_atoms_up_the_plane, mic=True, vector=True)
+    up_the_plane_distance_vectors_with_central_pair[2:, :] = cell.get_distances(atom_indices_of_central_pair[1], pair_atoms_up_the_plane, mic=True, vector=True)
+    up_the_plane_distances_with_central_pair = np.linalg.norm(up_the_plane_distance_vectors_with_central_pair, axis=1)
+
+    down_the_plane_distance_vectors_with_central_pair = np.zeros((4, 3))
+    down_the_plane_distance_vectors_with_central_pair[:2, :] = cell.get_distances(atom_indices_of_central_pair[0], pair_atoms_down_the_plane, mic=True, vector=True)
+    down_the_plane_distance_vectors_with_central_pair[2:, :] = cell.get_distances(atom_indices_of_central_pair[1], pair_atoms_down_the_plane, mic=True, vector=True)
+    down_the_plane_distances_with_central_pair = np.linalg.norm(down_the_plane_distance_vectors_with_central_pair, axis=1)
     return (cell, pair_atoms_within_bounds)
