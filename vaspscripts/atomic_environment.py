@@ -203,19 +203,19 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     neighbor_array_indices_pair_atom2 = np.where(neighbor_distances_pair_atom2 < cutoff_distance)[0]
     neighbor_atoms_from_pair_atom1 = compiled_neighbor_pair_atoms[neighbor_array_indices_pair_atom1]
     neighbor_atoms_from_pair_atom2 = compiled_neighbor_pair_atoms[neighbor_array_indices_pair_atom2]
-    neihgbor_distance_vectors_from_pair_atom1 = neighbor_distance_vectors_pair_atom1[neighbor_array_indices_pair_atom1]
-    neihgbor_distance_vectors_from_pair_atom2 = neighbor_distance_vectors_pair_atom2[neighbor_array_indices_pair_atom2]
+    neighbor_distance_vectors_from_pair_atom1 = neighbor_distance_vectors_pair_atom1[neighbor_array_indices_pair_atom1]
+    neighbor_distance_vectors_from_pair_atom2 = neighbor_distance_vectors_pair_atom2[neighbor_array_indices_pair_atom2]
     neighbor_distances_from_pair_atom1 = neighbor_distances_pair_atom1[neighbor_array_indices_pair_atom1]
     neighbor_distances_from_pair_atom2 = neighbor_distances_pair_atom2[neighbor_array_indices_pair_atom2]
     num_in_plane_pathways_pair_atom1 = len(neighbor_atoms_from_pair_atom1)
     num_in_plane_pathways_pair_atom2 = len(neighbor_atoms_from_pair_atom2)
     compiled_in_plane_pathways_pair_atom1 = np.hstack((pair_atom1 * np.ones(num_in_plane_pathways_pair_atom1)[:, None],
                                               neighbor_atoms_from_pair_atom1[:, None],
-                                              neihgbor_distance_vectors_from_pair_atom1,
+                                              neighbor_distance_vectors_from_pair_atom1,
                                               neighbor_distances_from_pair_atom1[:, None]))
     compiled_in_plane_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_in_plane_pathways_pair_atom2)[:, None],
                                               neighbor_atoms_from_pair_atom2[:, None],
-                                              neihgbor_distance_vectors_from_pair_atom2,
+                                              neighbor_distance_vectors_from_pair_atom2,
                                               neighbor_distances_from_pair_atom2[:, None]))
     compiled_in_plane_pathways = np.vstack((compiled_in_plane_pathways_pair_atom1, compiled_in_plane_pathways_pair_atom2))
 
