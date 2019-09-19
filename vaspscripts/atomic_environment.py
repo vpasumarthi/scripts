@@ -224,4 +224,10 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     # upper-plane
     upper_plane_atom_indices = pair_atoms_in_plane[upper_plane_index]
     num_upper_plane_atoms = len(upper_plane_atom_indices)
+    pair_atoms_in_upper_plane = np.zeros((num_upper_plane_atoms, 2), int)
+    pair_atoms_in_upper_plane[:, 0] = upper_plane_atom_indices
+    for index, atom_index in enumerate(upper_plane_atom_indices):
+        row_index, column_index = np.where(desired_pair_indices == atom_index)
+        new_column_index = 1 if column_index[0] == 0 else 0
+        pair_atoms_in_upper_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
     return (cell, compiled_in_plane_pathways)
