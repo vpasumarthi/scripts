@@ -191,4 +191,30 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
         new_column_index = 1 if column_index[0] == 0 else 0
         neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
 
+    # find unique pathways within cutoff distance
+    cutoff_distance = 7.0
+    compiled_neighbor_pair_atoms = neighbor_pair_atoms.flatten()
+    neighbor_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_neighbor_pair_atoms, mic=True, vector=True)
+    neighbor_distances_pair_atom1 = np.linalg.norm(neighbor_distance_vectors_pair_atom1, axis=1)
+    neighbor_distance_vectors_pair_atom2 = cell.get_distances(pair_atom2, compiled_neighbor_pair_atoms, mic=True, vector=True)
+    neighbor_distances_pair_atom2 = np.linalg.norm(neighbor_distance_vectors_pair_atom2, axis=1)
+
+    neighbor_array_indices_pair_atom1 = np.where(neighbor_distances_pair_atom1 < cutoff_distance)[0]
+    neighbor_array_indices_pair_atom2 = np.where(neighbor_distances_pair_atom2 < cutoff_distance)[0]
+    neighbor_atoms_from_pair_atom1 = compiled_neighbor_pair_atoms[neighbor_array_indices_pair_atom1]
+    neighbor_atoms_from_pair_atom2 = compiled_neighbor_pair_atoms[neighbor_array_indices_pair_atom2]
+    neihgbor_distance_vectors_from_pair_atom1 = neighbor_distance_vectors_pair_atom1[neighbor_array_indices_pair_atom1]
+    neihgbor_distance_vectors_from_pair_atom2 = neighbor_distance_vectors_pair_atom2[neighbor_array_indices_pair_atom2]
+    neighbor_distances_from_pair_atom1 = neighbor_distances_pair_atom1[neighbor_array_indices_pair_atom1]
+    neighbor_distances_from_pair_atom2 = neighbor_distances_pair_atom2[neighbor_array_indices_pair_atom2]
+    num_pathways_pair_atom1 = len(neighbor_atoms_from_pair_atom1)
+    num_pathways_pair_atom2 = len(neighbor_atoms_from_pair_atom2)
+    compiled_pathways_pair_atom1 = np.hstack((pair_atom1 * np.ones(num_pathways_pair_atom1)[:, None],
+                                              neighbor_atoms_from_pair_atom1[:, None],
+                                              neihgbor_distance_vectors_from_pair_atom1,
+                                              neighbor_distances_from_pair_atom1[:, None]))
+    compiled_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_pathways_pair_atom2)[:, None],
+                                              neighbor_atoms_from_pair_atom2[:, None],
+                                              neihgbor_distance_vectors_from_pair_atom2,
+                                              neighbor_distances_from_pair_atom2[:, None]))
     return (cell, pair_atoms_within_bounds)
