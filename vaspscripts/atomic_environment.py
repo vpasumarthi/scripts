@@ -138,9 +138,13 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     if (relative_plane_contributions[0] < 1) & (relative_plane_contributions[1] > 1):
         pair_atom_index_up_the_plane = atom_indices_of_central_pair[1]
         pair_atom_index_low_the_plane = atom_indices_of_central_pair[0]
+        plane_contribution_up_the_plane = central_pair_plane_contributions[1]
+        plane_contribution_down_the_plane = central_pair_plane_contributions[0]
     elif (relative_plane_contributions[0] > 1) & (relative_plane_contributions[1] < 1):
         pair_atom_index_up_the_plane = atom_indices_of_central_pair[0]
         pair_atom_index_low_the_plane = atom_indices_of_central_pair[1]
+        plane_contribution_up_the_plane = central_pair_plane_contributions[0]
+        plane_contribution_down_the_plane = central_pair_plane_contributions[1]
     else:
         print(f'Pair atoms are not aligned along the direction of plane.')
         exit()
