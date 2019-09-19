@@ -86,8 +86,21 @@ def get_well_dispersed_pairs(src_file_path, element_type, desired_pairwise_dista
     np.save(src_file_path.parent / 'atom_pair_combinations.npy', atom_pair_combinations)
     return None
 
-def get_unique_pathways():
-    return None
+def get_unique_pathways(compiled_pathways):
+    rounding_digits = 3
+    compiled_pathways[:, 2:] = np.round(compiled_pathways[:, 2:], rounding_digits)
+
+    # eliminate mirror image symmetry around cartesian axes
+    unique_pathways = []
+    unique_distances = np.unique(compiled_pathways[:, -1])
+    for distance in unique_distances:
+        matching_pathway_row_indices = np.where(compiled_pathways[:, -1] == distance)[0]
+        absolute_contribution = np.abs(compiled_pathways[matching_pathway_row_indices, 2:])
+        unique_rows = np.unique(absolute_contribution, return_index=True, axis=0)[1]
+        for row_index in unique_rows:
+            unique_pathways.append(compiled_pathways[matching_pathway_row_indices[row_index]])
+    unique_pathways = np.asarray(unique_pathways)
+    return unique_pathways
 
 def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
@@ -221,6 +234,7 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               neighbor_distance_vectors_from_pair_atom2,
                                               neighbor_distances_from_pair_atom2[:, None]))
     compiled_in_plane_pathways = np.vstack((compiled_in_plane_pathways_pair_atom1, compiled_in_plane_pathways_pair_atom2))
+    unique_in_plane_pathways = get_unique_pathways(compiled_in_plane_pathways)
 
     ## find out-of-plane transport pathways
 
