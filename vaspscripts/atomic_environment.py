@@ -144,4 +144,9 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     else:
         print(f'Pair atoms are not aligned along the direction of plane.')
         exit()
+
+    # compute plane contributions for the remaining atoms
+    neighbor_central_plane_atom_positions = cell.positions[neighbor_central_plane_atom_indices]
+    num_neighbor_central_plane_atoms = len(neighbor_central_plane_atom_indices)
+    neighbor_central_plane_contributions = neighbor_central_plane_atom_positions[:, :2] / np.tile(cell_lengths[:2], (num_neighbor_central_plane_atoms, 1))
     return (cell, pair_atoms_within_bounds)
