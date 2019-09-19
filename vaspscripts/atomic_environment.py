@@ -183,4 +183,12 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     down_the_plane_distance_vectors_with_central_pair[:2, :] = cell.get_distances(atom_indices_of_central_pair[0], pair_atoms_down_the_plane, mic=True, vector=True)
     down_the_plane_distance_vectors_with_central_pair[2:, :] = cell.get_distances(atom_indices_of_central_pair[1], pair_atoms_down_the_plane, mic=True, vector=True)
     down_the_plane_distances_with_central_pair = np.linalg.norm(down_the_plane_distance_vectors_with_central_pair, axis=1)
+    
+    neighbor_pair_atoms = np.zeros((num_neighbor_central_plane_atoms, 2), int)
+    neighbor_pair_atoms[:, 0] = neighbor_central_plane_atom_indices
+    for index, neighbor_atom_index in enumerate(neighbor_central_plane_atom_indices):
+        row_index, column_index = np.where(desired_pair_indices == neighbor_atom_index)
+        new_column_index = 1 if column_index[0] == 0 else 0
+        neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+
     return (cell, pair_atoms_within_bounds)
