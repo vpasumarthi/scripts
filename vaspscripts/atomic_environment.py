@@ -309,4 +309,5 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     compiled_lower_plane_pathways = np.vstack((compiled_lower_plane_pathways_pair_atom1, compiled_lower_plane_pathways_pair_atom2))
 
     compiled_out_of_plane_pathways = np.vstack((compiled_upper_plane_pathways, compiled_lower_plane_pathways))
+    unique_out_of_plane_pathways = get_unique_pathways(compiled_out_of_plane_pathways)
     return (cell, compiled_in_plane_pathways, compiled_out_of_plane_pathways)
