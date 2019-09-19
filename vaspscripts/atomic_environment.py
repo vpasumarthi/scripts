@@ -230,4 +230,5 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
         row_index, column_index = np.where(desired_pair_indices == atom_index)
         new_column_index = 1 if column_index[0] == 0 else 0
         pair_atoms_in_upper_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+    compiled_upper_plane_pair_atoms = pair_atoms_in_upper_plane.flatten()
     return (cell, compiled_in_plane_pathways)
