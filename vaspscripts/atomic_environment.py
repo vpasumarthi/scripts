@@ -217,4 +217,5 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               neighbor_atoms_from_pair_atom2[:, None],
                                               neihgbor_distance_vectors_from_pair_atom2,
                                               neighbor_distances_from_pair_atom2[:, None]))
-    return (cell, pair_atoms_within_bounds)
+    compiled_pathways = np.vstack((compiled_pathways_pair_atom1, compiled_pathways_pair_atom2))
+    return (cell, compiled_pathways)
