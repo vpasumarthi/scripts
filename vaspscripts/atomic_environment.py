@@ -129,8 +129,8 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
 
     ## find in-plane neighbors
     # find atom indices of neighbors in central plane
-    bounded_atoms_array_indices = np.in1d(central_plane_atom_indices, pair_atoms_within_bounds).nonzero()[0]
-    neighbor_central_plane_atom_indices = np.delete(central_plane_atom_indices, bounded_atoms_array_indices)
+    central_pair_atom_index = np.where(central_plane_atom_indices == central_pair_atom_of_choice)[0][0]
+    neighbor_central_plane_atom_indices = np.delete(central_plane_atom_indices, central_pair_atom_index)
 
     # classify central pair atom indices between up-the-plane, down-the-plane
     central_pair_positions = cell.positions[atom_indices_of_central_pair]
