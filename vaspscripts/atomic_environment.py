@@ -130,4 +130,18 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     # find atom indices of neighbors in central plane
     bounded_atoms_array_indices = np.in1d(central_plane_atom_indices, pair_atoms_within_bounds).nonzero()[0]
     neighbor_central_plane_atom_indices = np.delete(central_plane_atom_indices, bounded_atoms_array_indices)
+
+    # classify central pair atom indices between up-the-plane, down-the-plane
+    central_pair_positions = cell.positions[atom_indices_of_central_pair]
+    central_pair_plane_contributions = central_pair_positions[:, :2] / np.tile(cell_lengths[:2], (2, 1))
+    relative_plane_contributions = central_pair_plane_contributions[1] / central_pair_plane_contributions[0]
+    if (relative_plane_contributions[0] < 1) & (relative_plane_contributions[1] > 1):
+        pair_atom_index_up_the_plane = atom_indices_of_central_pair[1]
+        pair_atom_index_low_the_plane = atom_indices_of_central_pair[0]
+    elif (relative_plane_contributions[0] > 1) & (relative_plane_contributions[1] < 1):
+        pair_atom_index_up_the_plane = atom_indices_of_central_pair[0]
+        pair_atom_index_low_the_plane = atom_indices_of_central_pair[1]
+    else:
+        print(f'Pair atoms are not aligned along the direction of plane.')
+        break
     return (cell, pair_atoms_within_bounds)
