@@ -143,5 +143,5 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
         pair_atom_index_low_the_plane = atom_indices_of_central_pair[1]
     else:
         print(f'Pair atoms are not aligned along the direction of plane.')
-        break
+        exit()
     return (cell, pair_atoms_within_bounds)
