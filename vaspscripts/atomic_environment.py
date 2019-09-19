@@ -240,6 +240,8 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
 
     # upper-plane
     upper_plane_atom_indices = pair_atoms_in_plane[upper_plane_index]
+    upper_plane_atom_indices = upper_plane_atom_indices[(upper_plane_atom_indices != pair_atom1) &
+                                                        (upper_plane_atom_indices != pair_atom2)]
     num_upper_plane_atoms = len(upper_plane_atom_indices)
     pair_atoms_in_upper_plane = np.zeros((num_upper_plane_atoms, 2), int)
     pair_atoms_in_upper_plane[:, 0] = upper_plane_atom_indices
@@ -275,6 +277,8 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
 
     # lower-plane
     lower_plane_atom_indices = pair_atoms_in_plane[lower_plane_index]
+    lower_plane_atom_indices = lower_plane_atom_indices[(lower_plane_atom_indices != pair_atom1) &
+                                                        (lower_plane_atom_indices != pair_atom2)]
     num_lower_plane_atoms = len(lower_plane_atom_indices)
     pair_atoms_in_lower_plane = np.zeros((num_lower_plane_atoms, 2), int)
     pair_atoms_in_lower_plane[:, 0] = lower_plane_atom_indices
