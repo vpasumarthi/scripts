@@ -167,4 +167,8 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     neighbor_distances_down_the_plane = cell.get_distances(pair_atom_index_down_the_plane, neighbors_down_the_plane, mic=True)
     neighbor_pair_atom_up_the_plane = neighbors_up_the_plane[np.argmin(neighbor_distances_up_the_plane)]
     neighbor_pair_atom_down_the_plane = neighbors_down_the_plane[np.argmin(neighbor_distances_down_the_plane)]
+    pair_index_up_the_plane = np.where(desired_pair_indices == neighbor_pair_atom_up_the_plane)[0][0]
+    pair_atoms_up_the_plane = desired_pair_indices[pair_index_up_the_plane, :]
+    pair_index_down_the_plane = np.where(desired_pair_indices == neighbor_pair_atom_down_the_plane)[0][0]
+    pair_atoms_down_the_plane = desired_pair_indices[pair_index_down_the_plane, :]
     return (cell, pair_atoms_within_bounds)
