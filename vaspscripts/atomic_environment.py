@@ -255,4 +255,39 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               upper_plane_neighbor_distance_vectors_from_pair_atom2,
                                               upper_plane_neighbor_distances_from_pair_atom2[:, None]))
     compiled_upper_plane_pathways = np.vstack((compiled_upper_plane_pathways_pair_atom1, compiled_upper_plane_pathways_pair_atom2))
-    return (cell, compiled_in_plane_pathways, compiled_upper_plane_pathways)
+
+    # lower-plane
+    lower_plane_atom_indices = pair_atoms_in_plane[lower_plane_index]
+    num_lower_plane_atoms = len(lower_plane_atom_indices)
+    pair_atoms_in_lower_plane = np.zeros((num_lower_plane_atoms, 2), int)
+    pair_atoms_in_lower_plane[:, 0] = lower_plane_atom_indices
+    for index, atom_index in enumerate(lower_plane_atom_indices):
+        row_index, column_index = np.where(desired_pair_indices == atom_index)
+        new_column_index = 1 if column_index[0] == 0 else 0
+        pair_atoms_in_lower_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+    compiled_lower_plane_pair_atoms = pair_atoms_in_lower_plane.flatten()
+    lower_plane_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_lower_plane_pair_atoms, mic=True, vector=True)
+    lower_plane_distances_pair_atom1 = np.linalg.norm(lower_plane_distance_vectors_pair_atom1, axis=1)
+    lower_plane_distance_vectors_pair_atom2 = cell.get_distances(pair_atom2, compiled_lower_plane_pair_atoms, mic=True, vector=True)
+    lower_plane_distances_pair_atom2 = np.linalg.norm(lower_plane_distance_vectors_pair_atom2, axis=1)
+
+    lower_plane_neighbor_array_indices_pair_atom1 = np.where(lower_plane_distances_pair_atom1 < cutoff_distance)[0]
+    lower_plane_neighbor_array_indices_pair_atom2 = np.where(lower_plane_distances_pair_atom2 < cutoff_distance)[0]
+    lower_plane_neighbor_atoms_from_pair_atom1 = compiled_lower_plane_pair_atoms[lower_plane_neighbor_array_indices_pair_atom1]
+    lower_plane_neighbor_atoms_from_pair_atom2 = compiled_lower_plane_pair_atoms[lower_plane_neighbor_array_indices_pair_atom2]
+    lower_plane_neighbor_distance_vectors_from_pair_atom1 = lower_plane_distance_vectors_pair_atom1[lower_plane_neighbor_array_indices_pair_atom1]
+    lower_plane_neighbor_distance_vectors_from_pair_atom2 = lower_plane_distance_vectors_pair_atom2[lower_plane_neighbor_array_indices_pair_atom2]
+    lower_plane_neighbor_distances_from_pair_atom1 = neighbor_distances_pair_atom1[lower_plane_neighbor_array_indices_pair_atom1]
+    lower_plane_neighbor_distances_from_pair_atom2 = neighbor_distances_pair_atom2[lower_plane_neighbor_array_indices_pair_atom2]
+    num_lower_plane_pathways_pair_atom1 = len(lower_plane_neighbor_atoms_from_pair_atom1)
+    num_lower_plane_pathways_pair_atom2 = len(lower_plane_neighbor_atoms_from_pair_atom2)
+    compiled_lower_plane_pathways_pair_atom1 = np.hstack((pair_atom1 * np.ones(num_lower_plane_pathways_pair_atom1)[:, None],
+                                              lower_plane_neighbor_atoms_from_pair_atom1[:, None],
+                                              lower_plane_neighbor_distance_vectors_from_pair_atom1,
+                                              lower_plane_neighbor_distances_from_pair_atom1[:, None]))
+    compiled_lower_plane_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_lower_plane_pathways_pair_atom2)[:, None],
+                                              lower_plane_neighbor_atoms_from_pair_atom2[:, None],
+                                              lower_plane_neighbor_distance_vectors_from_pair_atom2,
+                                              lower_plane_neighbor_distances_from_pair_atom2[:, None]))
+    compiled_lower_plane_pathways = np.vstack((compiled_lower_plane_pathways_pair_atom1, compiled_lower_plane_pathways_pair_atom2))
+    return (cell, compiled_in_plane_pathways, compiled_upper_plane_pathways, compiled_lower_plane_pathways)
