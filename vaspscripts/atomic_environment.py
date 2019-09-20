@@ -104,7 +104,7 @@ def get_unique_pathways(compiled_pathways):
 
 def get_plane_analysis(src_file_path, cell_size, element_type,
                        desired_pairwise_distance, num_plane_separation,
-                       ref_plane, selection_bounds):
+                       ref_plane, selection_bounds, cutoff_distance):
     (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
 
     # plane contributions of all points
@@ -216,7 +216,6 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
         neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
 
     # find unique pathways within cutoff distance
-    cutoff_distance = 7.0
     compiled_neighbor_pair_atoms = neighbor_pair_atoms.flatten()
     neighbor_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_neighbor_pair_atoms, mic=True, vector=True)
     neighbor_distances_pair_atom1 = np.linalg.norm(neighbor_distance_vectors_pair_atom1, axis=1)
