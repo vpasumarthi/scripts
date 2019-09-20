@@ -317,4 +317,12 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     
     compiled_pathways = np.vstack((unique_in_plane_pathways, unique_out_of_plane_pathways))
     unique_pathways = get_unique_pathways(compiled_pathways)
+    num_unique_pathways = len(unique_pathways)
+    unique_neighbor_atom_indices = unique_pathways[:, 1].astype(int)
+    unique_neighbor_pair_atoms = np.zeros((num_unique_pathways, 2), int)
+    unique_neighbor_pair_atoms[:, 0] = unique_neighbor_atom_indices
+    for index, atom_index in enumerate(unique_neighbor_atom_indices):
+        row_index, column_index = np.where(desired_pair_indices == atom_index)
+        new_column_index = 1 if column_index[0] == 0 else 0
+        unique_neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
     return (cell, unique_in_plane_pathways, unique_out_of_plane_pathways)
