@@ -111,7 +111,8 @@ def get_plane_analysis(src_file_path, cell_size, element_type, desired_pairwise_
     # planes parallel to x/a + y/b = 1
     plane_contributions = element_positions[:, 0] / cell_lengths[0] + element_positions[:, 1] / cell_lengths[1]
     num_planes = 2 * (cell_size[0] + cell_size[1])  # plane intersects a and b axis at half-unit cell length
-    bins = np.linspace(0, 2, num_planes+1)  # 0 through one corner, 1 through diagonal, 2 through diagonally opposite corner
+    bin_edge_shift = plane_contributions.min()
+    bins = np.linspace(0, 2, num_planes+1)  + bin_edge_shift # 0 through one corner, 1 through diagonal, 2 through diagonally opposite corner
     atoms_sorted_by_plane = np.empty(num_planes, object)
     pair_atoms_in_plane = np.empty(num_planes, object)
     num_atoms_by_plane = np.zeros(num_planes)
