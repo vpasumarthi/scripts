@@ -102,7 +102,7 @@ def get_unique_pathways(compiled_pathways):
     unique_pathways = np.asarray(unique_pathways)
     return unique_pathways
 
-def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
+def get_plane_analysis(src_file_path, cell_size, element_type, desired_pairwise_distance):
     (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
 
     # plane contributions of all points
@@ -110,7 +110,7 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
     element_positions = cell.positions[atomic_indices]
     # planes parallel to x/a + y/b = 1
     plane_contributions = element_positions[:, 0] / cell_lengths[0] + element_positions[:, 1] / cell_lengths[1]
-    num_planes = 32  # identified from visual observation
+    num_planes = 2 * (cell_size[0] + cell_size[1])  # plane intersects a and b axis at half-unit cell length
     bins = np.linspace(0, 2, num_planes+1)  # 0 through one corner, 1 through diagonal, 2 through diagonally opposite corner
     atoms_sorted_by_plane = np.empty(num_planes, object)
     pair_atoms_in_plane = np.empty(num_planes, object)
