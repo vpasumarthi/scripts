@@ -229,7 +229,7 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               neighbor_atoms_from_pair_atom1[:, None],
                                               neighbor_distance_vectors_from_pair_atom1,
                                               neighbor_distances_from_pair_atom1[:, None]))
-    compiled_in_plane_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_in_plane_pathways_pair_atom2)[:, None],
+    compiled_in_plane_pathways_pair_atom2 = np.hstack((pair_atom2 * np.ones(num_in_plane_pathways_pair_atom2)[:, None],
                                               neighbor_atoms_from_pair_atom2[:, None],
                                               neighbor_distance_vectors_from_pair_atom2,
                                               neighbor_distances_from_pair_atom2[:, None]))
@@ -269,7 +269,7 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               upper_plane_neighbor_atoms_from_pair_atom1[:, None],
                                               upper_plane_neighbor_distance_vectors_from_pair_atom1,
                                               upper_plane_neighbor_distances_from_pair_atom1[:, None]))
-    compiled_upper_plane_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_upper_plane_pathways_pair_atom2)[:, None],
+    compiled_upper_plane_pathways_pair_atom2 = np.hstack((pair_atom2 * np.ones(num_upper_plane_pathways_pair_atom2)[:, None],
                                               upper_plane_neighbor_atoms_from_pair_atom2[:, None],
                                               upper_plane_neighbor_distance_vectors_from_pair_atom2,
                                               upper_plane_neighbor_distances_from_pair_atom2[:, None]))
@@ -306,7 +306,7 @@ def get_plane_analysis(src_file_path, element_type, desired_pairwise_distance):
                                               lower_plane_neighbor_atoms_from_pair_atom1[:, None],
                                               lower_plane_neighbor_distance_vectors_from_pair_atom1,
                                               lower_plane_neighbor_distances_from_pair_atom1[:, None]))
-    compiled_lower_plane_pathways_pair_atom2 = np.hstack((pair_atom1 * np.ones(num_lower_plane_pathways_pair_atom2)[:, None],
+    compiled_lower_plane_pathways_pair_atom2 = np.hstack((pair_atom2 * np.ones(num_lower_plane_pathways_pair_atom2)[:, None],
                                               lower_plane_neighbor_atoms_from_pair_atom2[:, None],
                                               lower_plane_neighbor_distance_vectors_from_pair_atom2,
                                               lower_plane_neighbor_distances_from_pair_atom2[:, None]))
