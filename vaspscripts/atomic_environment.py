@@ -102,6 +102,9 @@ def get_unique_pathways(compiled_pathways):
     unique_pathways = np.asarray(unique_pathways)
     return unique_pathways
 
+def get_pair_atom():
+    return pair_atom
+
 def get_plane_analysis(src_file_path, cell_size, element_type,
                        desired_pairwise_distance, num_plane_separation,
                        ref_plane, selection_bounds, cutoff_distance):
