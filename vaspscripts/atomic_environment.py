@@ -104,7 +104,7 @@ def get_unique_pathways(compiled_pathways):
 
 def get_plane_analysis(src_file_path, cell_size, element_type,
                        desired_pairwise_distance, num_plane_separation,
-                       ref_plane):
+                       ref_plane, selection_bounds):
     (cell, atomic_indices, desired_pair_indices) = identify_desired_atom_pair_indices(src_file_path, element_type, desired_pairwise_distance)
 
     # plane contributions of all points
@@ -142,8 +142,7 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     # select one pair from ref plane
     ref_plane_atom_indices = pair_atoms_in_plane[ref_plane_index]
     ref_plane_atom_positions = cell.positions[ref_plane_atom_indices]
-    xmin, xmax = 0.45, 0.55
-    ymin, ymax = 0.45, 0.55
+    xmin, xmax, ymin, ymax = selection_bounds
     pair_atoms_within_bounds = ref_plane_atom_indices[(ref_plane_atom_positions[:, 0] / cell_lengths[0] > xmin) & (ref_plane_atom_positions[:, 0] / cell_lengths[0] < xmax) & (ref_plane_atom_positions[:, 1] / cell_lengths[1] > ymin) & (ref_plane_atom_positions[:, 1] / cell_lengths[1] < ymax)]
     ref_pair_atom_of_choice = pair_atoms_within_bounds[0]
     pair_index_of_selected_atom = np.where(desired_pair_indices == ref_pair_atom_of_choice)[0][0]
