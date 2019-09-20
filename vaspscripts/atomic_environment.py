@@ -131,55 +131,55 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
             pair_element_index_array = np.asarray(pair_element_index_list)
             pair_atoms_in_plane[plane_index] = desired_pair_indices[pair_element_index_array[:, 0], pair_element_index_array[:, 1]]
 
-    central_plane_index = int(num_planes / 2 - 1)
-    upper_plane_index = central_plane_index + num_plane_separation
-    lower_plane_index = central_plane_index - num_plane_separation
+    ref_plane_index = int(num_planes / 2 - 1)
+    upper_plane_index = ref_plane_index + num_plane_separation
+    lower_plane_index = ref_plane_index - num_plane_separation
 
-    # select one pair from central plane
-    central_plane_atom_indices = pair_atoms_in_plane[central_plane_index]
-    central_plane_atom_positions = cell.positions[central_plane_atom_indices]
+    # select one pair from ref plane
+    ref_plane_atom_indices = pair_atoms_in_plane[ref_plane_index]
+    ref_plane_atom_positions = cell.positions[ref_plane_atom_indices]
     xmin, xmax = 0.45, 0.55
     ymin, ymax = 0.45, 0.55
-    pair_atoms_within_bounds = central_plane_atom_indices[(central_plane_atom_positions[:, 0] / cell_lengths[0] > xmin) & (central_plane_atom_positions[:, 0] / cell_lengths[0] < xmax) & (central_plane_atom_positions[:, 1] / cell_lengths[1] > ymin) & (central_plane_atom_positions[:, 1] / cell_lengths[1] < ymax)]
-    central_pair_atom_of_choice = pair_atoms_within_bounds[0]
-    pair_index_of_selected_atom = np.where(desired_pair_indices == central_pair_atom_of_choice)[0][0]
-    atom_indices_of_central_pair = desired_pair_indices[pair_index_of_selected_atom, :]
-    pair_atom1, pair_atom2 = atom_indices_of_central_pair
+    pair_atoms_within_bounds = ref_plane_atom_indices[(ref_plane_atom_positions[:, 0] / cell_lengths[0] > xmin) & (ref_plane_atom_positions[:, 0] / cell_lengths[0] < xmax) & (ref_plane_atom_positions[:, 1] / cell_lengths[1] > ymin) & (ref_plane_atom_positions[:, 1] / cell_lengths[1] < ymax)]
+    ref_pair_atom_of_choice = pair_atoms_within_bounds[0]
+    pair_index_of_selected_atom = np.where(desired_pair_indices == ref_pair_atom_of_choice)[0][0]
+    atom_indices_of_ref_pair = desired_pair_indices[pair_index_of_selected_atom, :]
+    pair_atom1, pair_atom2 = atom_indices_of_ref_pair
 
     ## find in-plane neighbors
-    # find atom indices of neighbors in central plane
-    central_pair_atom_index = np.where(central_plane_atom_indices == central_pair_atom_of_choice)[0][0]
-    neighbor_central_plane_atom_indices = np.delete(central_plane_atom_indices, central_pair_atom_index)
+    # find atom indices of neighbors in ref plane
+    ref_pair_atom_index = np.where(ref_plane_atom_indices == ref_pair_atom_of_choice)[0][0]
+    neighbor_ref_plane_atom_indices = np.delete(ref_plane_atom_indices, ref_pair_atom_index)
 
-    # classify central pair atom indices between up-the-plane, down-the-plane
-    central_pair_positions = cell.positions[atom_indices_of_central_pair]
-    central_pair_plane_contributions = central_pair_positions[:, :2] / np.tile(cell_lengths[:2], (2, 1))
-    relative_plane_contributions = central_pair_plane_contributions[1] / central_pair_plane_contributions[0]
+    # classify ref pair atom indices between up-the-plane, down-the-plane
+    ref_pair_positions = cell.positions[atom_indices_of_ref_pair]
+    ref_pair_plane_contributions = ref_pair_positions[:, :2] / np.tile(cell_lengths[:2], (2, 1))
+    relative_plane_contributions = ref_pair_plane_contributions[1] / ref_pair_plane_contributions[0]
     if (relative_plane_contributions[0] < 1) & (relative_plane_contributions[1] > 1):
-        pair_atom_index_up_the_plane = atom_indices_of_central_pair[1]
-        pair_atom_index_down_the_plane = atom_indices_of_central_pair[0]
-        plane_contribution_up_the_plane = central_pair_plane_contributions[1]
-        plane_contribution_down_the_plane = central_pair_plane_contributions[0]
+        pair_atom_index_up_the_plane = atom_indices_of_ref_pair[1]
+        pair_atom_index_down_the_plane = atom_indices_of_ref_pair[0]
+        plane_contribution_up_the_plane = ref_pair_plane_contributions[1]
+        plane_contribution_down_the_plane = ref_pair_plane_contributions[0]
     elif (relative_plane_contributions[0] > 1) & (relative_plane_contributions[1] < 1):
-        pair_atom_index_up_the_plane = atom_indices_of_central_pair[0]
-        pair_atom_index_down_the_plane = atom_indices_of_central_pair[1]
-        plane_contribution_up_the_plane = central_pair_plane_contributions[0]
-        plane_contribution_down_the_plane = central_pair_plane_contributions[1]
+        pair_atom_index_up_the_plane = atom_indices_of_ref_pair[0]
+        pair_atom_index_down_the_plane = atom_indices_of_ref_pair[1]
+        plane_contribution_up_the_plane = ref_pair_plane_contributions[0]
+        plane_contribution_down_the_plane = ref_pair_plane_contributions[1]
     else:
         print(f'Pair atoms are not aligned along the direction of plane.')
         exit()
 
     # compute plane contributions for the remaining atoms
-    neighbor_central_plane_atom_positions = cell.positions[neighbor_central_plane_atom_indices]
-    num_neighbor_central_plane_atoms = len(neighbor_central_plane_atom_indices)
-    neighbor_central_plane_contributions = neighbor_central_plane_atom_positions[:, :2] / np.tile(cell_lengths[:2], (num_neighbor_central_plane_atoms, 1))
+    neighbor_ref_plane_atom_positions = cell.positions[neighbor_ref_plane_atom_indices]
+    num_neighbor_ref_plane_atoms = len(neighbor_ref_plane_atom_indices)
+    neighbor_ref_plane_contributions = neighbor_ref_plane_atom_positions[:, :2] / np.tile(cell_lengths[:2], (num_neighbor_ref_plane_atoms, 1))
 
     # divide neighbor atoms into up-the-plane, down-the-plane sections
-    neighbor_relative_contributions_up_the_plane = neighbor_central_plane_contributions / np.tile(plane_contribution_up_the_plane, (num_neighbor_central_plane_atoms, 1))
-    neighbor_relative_contributions_down_the_plane = neighbor_central_plane_contributions / np.tile(plane_contribution_down_the_plane, (num_neighbor_central_plane_atoms, 1))
-    neighbors_up_the_plane = neighbor_central_plane_atom_indices[(neighbor_relative_contributions_up_the_plane[:, 0] < 1) &
+    neighbor_relative_contributions_up_the_plane = neighbor_ref_plane_contributions / np.tile(plane_contribution_up_the_plane, (num_neighbor_ref_plane_atoms, 1))
+    neighbor_relative_contributions_down_the_plane = neighbor_ref_plane_contributions / np.tile(plane_contribution_down_the_plane, (num_neighbor_ref_plane_atoms, 1))
+    neighbors_up_the_plane = neighbor_ref_plane_atom_indices[(neighbor_relative_contributions_up_the_plane[:, 0] < 1) &
                                                                  (neighbor_relative_contributions_up_the_plane[:, 1] > 1)]
-    neighbors_down_the_plane = neighbor_central_plane_atom_indices[(neighbor_relative_contributions_down_the_plane[:, 0] > 1) &
+    neighbors_down_the_plane = neighbor_ref_plane_atom_indices[(neighbor_relative_contributions_down_the_plane[:, 0] > 1) &
                                                                    (neighbor_relative_contributions_down_the_plane[:, 1] < 1)]
 
     # compute relative distances from the pair atoms
@@ -192,20 +192,20 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     pair_index_down_the_plane = np.where(desired_pair_indices == neighbor_pair_atom_down_the_plane)[0][0]
     pair_atoms_down_the_plane = desired_pair_indices[pair_index_down_the_plane, :]
 
-    # compute inter-pair distances with central pair atoms: [(0, 0), (0, 1), (1, 0), (1, 1)]
-    up_the_plane_distance_vectors_with_central_pair = np.zeros((4, 3))
-    up_the_plane_distance_vectors_with_central_pair[:2, :] = cell.get_distances(atom_indices_of_central_pair[0], pair_atoms_up_the_plane, mic=True, vector=True)
-    up_the_plane_distance_vectors_with_central_pair[2:, :] = cell.get_distances(atom_indices_of_central_pair[1], pair_atoms_up_the_plane, mic=True, vector=True)
-    up_the_plane_distances_with_central_pair = np.linalg.norm(up_the_plane_distance_vectors_with_central_pair, axis=1)
+    # compute inter-pair distances with ref pair atoms: [(0, 0), (0, 1), (1, 0), (1, 1)]
+    up_the_plane_distance_vectors_with_ref_pair = np.zeros((4, 3))
+    up_the_plane_distance_vectors_with_ref_pair[:2, :] = cell.get_distances(atom_indices_of_ref_pair[0], pair_atoms_up_the_plane, mic=True, vector=True)
+    up_the_plane_distance_vectors_with_ref_pair[2:, :] = cell.get_distances(atom_indices_of_ref_pair[1], pair_atoms_up_the_plane, mic=True, vector=True)
+    up_the_plane_distances_with_ref_pair = np.linalg.norm(up_the_plane_distance_vectors_with_ref_pair, axis=1)
 
-    down_the_plane_distance_vectors_with_central_pair = np.zeros((4, 3))
-    down_the_plane_distance_vectors_with_central_pair[:2, :] = cell.get_distances(atom_indices_of_central_pair[0], pair_atoms_down_the_plane, mic=True, vector=True)
-    down_the_plane_distance_vectors_with_central_pair[2:, :] = cell.get_distances(atom_indices_of_central_pair[1], pair_atoms_down_the_plane, mic=True, vector=True)
-    down_the_plane_distances_with_central_pair = np.linalg.norm(down_the_plane_distance_vectors_with_central_pair, axis=1)
+    down_the_plane_distance_vectors_with_ref_pair = np.zeros((4, 3))
+    down_the_plane_distance_vectors_with_ref_pair[:2, :] = cell.get_distances(atom_indices_of_ref_pair[0], pair_atoms_down_the_plane, mic=True, vector=True)
+    down_the_plane_distance_vectors_with_ref_pair[2:, :] = cell.get_distances(atom_indices_of_ref_pair[1], pair_atoms_down_the_plane, mic=True, vector=True)
+    down_the_plane_distances_with_ref_pair = np.linalg.norm(down_the_plane_distance_vectors_with_ref_pair, axis=1)
     
-    neighbor_pair_atoms = np.zeros((num_neighbor_central_plane_atoms, 2), int)
-    neighbor_pair_atoms[:, 0] = neighbor_central_plane_atom_indices
-    for index, neighbor_atom_index in enumerate(neighbor_central_plane_atom_indices):
+    neighbor_pair_atoms = np.zeros((num_neighbor_ref_plane_atoms, 2), int)
+    neighbor_pair_atoms[:, 0] = neighbor_ref_plane_atom_indices
+    for index, neighbor_atom_index in enumerate(neighbor_ref_plane_atom_indices):
         row_index, column_index = np.where(desired_pair_indices == neighbor_atom_index)
         new_column_index = 1 if column_index[0] == 0 else 0
         neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
