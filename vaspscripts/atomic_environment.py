@@ -151,8 +151,10 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
 
     ## find in-plane neighbors
     # find atom indices of neighbors in ref plane
-    ref_pair_atom_index = np.where(ref_plane_atom_indices == ref_pair_atom_of_choice)[0][0]
-    neighbor_ref_plane_atom_indices = np.delete(ref_plane_atom_indices, ref_pair_atom_index)
+    neighbor_ref_plane_atom_indices = ref_plane_atom_indices.copy()
+    for atom_index in atom_indices_of_ref_pair:
+        ref_pair_atom_index = np.where(neighbor_ref_plane_atom_indices == atom_index)[0][0]
+        neighbor_ref_plane_atom_indices = np.delete(neighbor_ref_plane_atom_indices, ref_pair_atom_index)
 
     # classify ref pair atom indices between up-the-plane, down-the-plane
     ref_pair_positions = cell.positions[atom_indices_of_ref_pair]
