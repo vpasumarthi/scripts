@@ -217,9 +217,7 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     neighbor_pair_atoms = np.zeros((num_neighbor_ref_plane_atoms, 2), int)
     neighbor_pair_atoms[:, 0] = neighbor_ref_plane_atom_indices
     for index, neighbor_atom_index in enumerate(neighbor_ref_plane_atom_indices):
-        row_index, column_index = np.where(desired_pair_indices == neighbor_atom_index)
-        new_column_index = 1 if column_index[0] == 0 else 0
-        neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+        neighbor_pair_atoms[index, 1] = get_pair_atom_index(desired_pair_indices, neighbor_atom_index)
 
     # find unique pathways within cutoff distance
     compiled_neighbor_pair_atoms = neighbor_pair_atoms.flatten()
@@ -259,9 +257,7 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     pair_atoms_in_upper_plane = np.zeros((num_upper_plane_atoms, 2), int)
     pair_atoms_in_upper_plane[:, 0] = upper_plane_atom_indices
     for index, atom_index in enumerate(upper_plane_atom_indices):
-        row_index, column_index = np.where(desired_pair_indices == atom_index)
-        new_column_index = 1 if column_index[0] == 0 else 0
-        pair_atoms_in_upper_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+        pair_atoms_in_upper_plane[index, 1] = get_pair_atom_index(desired_pair_indices, atom_index)
     compiled_upper_plane_pair_atoms = pair_atoms_in_upper_plane.flatten()
     upper_plane_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_upper_plane_pair_atoms, mic=True, vector=True)
     upper_plane_distances_pair_atom1 = np.linalg.norm(upper_plane_distance_vectors_pair_atom1, axis=1)
@@ -296,9 +292,7 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     pair_atoms_in_lower_plane = np.zeros((num_lower_plane_atoms, 2), int)
     pair_atoms_in_lower_plane[:, 0] = lower_plane_atom_indices
     for index, atom_index in enumerate(lower_plane_atom_indices):
-        row_index, column_index = np.where(desired_pair_indices == atom_index)
-        new_column_index = 1 if column_index[0] == 0 else 0
-        pair_atoms_in_lower_plane[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+        pair_atoms_in_lower_plane[index, 1] = get_pair_atom_index(desired_pair_indices, atom_index)
     compiled_lower_plane_pair_atoms = pair_atoms_in_lower_plane.flatten()
     lower_plane_distance_vectors_pair_atom1 = cell.get_distances(pair_atom1, compiled_lower_plane_pair_atoms, mic=True, vector=True)
     lower_plane_distances_pair_atom1 = np.linalg.norm(lower_plane_distance_vectors_pair_atom1, axis=1)
@@ -335,7 +329,5 @@ def get_plane_analysis(src_file_path, cell_size, element_type,
     unique_neighbor_pair_atoms = np.zeros((num_unique_pathways, 2), int)
     unique_neighbor_pair_atoms[:, 0] = unique_neighbor_atom_indices
     for index, atom_index in enumerate(unique_neighbor_atom_indices):
-        row_index, column_index = np.where(desired_pair_indices == atom_index)
-        new_column_index = 1 if column_index[0] == 0 else 0
-        unique_neighbor_pair_atoms[index, 1] = desired_pair_indices[row_index[0], new_column_index]
+        unique_neighbor_pair_atoms[index, 1] = get_pair_atom_index(desired_pair_indices, atom_index)
     return (cell, unique_in_plane_pathways, unique_out_of_plane_pathways)
