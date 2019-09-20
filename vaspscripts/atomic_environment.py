@@ -126,8 +126,9 @@ def get_plane_analysis(src_file_path, cell_size, element_type, desired_pairwise_
             pair_element_index_tuple = np.where(desired_pair_indices == atom_index)
             if pair_element_index_tuple[0].shape[0]:
                 pair_element_index_list.append([pair_element_index_tuple[0][0], pair_element_index_tuple[1][0]])
-        pair_element_index_array = np.asarray(pair_element_index_list)
-        pair_atoms_in_plane[plane_index] = desired_pair_indices[pair_element_index_array[:, 0], pair_element_index_array[:, 1]]
+        if len(pair_element_index_list):
+            pair_element_index_array = np.asarray(pair_element_index_list)
+            pair_atoms_in_plane[plane_index] = desired_pair_indices[pair_element_index_array[:, 0], pair_element_index_array[:, 1]]
 
     central_plane_index = int(num_planes / 2 - 1)
     upper_plane_index = central_plane_index + 1
