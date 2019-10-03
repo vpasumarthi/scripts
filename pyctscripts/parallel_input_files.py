@@ -48,7 +48,7 @@ def generate_slurm_msd_script(src_path):
     end_term = 'END'
     
     with open(job_ids_file_path, 'r') as job_ids_file:
-       job_ids = job_ids_file.readline().strip()[:-1]
+        job_ids = job_ids_file.readline().strip()[:-1]
     
     with open(old_slurm_file_path, 'r') as old_slurm_file, open(new_slurm_file_path, 'w') as new_slurm_file:
         for line_index, line in enumerate(old_slurm_file):
