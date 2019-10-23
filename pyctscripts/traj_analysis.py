@@ -8,7 +8,7 @@ from PyCT import constants
 
 def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
                     max_hop_dist):
-    report_file_name = f'traj_analysis_{traj_index+1}.log'
+    report_file_name = f'traj_analysis.log'
     num_kmc_steps = sum(counts_hops[hop_proc_indices])
     total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
     [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
@@ -29,7 +29,7 @@ def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
     return (uni_escape_dist, escape_proc_indices, escape_counts)
 
 def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
-                          dst_path, plot_style, traj_index):
+                          dst_path, plot_style):
     # analysis on choice among available processes
     [unique_hop_dist, counts_hops] = np.unique(disp_array_prec,
                                                return_counts=True)
@@ -51,7 +51,7 @@ def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of processes')
-    filename = f'process_histogram_{plot_style}_{traj_index+1}'
+    filename = f'process_histogram_{plot_style}'
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
@@ -60,7 +60,7 @@ def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
 
 def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path,
-                              plot_style, traj_index):
+                              plot_style):
     # analysis on escape distances
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -78,7 +78,7 @@ def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Escape Distances')
-    filename = f'escape_distance_histogram_{plot_style}_{traj_index+1}'
+    filename = f'escape_distance_histogram_{plot_style}'
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
@@ -86,7 +86,7 @@ def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
     return None
 
 def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
-                           annotate, dst_path, plot_style, traj_index):
+                           annotate, dst_path, plot_style):
     # analysis on hopping distance contributing to mobility
     [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
                                                            return_counts=True)
@@ -107,7 +107,7 @@ def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Hop Distances contributing to mobility')
-    filename = f'mobil_hop_distance_histogram_{plot_style}_{traj_index+1}'
+    filename = f'mobil_hop_distance_histogram_{plot_style}'
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
@@ -115,7 +115,7 @@ def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
     return None
 
 def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
-                         plot_style, traj_index):
+                         plot_style):
     # analysis on hopping distance contributing to rattling
     [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
                                         rattle_dist_array, return_counts=True)
@@ -136,7 +136,7 @@ def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Hop Distances contributing to rattling')
-    filename = f'rattle_hop_distance_histogram_{plot_style}_{traj_index+1}'
+    filename = f'rattle_hop_distance_histogram_{plot_style}'
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
