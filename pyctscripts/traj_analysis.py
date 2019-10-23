@@ -28,11 +28,23 @@ def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
                     f'{", ".join(str(dist) for dist in escape_dist_list)}\n')
     return (uni_escape_dist, escape_proc_indices, escape_counts)
 
-def plot_process_analysis(disp_array_prec, max_hop_dist, bar_color, annotate,
+def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
                           dst_path, plot_style):
+    n_traj = len(disp_array_prec_dict)
+    unique_hop_dist_dict = {}
+    counts_hops_dict = {}
+    hop_dist_to_count_dict = {}
+    for traj_index in range(n_traj):
     # analysis on choice among available processes
-    [unique_hop_dist, counts_hops] = np.unique(disp_array_prec,
-                                               return_counts=True)
+        [unique_hop_dist, counts_hops_dict] = np.unique(disp_array_prec_dict[traj_index+1],
+                                                        return_counts=True)
+        for hop_dist_index, hop_dist in enumerate(unique_hop_dist):
+            if hop_dist in hop_dist_to_count_dict:
+                hop_dist_to_count_dict[hop_dist].append(counts_hops_dict[hop_dist_index])
+            else:
+                hop_dist_to_count_dict[hop_dist] = [0] * traj_index
+                hop_dist_to_count_dict[hop_dist].append(counts_hops_dict[hop_dist_index])
+
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -163,7 +175,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
     rattle_event_array_dict = {}
     mobility_dist_array_dict = {}
     for traj_index in range(n_traj):
-        position_array_dict[traj_index+1] = np.load(f'{dst_path}/traj{traj_index+1}/unwrapped_traj.npy') / constants.ANG2BOHR
+        position_array = np.load(f'{dst_path}/traj{traj_index+1}/unwrapped_traj.npy') / constants.ANG2BOHR
     
         disp_vec_array = np.diff(position_array, axis=0)
         disp_array = np.linalg.norm(disp_vec_array, axis=1)
