@@ -158,8 +158,12 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
             print(exc)
 
     n_traj = int(sim_params['n_traj'])
+    disp_array_prec_dict = {}
+    rattle_dist_array_dict = {}
+    rattle_event_array_dict = {}
+    mobility_dist_array_dict = {}
     for traj_index in range(n_traj):
-        position_array = np.load(f'{dst_path}/traj{traj_index+1}/unwrapped_traj.npy') / constants.ANG2BOHR
+        position_array_dict[traj_index+1] = np.load(f'{dst_path}/traj{traj_index+1}/unwrapped_traj.npy') / constants.ANG2BOHR
     
         disp_vec_array = np.diff(position_array, axis=0)
         disp_array = np.linalg.norm(disp_vec_array, axis=1)
@@ -189,23 +193,27 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     rattle_event_list.append([num_rattles, escape_dist])
                 mobility_dist_list.append(hop_dist)
                 num_rattles = 0
-    
-        rattle_event_array = np.asarray(rattle_event_list)
+
         rattle_dist_array = np.asarray(rattle_dist_list)
+        rattle_event_array = np.asarray(rattle_event_list)
         mobility_dist_array = np.asarray(mobility_dist_list)
-    
-        (counts_hops, hop_proc_indices) = plot_process_analysis(
-                                                    disp_array_prec, max_hop_dist,
-                                                    bar_color, annotate, dst_path,
-                                                    plot_style, traj_index)
-        (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
-                    counts_hops, hop_proc_indices, rattle_event_array,
-                    max_hop_dist, traj_index)
-        plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
-                                  escape_counts, bar_color, annotate, dst_path,
-                                  plot_style, traj_index)
-        plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
-                               annotate, dst_path, plot_style, traj_index)
-        plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
-                             plot_style, traj_index)
+        rattle_dist_array_dict[traj_index+1] = rattle_dist_array
+        rattle_event_array_dict[traj_index+1] = rattle_event_array
+        mobility_dist_array_dict[traj_index+1] = mobility_dist_array
+        disp_array_prec_dict[traj_index+1] = disp_array_prec
+
+    (counts_hops, hop_proc_indices) = plot_process_analysis(
+                                                disp_array_prec_dict, max_hop_dist,
+                                                bar_color, annotate, dst_path,
+                                                plot_style)
+    (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
+                counts_hops, hop_proc_indices, rattle_event_array_dict,
+                max_hop_dist)
+    plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
+                              escape_counts, bar_color, annotate, dst_path,
+                              plot_style)
+    plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
+                           annotate, dst_path, plot_style)
+    plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
+                         plot_style)
     return None
