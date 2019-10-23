@@ -157,52 +157,54 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
         except yaml.YAMLError as exc:
             print(exc)
 
-    position_array = np.load(dst_path / 'traj1/unwrapped_traj.npy') / constants.ANG2BOHR
-
-    disp_vec_array = np.diff(position_array, axis=0)
-    disp_array = np.linalg.norm(disp_vec_array, axis=1)
-    # round displacements to given precision
-    disp_array_prec = np.round(disp_array, disp_prec)
+    n_traj = int(sim_params['n_traj'])
+    for traj_index in range(n_traj):
+        position_array = np.load(f'{dst_path}/traj{traj_index+1}/unwrapped_traj.npy') / constants.ANG2BOHR
     
-    num_steps = position_array.shape[0] - 1
-    num_rattles = 0
-    rattle_dist_list = []
-    rattle_event_list = []
-    mobility_dist_list = []
-    for step_index in range(num_steps):
-        hop_dist = disp_array_prec[step_index]
-        if hop_dist in intra_poly_dist_list:
-            num_rattles += 1
-            if num_rattles == 2:
-                hop_dist_old = disp_array_prec[step_index - 1]
-                rattle_dist_list.append(hop_dist_old)
-                rattle_dist_list.append(hop_dist)
-            elif num_rattles > 1:
-                rattle_dist_list.append(hop_dist)
-        else:
-            if num_rattles == 1:
-                mobility_dist_list.append(disp_array_prec[step_index - 1])
-            elif num_rattles > 1:
-                escape_dist = hop_dist
-                rattle_event_list.append([num_rattles, escape_dist])
-            mobility_dist_list.append(hop_dist)
-            num_rattles = 0
-
-    rattle_event_array = np.asarray(rattle_event_list)
-    rattle_dist_array = np.asarray(rattle_dist_list)
-    mobility_dist_array = np.asarray(mobility_dist_list)
-
-    (counts_hops, hop_proc_indices) = plot_process_analysis(
-                                                disp_array_prec, max_hop_dist,
-                                                bar_color, annotate, dst_path,
-                                                plot_style)
-    (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
-                counts_hops, hop_proc_indices, rattle_event_array, max_hop_dist)
-    plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
-                              escape_counts, bar_color, annotate, dst_path,
-                              plot_style)
-    plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
-                           annotate, dst_path, plot_style)
-    plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
-                         plot_style)
+        disp_vec_array = np.diff(position_array, axis=0)
+        disp_array = np.linalg.norm(disp_vec_array, axis=1)
+        # round displacements to given precision
+        disp_array_prec = np.round(disp_array, disp_prec)
+        
+        num_steps = position_array.shape[0] - 1
+        num_rattles = 0
+        rattle_dist_list = []
+        rattle_event_list = []
+        mobility_dist_list = []
+        for step_index in range(num_steps):
+            hop_dist = disp_array_prec[step_index]
+            if hop_dist in intra_poly_dist_list:
+                num_rattles += 1
+                if num_rattles == 2:
+                    hop_dist_old = disp_array_prec[step_index - 1]
+                    rattle_dist_list.append(hop_dist_old)
+                    rattle_dist_list.append(hop_dist)
+                elif num_rattles > 1:
+                    rattle_dist_list.append(hop_dist)
+            else:
+                if num_rattles == 1:
+                    mobility_dist_list.append(disp_array_prec[step_index - 1])
+                elif num_rattles > 1:
+                    escape_dist = hop_dist
+                    rattle_event_list.append([num_rattles, escape_dist])
+                mobility_dist_list.append(hop_dist)
+                num_rattles = 0
+    
+        rattle_event_array = np.asarray(rattle_event_list)
+        rattle_dist_array = np.asarray(rattle_dist_list)
+        mobility_dist_array = np.asarray(mobility_dist_list)
+    
+        (counts_hops, hop_proc_indices) = plot_process_analysis(
+                                                    disp_array_prec, max_hop_dist,
+                                                    bar_color, annotate, dst_path,
+                                                    plot_style)
+        (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
+                    counts_hops, hop_proc_indices, rattle_event_array, max_hop_dist)
+        plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
+                                  escape_counts, bar_color, annotate, dst_path,
+                                  plot_style)
+        plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
+                               annotate, dst_path, plot_style)
+        plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
+                             plot_style)
     return None
