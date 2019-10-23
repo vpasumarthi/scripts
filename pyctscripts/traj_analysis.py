@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import yaml
 
 from PyCT import constants
 
@@ -146,6 +147,16 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                   annotate, bar_color, plot_style):
     #NOTE: currently works with unwrapped_traj.dat which has positions at every
     # step written to it using 'write_every_step' branch of PyCT
+
+    # Load simulation parameters
+    sim_param_file_name = 'simulation_parameters.yml'
+    sim_param_file_path = dst_path / sim_param_file_name
+    with open(sim_param_file_path, 'r') as stream:
+        try:
+            sim_params = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
     position_array = np.load(dst_path / 'traj1/unwrapped_traj.npy') / constants.ANG2BOHR
 
     disp_vec_array = np.diff(position_array, axis=0)
