@@ -13,6 +13,9 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
     num_kmc_steps_array = np.zeros(n_traj, int)
     total_rattle_steps_array = np.zeros(n_traj, int)
     average_rattles_per_event_array = np.zeros(n_traj)
+    escape_dist_list_array = np.empty(n_traj, object)
+    escape_count_array = np.empty(n_traj, object)
+    escape_proc_indices_array = np.empty(n_traj, object)
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
     for traj_index in range(n_traj):
         num_kmc_steps_array[traj_index] = sum(cumulative_hop_count[:, traj_index][hop_proc_indices])
@@ -21,15 +24,14 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
         [uni_escape_dist, escape_counts] = np.unique(rattle_event_array_dict[traj_index+1][:, 1],
                                                      return_counts=True)
         escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
+        escape_dist_list_array[traj_index] = np.copy(uni_escape_dist[escape_proc_indices])
+        escape_count_array[traj_index] = np.copy(escape_counts)
+        escape_proc_indices_array[traj_index] = np.copy(escape_proc_indices)
         if traj_index == 0:
-            escape_dist_list_array = uni_escape_dist[escape_proc_indices]
-            escape_count_array = escape_counts
-            escape_proc_indices_array = escape_proc_indices
+            cumulative_escape_dist_list = np.copy(uni_escape_dist[escape_proc_indices])
         else:
-            escape_dist_list_array = np.append(escape_dist_list_array, uni_escape_dist[escape_proc_indices])
-            escape_count_array = np.append(escape_count_array, escape_counts)
-            escape_proc_indices_array = np.append(escape_proc_indices, escape_proc_indices)
-    unique_escape_dist_array = np.unique(escape_dist_list_array.round(4))
+            cumulative_escape_dist_list = np.append(cumulative_escape_dist_list, uni_escape_dist[escape_proc_indices])
+    unique_escape_dist_array = np.unique(cumulative_escape_dist_list.round(4))
     with open(report_file_name, 'w') as report_file:
         report_file.write(f'Total number of kmc steps in simulation: {num_kmc_steps_array.mean():4.3e} +/- {num_kmc_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
         report_file.write(f'Cumulative number of kmc steps in rattling: {total_rattle_steps_array.mean():4.3e} +/- {total_rattle_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
