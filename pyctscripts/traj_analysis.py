@@ -200,12 +200,17 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
         for source_index, rattle_hop_dist in enumerate(unique_rattle_hop_dist):
             dest_index = np.where(cumulative_unique_rattle_hop_dist == rattle_hop_dist)[0][0]
             rattle_dist_hop_count_array[traj_index, dest_index] = counts_rattle_hops[source_index]
+    mean_rattle_dist_hop_count = np.mean(rattle_dist_hop_count_array, axis=0)
+    sem_rattle_dist_hop_count = np.std(rattle_dist_hop_count_array, axis=0) / np.sqrt(n_traj)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    rattle_dist_indices = np.arange(len(unique_rattle_hop_dist))
-    xtick_items = ['%1.4f' % item for item in unique_rattle_hop_dist]
-    plt.bar(rattle_dist_indices, counts_rattle_hops, align='center', alpha=1,
+    rattle_dist_indices = np.arange(num_unique_rattle_hop_dist)
+    xtick_items = ['%1.4f' % item for item in cumulative_unique_rattle_hop_dist]
+    plt.errorbar(rattle_dist_indices, mean_rattle_dist_hop_count,
+                 yerr=sem_rattle_dist_hop_count, fmt='o', capsize=3,
+                 color=bar_color, mfc='none', mec='none')
+    plt.bar(rattle_dist_indices, mean_rattle_dist_hop_count, align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
 
@@ -221,7 +226,7 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
-    plt.savefig(str(figure_path))
+    plt.savefig(str(figure_path), dpi=600)
     return None
 
 def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
