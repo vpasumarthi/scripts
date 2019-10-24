@@ -103,9 +103,8 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     for traj_index in range(n_traj):
         traj_escape_dist_count = traj_wise_escape_count_array[traj_index][escape_proc_indices_array[traj_index]]
         for source_index, escape_dist in enumerate(escape_dist_list_array[traj_index]):
-            dest_indices = np.where(unique_escape_dist == escape_dist)[0]
-            if len(dest_indices):
-                escape_dist_escape_count_array[traj_index, dest_indices[0]] = traj_escape_dist_count[source_index]
+            dest_index = np.where(unique_escape_dist == escape_dist)[0][0]
+            escape_dist_escape_count_array[traj_index, dest_index] = traj_escape_dist_count[source_index]
     mean_escape_count_array = np.mean(escape_dist_escape_count_array, axis=0)
     sem_escape_count_array = np.std(escape_dist_escape_count_array, axis=0) / np.sqrt(n_traj)
 
