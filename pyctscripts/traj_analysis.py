@@ -6,8 +6,8 @@ import yaml
 
 from PyCT import constants
 
-def generate_report(hop_count, hop_proc_indices, rattle_event_array,
-                    max_hop_dist):
+def generate_report(hop_dist_to_count_dict, hop_proc_indices,
+                    rattle_event_array_dict, max_hop_dist):
     report_file_name = f'traj_analysis.log'
     num_kmc_steps = sum(hop_count[hop_proc_indices])
     total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
@@ -74,7 +74,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     figure_path = dst_path / figure_name
     plt.tight_layout()
     plt.savefig(str(figure_path), dpi=600)
-    return (hop_count, hop_proc_indices)
+    return (hop_dist_to_count_dict, hop_proc_indices)
 
 def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path,
@@ -220,13 +220,13 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
         mobility_dist_array_dict[traj_index+1] = mobility_dist_array
         disp_array_prec_dict[traj_index+1] = disp_array_prec
 
-    (hop_count, hop_proc_indices) = plot_process_analysis(
+    (hop_dist_to_count_dict, hop_proc_indices) = plot_process_analysis(
                                                 disp_array_prec_dict, max_hop_dist,
                                                 bar_color, annotate, dst_path,
                                                 plot_style)
     (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
-                hop_count, hop_proc_indices, rattle_event_array_dict,
-                max_hop_dist)
+                hop_dist_to_count_dict, hop_proc_indices,
+                rattle_event_array_dict, max_hop_dist)
     plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path,
                               plot_style)
