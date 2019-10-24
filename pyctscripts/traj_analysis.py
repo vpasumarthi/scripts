@@ -106,16 +106,22 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
             dest_indices = np.where(unique_escape_dist == escape_dist)[0]
             if len(dest_indices):
                 escape_dist_escape_count_array[traj_index, dest_indices[0]] = traj_escape_dist_count[source_index]
+    mean_escape_count_array = np.mean(escape_dist_escape_count_array, axis=0)
+    sem_escape_count_array = np.std(escape_dist_escape_count_array, axis=0) / np.sqrt(n_traj)
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
-    xtick_items = ['%1.4f' % item for item in uni_escape_dist[escape_proc_indices]]
-    plt.bar(escape_dist_indices, escape_counts[escape_proc_indices], align='center', alpha=1,
+    escape_dist_indices = np.arange(num_unique_escape_dist)
+    xtick_items = ['%1.4f' % item for item in unique_escape_dist]
+    plt.errorbar(escape_dist_indices, mean_escape_count_array,
+                 yerr=sem_escape_count_array, fmt='o', capsize=3,
+                 color=bar_color, mfc='none', mec='none')
+    plt.bar(escape_dist_indices, mean_escape_count_array, align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
 
     if annotate:
-        for i, v in enumerate(escape_counts[escape_proc_indices]):
+        for i, v in enumerate(mean_escape_count_array):
             ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                     fontweight='bold')
     ax.set_xlabel('Escape Distance')
@@ -126,7 +132,7 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
-    plt.savefig(str(figure_path))
+    plt.savefig(str(figure_path), dpi=600)
     return None
 
 def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
