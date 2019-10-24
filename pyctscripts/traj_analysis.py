@@ -31,19 +31,20 @@ def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
 def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
                           dst_path, plot_style):
     n_traj = len(disp_array_prec_dict)
-    unique_hop_dist_dict = {}
-    counts_hops_dict = {}
     hop_dist_to_count_dict = {}
     for traj_index in range(n_traj):
     # analysis on choice among available processes
-        [unique_hop_dist, counts_hops_dict] = np.unique(disp_array_prec_dict[traj_index+1],
+        [unique_hop_dist, counts_hops] = np.unique(disp_array_prec_dict[traj_index+1],
                                                         return_counts=True)
         for hop_dist_index, hop_dist in enumerate(unique_hop_dist):
             if hop_dist in hop_dist_to_count_dict:
-                hop_dist_to_count_dict[hop_dist].append(counts_hops_dict[hop_dist_index])
+                hop_dist_to_count_dict[hop_dist].append(counts_hops[hop_dist_index])
             else:
                 hop_dist_to_count_dict[hop_dist] = [0] * traj_index
-                hop_dist_to_count_dict[hop_dist].append(counts_hops_dict[hop_dist_index])
+                hop_dist_to_count_dict[hop_dist].append(counts_hops[hop_dist_index])
+
+    cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
+    cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
 
     plt.switch_backend('Agg')
     fig = plt.figure()
