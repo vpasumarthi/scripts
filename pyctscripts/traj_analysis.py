@@ -44,6 +44,14 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     n_traj = len(disp_array_prec_dict)
     hop_dist_to_count_dict = {}
     for traj_index in range(n_traj):
+        if traj_index == 0:
+            cumulative_hop_dist_array = np.copy(disp_array_prec_dict[traj_index+1])
+        else:
+            cumulative_hop_dist_array = np.append(cumulative_hop_dist_array, disp_array_prec_dict[traj_index+1])
+    cumulative_unique_hop_dist = np.unique(cumulative_hop_dist_array)
+    num_unique_hop_dist = len(cumulative_unique_hop_dist)
+
+    for traj_index in range(n_traj):
     # analysis on choice among available processes
         [unique_hop_dist, hop_count] = np.unique(disp_array_prec_dict[traj_index+1],
                                                         return_counts=True)
@@ -54,8 +62,8 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
                 hop_dist_to_count_dict[hop_dist] = [0] * traj_index
                 hop_dist_to_count_dict[hop_dist].append(hop_count[hop_dist_index])
 
-    cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
+    import pdb; pdb.set_trace()
     mean_hop_count = np.mean(cumulative_hop_count, axis=1)
     sem_hop_count = np.std(cumulative_hop_count, axis=1) / np.sqrt(n_traj)
 
