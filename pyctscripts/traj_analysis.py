@@ -45,18 +45,23 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
 
     cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
+    mean_hop_count = np.mean(cumulative_hop_count, axis=1)
+    sem_hop_count = np.std(cumulative_hop_count, axis=1) / np.sqrt(n_traj)
 
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
-    xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
-    plt.bar(hop_proc_indices, hop_count[hop_proc_indices], align='center', alpha=1,
+    hop_proc_indices = np.where((0 < cumulative_unique_hop_dist) & (cumulative_unique_hop_dist <= max_hop_dist))[0]
+    xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+    plt.errorbar(hop_proc_indices, mean_hop_count[hop_proc_indices],
+                 yerr=sem_hop_count[hop_proc_indices], fmt='o', capsize=3,
+                 color=bar_color, mfc='none', mec='none')
+    plt.bar(hop_proc_indices, mean_hop_count[hop_proc_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
     if annotate:
-        for i, v in enumerate(hop_count[hop_proc_indices]):
+        for i, v in enumerate(mean_hop_count[hop_proc_indices]):
             ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
                     fontweight='bold')
 
