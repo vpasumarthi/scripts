@@ -184,7 +184,14 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
 
 def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
                          plot_style):
+    n_traj = len(rattle_dist_array_dict)
     # analysis on hopping distance contributing to rattling
+    for traj_index in range(n_traj):
+        if traj_index == 0:
+            cumulative_rattle_hop_dist_array = np.copy(rattle_dist_array_dict[traj_index+1])
+        else:
+            cumulative_rattle_hop_dist_array = np.append(cumulative_rattle_hop_dist_array, rattle_dist_array_dict[traj_index+1])
+
     [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
                                         rattle_dist_array, return_counts=True)
 
