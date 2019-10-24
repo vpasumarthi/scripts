@@ -11,12 +11,13 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
     report_file_name = f'traj_analysis.log'
     n_traj = len(rattle_event_array_dict)
     num_kmc_steps_array = np.zeros(n_traj, int)
+    total_rattle_steps_array = np.zeros(n_traj, int)
     cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
     for traj_index in range(n_traj):
-        num_kmc_steps_array[traj_index] = sum(cumulative_hop_count[hop_proc_indices])
-        total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
-        [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
+        num_kmc_steps_array[traj_index] = sum(cumulative_hop_count[:, traj_index][hop_proc_indices])
+        total_rattle_steps_array[traj_index] = int(np.sum(rattle_event_array_dict[traj_index+1][:, 0]))
+        [uni_escape_dist, escape_counts] = np.unique(rattle_event_array_dict[traj_index+1][:, 1],
                                                      return_counts=True)
         escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
         escape_dist_list = list(uni_escape_dist[escape_proc_indices])
