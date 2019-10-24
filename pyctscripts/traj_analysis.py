@@ -135,9 +135,16 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def plot_mobility_analysis(mobility_dist_array, max_hop_dist, bar_color,
+def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
                            annotate, dst_path, plot_style):
+    n_traj = len(mobility_dist_array_dict)
     # analysis on hopping distance contributing to mobility
+    for traj_index in range(n_traj):
+        if traj_index == 0:
+            cumulative_mobil_dist_array = np.copy(mobility_dist_array_dict[traj_index])
+        else:
+            cumulative_mobil_dist_array = np.append(cumulative_mobil_dist_array, mobility_dist_array_dict[traj_index])
+
     [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
                                                            return_counts=True)
     mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
