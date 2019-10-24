@@ -14,7 +14,6 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
     total_rattle_steps_array = np.zeros(n_traj, int)
     average_rattles_per_event_array = np.zeros(n_traj)
     escape_dist_list_array = np.empty(n_traj, object)
-    cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
     for traj_index in range(n_traj):
         num_kmc_steps_array[traj_index] = sum(cumulative_hop_count[:, traj_index][hop_proc_indices])
