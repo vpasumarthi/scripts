@@ -141,13 +141,20 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
     # analysis on hopping distance contributing to mobility
     for traj_index in range(n_traj):
         if traj_index == 0:
-            cumulative_mobil_dist_array = np.copy(mobility_dist_array_dict[traj_index])
+            cumulative_mobil_dist_array = np.copy(mobility_dist_array_dict[traj_index+1])
         else:
-            cumulative_mobil_dist_array = np.append(cumulative_mobil_dist_array, mobility_dist_array_dict[traj_index])
+            cumulative_mobil_dist_array = np.append(cumulative_mobil_dist_array, mobility_dist_array_dict[traj_index+1])
+    cumulative_unique_mobil_hop_dist = np.unique(cumulative_mobil_dist_array)
+    num_unique_mobil_hop_dist = len(cumulative_unique_mobil_hop_dist)
+    mobil_dist_hop_count_array = np.zeros((n_traj, num_unique_mobil_hop_dist), int)
+    for traj_index in range(n_traj):
+        [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array_dict[traj_index+1],
+                                                               return_counts=True)
+        mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
+        for source_index, mobil_hop_dist in enumerate(unique_mobil_hop_dist[mobil_proc_indices]):
+            dest_index = np.where(cumulative_unique_mobil_hop_dist == mobil_hop_dist)[0][0]
+            mobil_dist_hop_count_array[traj_index, dest_index] = counts_mobil_hops[mobil_proc_indices][source_index]
 
-    [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array,
-                                                           return_counts=True)
-    mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
     fig = plt.figure()
     ax = fig.add_subplot(111)
     mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
