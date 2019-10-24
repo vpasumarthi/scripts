@@ -42,7 +42,6 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
 def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
                           dst_path, plot_style):
     n_traj = len(disp_array_prec_dict)
-    hop_dist_to_count_dict = {}
     for traj_index in range(n_traj):
         if traj_index == 0:
             cumulative_hop_dist_array = np.copy(disp_array_prec_dict[traj_index+1])
@@ -50,6 +49,9 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
             cumulative_hop_dist_array = np.append(cumulative_hop_dist_array, disp_array_prec_dict[traj_index+1])
     cumulative_unique_hop_dist = np.unique(cumulative_hop_dist_array)
     num_unique_hop_dist = len(cumulative_unique_hop_dist)
+    hop_dist_to_count_dict = {}
+    for hop_dist in cumulative_unique_hop_dist:
+        hop_dist_to_count_dict[hop_dist] = np.zeros(n_traj, int)
 
     for traj_index in range(n_traj):
     # analysis on choice among available processes
