@@ -154,12 +154,17 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
         for source_index, mobil_hop_dist in enumerate(unique_mobil_hop_dist[mobil_proc_indices]):
             dest_index = np.where(cumulative_unique_mobil_hop_dist == mobil_hop_dist)[0][0]
             mobil_dist_hop_count_array[traj_index, dest_index] = counts_mobil_hops[mobil_proc_indices][source_index]
+    mean_mobil_hop_count_array = np.mean(mobil_dist_hop_count_array, axis=0)
+    sem_mobil_hop_count_array = np.std(mobil_dist_hop_count_array, axis=0) / np.sqrt(n_traj)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    mobil_dist_indices = np.arange(len(unique_mobil_hop_dist[mobil_proc_indices]))
-    xtick_items = ['%1.4f' % item for item in unique_mobil_hop_dist[mobil_proc_indices]]
-    plt.bar(mobil_dist_indices, counts_mobil_hops[mobil_proc_indices], align='center', alpha=1,
+    mobil_dist_indices = np.arange(num_unique_mobil_hop_dist)
+    xtick_items = ['%1.4f' % item for item in cumulative_unique_mobil_hop_dist]
+    plt.errorbar(mobil_dist_indices, mean_mobil_hop_count_array,
+                 yerr=sem_mobil_hop_count_array, fmt='o', capsize=3,
+                 color=bar_color, mfc='none', mec='none')
+    plt.bar(mobil_dist_indices, mean_mobil_hop_count_array, align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
@@ -175,7 +180,7 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
-    plt.savefig(str(figure_path))
+    plt.savefig(str(figure_path), dpi=600)
     return None
 
 def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
