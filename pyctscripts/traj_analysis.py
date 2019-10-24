@@ -91,6 +91,15 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
                               escape_count_array, bar_color, annotate, dst_path,
                               plot_style):
     # analysis on escape distances
+    n_traj = len(escape_dist_list_array)
+    for traj_index in range(n_traj):
+        if traj_index == 0:
+            cumulative_escape_dist_list = np.copy(escape_dist_list_array[traj_index])
+        else:
+            cumulative_escape_dist_list = np.append(cumulative_escape_dist_list, escape_dist_list_array[traj_index])
+    unique_escape_dist = np.unique(cumulative_escape_dist_list)
+    num_unique_escape_dist = len(unique_escape_dist)
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
