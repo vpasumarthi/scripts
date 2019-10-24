@@ -14,7 +14,7 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
     total_rattle_steps_array = np.zeros(n_traj, int)
     average_rattles_per_event_array = np.zeros(n_traj)
     escape_dist_list_array = np.empty(n_traj, object)
-    escape_count_array = np.empty(n_traj, object)
+    traj_wise_escape_count_array = np.empty(n_traj, object)
     escape_proc_indices_array = np.empty(n_traj, object)
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
     for traj_index in range(n_traj):
@@ -25,7 +25,7 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
                                                      return_counts=True)
         escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
         escape_dist_list_array[traj_index] = np.copy(uni_escape_dist[escape_proc_indices])
-        escape_count_array[traj_index] = np.copy(escape_counts)
+        traj_wise_escape_count_array[traj_index] = np.copy(escape_counts)
         escape_proc_indices_array[traj_index] = np.copy(escape_proc_indices)
         if traj_index == 0:
             cumulative_escape_dist_list = np.copy(uni_escape_dist[escape_proc_indices])
@@ -37,7 +37,7 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
         report_file.write(f'Cumulative number of kmc steps in rattling: {total_rattle_steps_array.mean():4.3e} +/- {total_rattle_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
         report_file.write(f'Average number of rattles per rattle event: {average_rattles_per_event_array.mean():4.3f} +/- {average_rattles_per_event_array.std() / np.sqrt(n_traj):4.3f}\n')
         report_file.write(f'List of escape distances: {", ".join(str(dist) for dist in unique_escape_dist_array)}\n')
-    return (escape_dist_list_array, escape_proc_indices_array, escape_count_array)
+    return (escape_dist_list_array, escape_proc_indices_array, traj_wise_escape_count_array)
 
 def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
                           dst_path, plot_style):
@@ -256,11 +256,13 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                                                 disp_array_prec_dict, max_hop_dist,
                                                 bar_color, annotate, dst_path,
                                                 plot_style)
-    (escape_dist_list_array, escape_proc_indices_array, escape_count_array) = generate_report(
-                hop_dist_to_count_dict, hop_proc_indices,
-                rattle_event_array_dict, max_hop_dist)
+    (escape_dist_list_array, escape_proc_indices_array,
+     traj_wise_escape_count_array) = generate_report(hop_dist_to_count_dict,
+                                                     hop_proc_indices,
+                                                     rattle_event_array_dict,
+                                                     max_hop_dist)
     plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
-                              escape_count_array, bar_color, annotate, dst_path,
+                              traj_wise_escape_count_array, bar_color, annotate, dst_path,
                               plot_style)
     plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
                            annotate, dst_path, plot_style)
