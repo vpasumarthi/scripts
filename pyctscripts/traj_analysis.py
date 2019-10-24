@@ -6,10 +6,10 @@ import yaml
 
 from PyCT import constants
 
-def generate_report(counts_hops, hop_proc_indices, rattle_event_array,
+def generate_report(hop_count, hop_proc_indices, rattle_event_array,
                     max_hop_dist):
     report_file_name = f'traj_analysis.log'
-    num_kmc_steps = sum(counts_hops[hop_proc_indices])
+    num_kmc_steps = sum(hop_count[hop_proc_indices])
     total_rattle_steps = int(np.sum(rattle_event_array[:, 0]))
     [uni_escape_dist, escape_counts] = np.unique(rattle_event_array[:, 1],
                                                  return_counts=True)
@@ -34,14 +34,14 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     hop_dist_to_count_dict = {}
     for traj_index in range(n_traj):
     # analysis on choice among available processes
-        [unique_hop_dist, counts_hops] = np.unique(disp_array_prec_dict[traj_index+1],
+        [unique_hop_dist, hop_count] = np.unique(disp_array_prec_dict[traj_index+1],
                                                         return_counts=True)
         for hop_dist_index, hop_dist in enumerate(unique_hop_dist):
             if hop_dist in hop_dist_to_count_dict:
-                hop_dist_to_count_dict[hop_dist].append(counts_hops[hop_dist_index])
+                hop_dist_to_count_dict[hop_dist].append(hop_count[hop_dist_index])
             else:
                 hop_dist_to_count_dict[hop_dist] = [0] * traj_index
-                hop_dist_to_count_dict[hop_dist].append(counts_hops[hop_dist_index])
+                hop_dist_to_count_dict[hop_dist].append(hop_count[hop_dist_index])
 
     cumulative_unique_hop_dist = np.asarray([key for key in hop_dist_to_count_dict.keys()])
     cumulative_hop_count = np.asarray([value for value in hop_dist_to_count_dict.values()])
@@ -51,12 +51,12 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     ax = fig.add_subplot(111)
     hop_proc_indices = np.where((0 < unique_hop_dist) & (unique_hop_dist <= max_hop_dist))[0]
     xtick_items = ['%1.4f' % item for item in unique_hop_dist[hop_proc_indices]]
-    plt.bar(hop_proc_indices, counts_hops[hop_proc_indices], align='center', alpha=1,
+    plt.bar(hop_proc_indices, hop_count[hop_proc_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
     if annotate:
-        for i, v in enumerate(counts_hops[hop_proc_indices]):
+        for i, v in enumerate(hop_count[hop_proc_indices]):
             ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
                     fontweight='bold')
 
@@ -69,7 +69,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     figure_path = dst_path / figure_name
     plt.tight_layout()
     plt.savefig(str(figure_path))
-    return (counts_hops, hop_proc_indices)
+    return (hop_count, hop_proc_indices)
 
 def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path,
@@ -215,12 +215,12 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
         mobility_dist_array_dict[traj_index+1] = mobility_dist_array
         disp_array_prec_dict[traj_index+1] = disp_array_prec
 
-    (counts_hops, hop_proc_indices) = plot_process_analysis(
+    (hop_count, hop_proc_indices) = plot_process_analysis(
                                                 disp_array_prec_dict, max_hop_dist,
                                                 bar_color, annotate, dst_path,
                                                 plot_style)
     (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
-                counts_hops, hop_proc_indices, rattle_event_array_dict,
+                hop_count, hop_proc_indices, rattle_event_array_dict,
                 max_hop_dist)
     plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
                               escape_counts, bar_color, annotate, dst_path,
