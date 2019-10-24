@@ -87,8 +87,8 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     plt.savefig(str(figure_path), dpi=600)
     return (hop_dist_to_count_dict, hop_proc_indices)
 
-def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
-                              escape_counts, bar_color, annotate, dst_path,
+def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
+                              escape_count_array, bar_color, annotate, dst_path,
                               plot_style):
     # analysis on escape distances
     fig = plt.figure()
@@ -235,11 +235,11 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                                                 disp_array_prec_dict, max_hop_dist,
                                                 bar_color, annotate, dst_path,
                                                 plot_style)
-    (uni_escape_dist, escape_proc_indices, escape_counts) = generate_report(
+    (escape_dist_list_array, escape_proc_indices_array, escape_count_array) = generate_report(
                 hop_dist_to_count_dict, hop_proc_indices,
                 rattle_event_array_dict, max_hop_dist)
-    plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
-                              escape_counts, bar_color, annotate, dst_path,
+    plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
+                              escape_count_array, bar_color, annotate, dst_path,
                               plot_style)
     plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
                            annotate, dst_path, plot_style)
