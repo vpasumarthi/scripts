@@ -73,7 +73,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     figure_name = filename + '.png'
     figure_path = dst_path / figure_name
     plt.tight_layout()
-    plt.savefig(str(figure_path))
+    plt.savefig(str(figure_path), dpi=600)
     return (hop_count, hop_proc_indices)
 
 def plot_escape_dist_analysis(uni_escape_dist, escape_proc_indices,
