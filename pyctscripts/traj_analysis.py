@@ -191,9 +191,15 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
             cumulative_rattle_hop_dist_array = np.copy(rattle_dist_array_dict[traj_index+1])
         else:
             cumulative_rattle_hop_dist_array = np.append(cumulative_rattle_hop_dist_array, rattle_dist_array_dict[traj_index+1])
-
-    [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
-                                        rattle_dist_array, return_counts=True)
+    cumulative_unique_rattle_hop_dist = np.unique(cumulative_rattle_hop_dist_array)
+    num_unique_rattle_hop_dist = len(cumulative_unique_rattle_hop_dist)
+    rattle_dist_hop_count_array = np.zeros((n_traj, num_unique_rattle_hop_dist), int)
+    for traj_index in range(n_traj):
+        [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
+                    rattle_dist_array_dict[traj_index+1], return_counts=True)
+        for source_index, rattle_hop_dist in enumerate(unique_rattle_hop_dist):
+            dest_index = np.where(cumulative_unique_rattle_hop_dist == rattle_hop_dist)[0][0]
+            rattle_dist_hop_count_array[traj_index, dest_index] = counts_rattle_hops[source_index]
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
