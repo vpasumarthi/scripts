@@ -28,16 +28,10 @@ def generate_report(hop_dist_to_count_dict, hop_proc_indices,
             escape_dist_list_array = np.append(escape_dist_list_array, uni_escape_dist[escape_proc_indices])
     unique_escape_dist_array = np.unique(escape_dist_list_array.round(4))
     with open(report_file_name, 'w') as report_file:
-        report_file.write(f'Total number of kmc steps in simulation: '
-                          f'{num_kmc_steps}\n')
-        report_file.write(f'Cumulative number of kmc steps in rattling: '
-                          f'{total_rattle_steps}\n')
-        report_file.write(
-                        f'Average number of rattles per rattle event:'
-                        f'{np.mean(rattle_event_array[:, 0]):{7}.{5}}\n')
-        report_file.write(
-                    f'List of escape distances: '
-                    f'{", ".join(str(dist) for dist in escape_dist_list)}\n')
+        report_file.write(f'Total number of kmc steps in simulation: {num_kmc_steps_array.mean():4.3e} +/- {num_kmc_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
+        report_file.write(f'Cumulative number of kmc steps in rattling: {total_rattle_steps_array.mean():4.3e} +/- {total_rattle_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
+        report_file.write(f'Average number of rattles per rattle event: {average_rattles_per_event_array.mean():4.3f} +/- {average_rattles_per_event_array.std() / np.sqrt(n_traj):4.3f}\n')
+        report_file.write(f'List of escape distances: {", ".join(str(dist) for dist in unique_escape_dist_array)}\n')
     return (uni_escape_dist, escape_proc_indices, escape_counts)
 
 def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
