@@ -182,7 +182,7 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def plot_rattle_analysis(rattle_dist_array, bar_color, annotate, dst_path,
+def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
                          plot_style):
     # analysis on hopping distance contributing to rattling
     [unique_rattle_hop_dist, counts_rattle_hops] = np.unique(
