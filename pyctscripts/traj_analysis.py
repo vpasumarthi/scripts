@@ -88,7 +88,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     return (hop_dist_to_count_dict, hop_proc_indices)
 
 def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
-                              escape_count_array, bar_color, annotate, dst_path,
+                              traj_wise_escape_count_array, bar_color, annotate, dst_path,
                               plot_style):
     # analysis on escape distances
     n_traj = len(escape_dist_list_array)
@@ -99,7 +99,13 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
             cumulative_escape_dist_list = np.append(cumulative_escape_dist_list, escape_dist_list_array[traj_index])
     unique_escape_dist = np.unique(cumulative_escape_dist_list)
     num_unique_escape_dist = len(unique_escape_dist)
-
+    escape_dist_escape_count_array = np.zeros((n_traj, num_unique_escape_dist), int)
+    for traj_index in range(n_traj):
+        traj_escape_dist_count = traj_wise_escape_count_array[traj_index][escape_proc_indices_array[traj_index]]
+        for source_index, escape_dist in enumerate(escape_dist_list_array[traj_index]):
+            dest_indices = np.where(unique_escape_dist == escape_dist)[0]
+            if len(dest_indices):
+                escape_dist_escape_count_array[traj_index, dest_indices[0]] = traj_escape_dist_count[source_index]
     fig = plt.figure()
     ax = fig.add_subplot(111)
     escape_dist_indices = np.arange(len(uni_escape_dist[escape_proc_indices]))
