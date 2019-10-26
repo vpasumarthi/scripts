@@ -271,7 +271,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                     hop_dist_old = disp_array_prec[step_index - 1]
                     rattle_dist_list.append(hop_dist_old)
                     rattle_dist_list.append(hop_dist)
-                elif num_rattles > 1:
+                elif num_rattles > 2:
                     rattle_dist_list.append(hop_dist)
             else:
                 if num_rattles == 1:
