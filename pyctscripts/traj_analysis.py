@@ -306,9 +306,11 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
                                                      hop_proc_indices,
                                                      rattle_event_array_dict,
                                                      max_hop_dist)
-    plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
-                              traj_wise_escape_count_array, bar_color, annotate, dst_path,
-                              plot_style)
+    len_escape_dist_list_array = [len(traj_escape_dist_list_array) for traj_escape_dist_list_array in escape_dist_list_array]
+    if np.sum(len_escape_dist_list_array):
+        plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
+                                  traj_wise_escape_count_array, bar_color, annotate, dst_path,
+                                  plot_style)
     plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
                            annotate, dst_path, plot_style)
     plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
