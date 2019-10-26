@@ -18,8 +18,12 @@ def generate_report(hop_dist_count_array, hop_proc_indices,
     escape_proc_indices_array = np.empty(n_traj, object)
     for traj_index in range(n_traj):
         num_kmc_steps_array[traj_index] = sum(hop_dist_count_array[traj_index, :][hop_proc_indices])
-        total_rattle_steps_array[traj_index] = int(np.sum(rattle_event_array_dict[traj_index+1][:, 0]))
-        average_rattles_per_event_array[traj_index] = np.mean(rattle_event_array_dict[traj_index+1][:, 0])
+        if len(rattle_event_array_dict[traj_index+1]):
+            total_rattle_steps_array[traj_index] = int(np.sum(rattle_event_array_dict[traj_index+1][:, 0]))
+            average_rattles_per_event_array[traj_index] = np.mean(rattle_event_array_dict[traj_index+1][:, 0])
+        else:
+            total_rattle_steps_array[traj_index] = 0
+            average_rattles_per_event_array[traj_index] = 0
         [uni_escape_dist, escape_counts] = np.unique(rattle_event_array_dict[traj_index+1][:, 1],
                                                      return_counts=True)
         escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
