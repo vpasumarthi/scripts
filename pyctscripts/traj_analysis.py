@@ -238,7 +238,7 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
+def traj_analysis(dst_path, rattle_distance_pool, max_hop_dist, disp_prec,
                   annotate, bar_color, plot_style):
     #NOTE: currently works with unwrapped_traj.dat which has positions at every
     # step written to it using 'write_every_step' branch of PyCT
@@ -272,7 +272,7 @@ def traj_analysis(dst_path, intra_poly_dist_list, max_hop_dist, disp_prec,
         mobility_dist_list = []
         for step_index in range(num_steps):
             hop_dist = disp_array_prec[step_index]
-            if hop_dist in intra_poly_dist_list:
+            if hop_dist in rattle_distance_pool:
                 num_rattles += 1
                 if num_rattles == 2:
                     hop_dist_old = disp_array_prec[step_index - 1]
