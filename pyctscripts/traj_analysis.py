@@ -238,8 +238,8 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def traj_analysis(dst_path, rattle_distance_pool, max_hop_dist, disp_prec,
-                  annotate, bar_color, plot_style):
+def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
+                  max_hop_dist, disp_prec, annotate, bar_color, plot_style):
     #NOTE: currently works with unwrapped_traj.dat which has positions at every
     # step written to it using 'write_every_step' branch of PyCT
 
@@ -270,24 +270,25 @@ def traj_analysis(dst_path, rattle_distance_pool, max_hop_dist, disp_prec,
         rattle_dist_list = []
         rattle_event_list = []
         mobility_dist_list = []
-        for step_index in range(num_steps):
-            hop_dist = disp_array_prec[step_index]
-            if hop_dist in rattle_distance_pool:
-                num_rattles += 1
-                if num_rattles == 2:
-                    hop_dist_old = disp_array_prec[step_index - 1]
-                    rattle_dist_list.append(hop_dist_old)
-                    rattle_dist_list.append(hop_dist)
-                elif num_rattles > 2:
-                    rattle_dist_list.append(hop_dist)
-            else:
-                if num_rattles == 1:
-                    mobility_dist_list.append(disp_array_prec[step_index - 1])
-                elif num_rattles > 1:
-                    escape_dist = hop_dist
-                    rattle_event_list.append([num_rattles, escape_dist])
-                mobility_dist_list.append(hop_dist)
-                num_rattles = 0
+        if rattle_definition == 'inclusive':
+            for step_index in range(num_steps):
+                hop_dist = disp_array_prec[step_index]
+                if hop_dist in rattle_distance_pool:
+                    num_rattles += 1
+                    if num_rattles == 2:
+                        hop_dist_old = disp_array_prec[step_index - 1]
+                        rattle_dist_list.append(hop_dist_old)
+                        rattle_dist_list.append(hop_dist)
+                    elif num_rattles > 2:
+                        rattle_dist_list.append(hop_dist)
+                else:
+                    if num_rattles == 1:
+                        mobility_dist_list.append(disp_array_prec[step_index - 1])
+                    elif num_rattles > 1:
+                        escape_dist = hop_dist
+                        rattle_event_list.append([num_rattles, escape_dist])
+                    mobility_dist_list.append(hop_dist)
+                    num_rattles = 0
 
         rattle_dist_array = np.asarray(rattle_dist_list)
         rattle_event_array = np.asarray(rattle_event_list)
