@@ -289,6 +289,21 @@ def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
                         rattle_event_list.append([num_rattles, escape_dist])
                     mobility_dist_list.append(hop_dist)
                     num_rattles = 0
+        elif rattle_definition == 'exclusive':
+            hop_dist_old = disp_array_prec[0]
+            num_rattles = 1
+            for step_index in range(1, num_steps):
+                hop_dist_new = disp_array_prec[step_index]
+                if hop_dist_new == hop_dist_old:
+                    num_rattles += 1
+                else:
+                    if num_rattles > 1:
+                        rattle_dist_list.extend([hop_dist_old] * num_rattles)
+                        escape_dist = hop_dist_new
+                        rattle_event_list.append([num_rattles, escape_dist])
+                        num_rattles = 1
+                    mobility_dist_list.append(hop_dist_old)
+                hop_dist_old = hop_dist_new
 
         rattle_dist_array = np.asarray(rattle_dist_list)
         rattle_event_array = np.asarray(rattle_event_list)
