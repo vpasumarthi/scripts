@@ -45,7 +45,8 @@ def generate_report(hop_dist_count_array, hop_proc_indices,
         report_file.write(f'List of escape distances: {", ".join(str(dist) for dist in unique_escape_dist_array)}\n')
     return (escape_dist_list_array, escape_proc_indices_array, traj_wise_escape_count_array)
 
-def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotate,
+def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
+                          dist_to_barrier_height_dict, bar_color, annotate,
                           dst_path, plot_style):
     n_traj = len(disp_array_prec_dict)
     for traj_index in range(n_traj):
@@ -72,7 +73,10 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     fig = plt.figure()
     ax = fig.add_subplot(111)
     hop_proc_indices = np.where((0 < cumulative_unique_hop_dist) & (cumulative_unique_hop_dist <= max_hop_dist))[0]
-    xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+    if xlabel_choice == 'hop_dist':
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+    elif xlabel_choice == 'activation_energy':
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices]]
     plt.errorbar(hop_proc_indices, mean_hop_count[hop_proc_indices],
                  yerr=sem_hop_count[hop_proc_indices], fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
@@ -97,8 +101,9 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, bar_color, annotat
     return (hop_dist_count_array, hop_proc_indices)
 
 def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
-                              traj_wise_escape_count_array, bar_color, annotate, dst_path,
-                              plot_style):
+                              traj_wise_escape_count_array, xlabel_choice,
+                              dist_to_barrier_height_dict, bar_color, annotate,
+                              dst_path, plot_style):
     # analysis on escape distances
     n_traj = len(escape_dist_list_array)
     for traj_index in range(n_traj):
@@ -120,7 +125,10 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     fig = plt.figure()
     ax = fig.add_subplot(111)
     escape_dist_indices = np.arange(num_unique_escape_dist)
-    xtick_items = ['%1.4f' % item for item in unique_escape_dist]
+    if xlabel_choice == 'hop_dist':
+        xtick_items = ['%1.4f' % item for item in unique_escape_dist]
+    elif xlabel_choice == 'activation_energy':
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in unique_escape_dist]
     plt.errorbar(escape_dist_indices, mean_escape_count_array,
                  yerr=sem_escape_count_array, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
@@ -143,8 +151,9 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
-                           annotate, dst_path, plot_style):
+def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
+                           xlabel_choice, dist_to_barrier_height_dict,
+                           bar_color, annotate, dst_path, plot_style):
     n_traj = len(mobility_dist_array_dict)
     # analysis on hopping distance contributing to mobility
     for traj_index in range(n_traj):
@@ -168,7 +177,10 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
     fig = plt.figure()
     ax = fig.add_subplot(111)
     mobil_dist_indices = np.arange(num_unique_mobil_hop_dist)
-    xtick_items = ['%1.4f' % item for item in cumulative_unique_mobil_hop_dist]
+    if xlabel_choice == 'hop_dist':
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_mobil_hop_dist]
+    elif xlabel_choice == 'activation_energy':
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_mobil_hop_dist]
     plt.errorbar(mobil_dist_indices, mean_mobil_hop_count_array,
                  yerr=sem_mobil_hop_count_array, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
@@ -191,8 +203,9 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
-                         plot_style):
+def plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
+                         dist_to_barrier_height_dict, bar_color, annotate,
+                         dst_path, plot_style):
     n_traj = len(rattle_dist_array_dict)
     # analysis on hopping distance contributing to rattling
     for traj_index in range(n_traj):
@@ -215,7 +228,10 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
     fig = plt.figure()
     ax = fig.add_subplot(111)
     rattle_dist_indices = np.arange(num_unique_rattle_hop_dist)
-    xtick_items = ['%1.4f' % item for item in cumulative_unique_rattle_hop_dist]
+    if xlabel_choice == 'hop_dist':
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_rattle_hop_dist]
+    elif xlabel_choice == 'activation_energy':
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_rattle_hop_dist]
     plt.errorbar(rattle_dist_indices, mean_rattle_dist_hop_count,
                  yerr=sem_rattle_dist_hop_count, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
@@ -239,7 +255,8 @@ def plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
     return None
 
 def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
-                  max_hop_dist, disp_prec, annotate, bar_color, plot_style):
+                  max_hop_dist, disp_prec, xlabel_choice,
+                  dist_to_barrier_height_dict, annotate, bar_color, plot_style):
     #NOTE: currently works with unwrapped_traj.dat which has positions at every
     # step written to it using 'write_every_step' branch of PyCT
 
@@ -314,9 +331,9 @@ def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
         disp_array_prec_dict[traj_index+1] = disp_array_prec
 
     (hop_dist_count_array, hop_proc_indices) = plot_process_analysis(
-                                            disp_array_prec_dict, max_hop_dist,
-                                            bar_color, annotate, dst_path,
-                                            plot_style)
+                            disp_array_prec_dict, max_hop_dist, xlabel_choice,
+                            dist_to_barrier_height_dict, bar_color, annotate,
+                            dst_path, plot_style)
     (escape_dist_list_array, escape_proc_indices_array,
      traj_wise_escape_count_array) = generate_report(hop_dist_count_array,
                                                      hop_proc_indices,
@@ -325,10 +342,13 @@ def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
     len_escape_dist_list_array = [len(traj_escape_dist_list_array) for traj_escape_dist_list_array in escape_dist_list_array]
     if np.sum(len_escape_dist_list_array):
         plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
-                                  traj_wise_escape_count_array, bar_color, annotate, dst_path,
-                                  plot_style)
-    plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, bar_color,
-                           annotate, dst_path, plot_style)
-    plot_rattle_analysis(rattle_dist_array_dict, bar_color, annotate, dst_path,
-                         plot_style)
+                                  traj_wise_escape_count_array, xlabel_choice,
+                                  dist_to_barrier_height_dict, bar_color,
+                                  annotate, dst_path, plot_style)
+    plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, xlabel_choice,
+                           dist_to_barrier_height_dict, bar_color, annotate,
+                           dst_path, plot_style)
+    plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
+                         dist_to_barrier_height_dict, bar_color, annotate,
+                         dst_path, plot_style)
     return None
