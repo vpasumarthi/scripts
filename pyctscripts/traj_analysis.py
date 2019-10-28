@@ -82,7 +82,7 @@ def plot_process_analysis(disp_array_prec_dict, xlabel_choice,
                  color=bar_color, mfc='none', mec='none')
     plt.bar(hop_proc_indices, mean_hop_count[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
-    plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
+    plt.xticks(hop_proc_indices, xtick_items, rotation=45)
 
     if annotate:
         for i, v in enumerate(mean_hop_count):
@@ -142,7 +142,7 @@ def plot_escape_dist_analysis(escape_dist_list_array,
                  color=bar_color, mfc='none', mec='none')
     plt.bar(escape_dist_indices, mean_escape_count_array[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
-    plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
+    plt.xticks(escape_dist_indices, xtick_items, rotation=45)
 
     if annotate:
         for i, v in enumerate(mean_escape_count_array):
@@ -200,7 +200,7 @@ def plot_mobility_analysis(mobility_dist_array_dict, xlabel_choice,
                  color=bar_color, mfc='none', mec='none')
     plt.bar(mobil_dist_indices, mean_mobil_hop_count_array[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
-    plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
+    plt.xticks(mobil_dist_indices, xtick_items, rotation=45)
 
     if annotate:
         for i, v in enumerate(counts_mobil_hops):
@@ -258,7 +258,7 @@ def plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
                  color=bar_color, mfc='none', mec='none')
     plt.bar(rattle_dist_indices, mean_rattle_dist_hop_count[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
-    plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
+    plt.xticks(rattle_dist_indices, xtick_items, rotation=45)
 
     if annotate:
         for i, v in enumerate(counts_rattle_hops):
