@@ -7,7 +7,7 @@ import yaml
 from PyCT import constants
 
 def generate_report(hop_dist_count_array, hop_proc_indices,
-                    rattle_event_array_dict, max_hop_dist):
+                    rattle_event_array_dict):
     report_file_name = f'traj_analysis.log'
     n_traj = len(rattle_event_array_dict)
     num_kmc_steps_array = np.zeros(n_traj, int)
@@ -15,7 +15,6 @@ def generate_report(hop_dist_count_array, hop_proc_indices,
     average_rattles_per_event_array = np.zeros(n_traj)
     escape_dist_list_array = np.empty(n_traj, object)
     traj_wise_escape_count_array = np.empty(n_traj, object)
-    escape_proc_indices_array = np.empty(n_traj, object)
     for traj_index in range(n_traj):
         num_kmc_steps_array[traj_index] = sum(hop_dist_count_array[traj_index, :][hop_proc_indices])
         if len(rattle_event_array_dict[traj_index+1]):
@@ -23,16 +22,13 @@ def generate_report(hop_dist_count_array, hop_proc_indices,
             average_rattles_per_event_array[traj_index] = np.mean(rattle_event_array_dict[traj_index+1][:, 0])
             [uni_escape_dist, escape_counts] = np.unique(rattle_event_array_dict[traj_index+1][:, 1],
                                                          return_counts=True)
-            escape_proc_indices = np.where((0 < uni_escape_dist) & (uni_escape_dist <= max_hop_dist))[0]
-            escape_dist_list_array[traj_index] = np.copy(uni_escape_dist[escape_proc_indices])
+            escape_dist_list_array[traj_index] = np.copy(uni_escape_dist)
             traj_wise_escape_count_array[traj_index] = np.copy(escape_counts)
-            escape_proc_indices_array[traj_index] = np.copy(escape_proc_indices)
         else:
             total_rattle_steps_array[traj_index] = 0
             average_rattles_per_event_array[traj_index] = 0
             escape_dist_list_array[traj_index] = np.array([])
             traj_wise_escape_count_array[traj_index] = np.array([])
-            escape_proc_indices_array[traj_index] = np.array([])
         if traj_index == 0:
             cumulative_escape_dist_list = np.copy(escape_dist_list_array[traj_index])
         else:
@@ -43,9 +39,9 @@ def generate_report(hop_dist_count_array, hop_proc_indices,
         report_file.write(f'Cumulative number of kmc steps in rattling: {total_rattle_steps_array.mean():4.3e} +/- {total_rattle_steps_array.std() / np.sqrt(n_traj):4.3e}\n')
         report_file.write(f'Average number of rattles per rattle event: {average_rattles_per_event_array.mean():4.3f} +/- {average_rattles_per_event_array.std() / np.sqrt(n_traj):4.3f}\n')
         report_file.write(f'List of escape distances: {", ".join(str(dist) for dist in unique_escape_dist_array)}\n')
-    return (escape_dist_list_array, escape_proc_indices_array, traj_wise_escape_count_array)
+    return (escape_dist_list_array, traj_wise_escape_count_array)
 
-def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
+def plot_process_analysis(disp_array_prec_dict, xlabel_choice,
                           dist_to_barrier_height_dict, bar_color, annotate,
                           dst_path, plot_style):
     n_traj = len(disp_array_prec_dict)
@@ -72,24 +68,24 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
     plt.switch_backend('Agg')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    hop_proc_indices = np.where((0 < cumulative_unique_hop_dist) & (cumulative_unique_hop_dist <= max_hop_dist))[0]
     if xlabel_choice == 'hop_dist':
-        xtick_values = [item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+        xtick_values = [item for item in cumulative_unique_hop_dist]
         sort_indices = np.argsort(xtick_values)
-        xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices][sort_indices]]
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[sort_indices]]
     elif xlabel_choice == 'activation_energy':
-        xtick_values = [dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices]]
+        xtick_values = [dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist]
         sort_indices = np.argsort(xtick_values)
-        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices][sort_indices]]
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[sort_indices]]
+    hop_proc_indices = np.arange(len(cumulative_unique_hop_dist))
     plt.errorbar(hop_proc_indices, mean_hop_count[sort_indices],
-                 yerr=sem_hop_count[hop_proc_indices], fmt='o', capsize=3,
+                 yerr=sem_hop_count, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
     plt.bar(hop_proc_indices, mean_hop_count[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
     if annotate:
-        for i, v in enumerate(mean_hop_count[hop_proc_indices]):
+        for i, v in enumerate(mean_hop_count):
             ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
                     fontweight='bold')
 
@@ -107,7 +103,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
     plt.savefig(str(figure_path), dpi=600)
     return (hop_dist_count_array, hop_proc_indices)
 
-def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
+def plot_escape_dist_analysis(escape_dist_list_array,
                               traj_wise_escape_count_array, xlabel_choice,
                               dist_to_barrier_height_dict, bar_color, annotate,
                               dst_path, plot_style):
@@ -122,7 +118,7 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     num_unique_escape_dist = len(unique_escape_dist)
     escape_dist_escape_count_array = np.zeros((n_traj, num_unique_escape_dist), int)
     for traj_index in range(n_traj):
-        traj_escape_dist_count = traj_wise_escape_count_array[traj_index][escape_proc_indices_array[traj_index]]
+        traj_escape_dist_count = traj_wise_escape_count_array[traj_index]
         for source_index, escape_dist in enumerate(escape_dist_list_array[traj_index]):
             dest_index = np.where(unique_escape_dist == escape_dist)[0][0]
             escape_dist_escape_count_array[traj_index, dest_index] = traj_escape_dist_count[source_index]
@@ -166,8 +162,8 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
-                           xlabel_choice, dist_to_barrier_height_dict,
+def plot_mobility_analysis(mobility_dist_array_dict, xlabel_choice,
+                           dist_to_barrier_height_dict,
                            bar_color, annotate, dst_path, plot_style):
     n_traj = len(mobility_dist_array_dict)
     # analysis on hopping distance contributing to mobility
@@ -182,10 +178,9 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
     for traj_index in range(n_traj):
         [unique_mobil_hop_dist, counts_mobil_hops] = np.unique(mobility_dist_array_dict[traj_index+1],
                                                                return_counts=True)
-        mobil_proc_indices = np.where((0 < unique_mobil_hop_dist) & (unique_mobil_hop_dist <= max_hop_dist))[0]
-        for source_index, mobil_hop_dist in enumerate(unique_mobil_hop_dist[mobil_proc_indices]):
+        for source_index, mobil_hop_dist in enumerate(unique_mobil_hop_dist):
             dest_index = np.where(cumulative_unique_mobil_hop_dist == mobil_hop_dist)[0][0]
-            mobil_dist_hop_count_array[traj_index, dest_index] = counts_mobil_hops[mobil_proc_indices][source_index]
+            mobil_dist_hop_count_array[traj_index, dest_index] = counts_mobil_hops[source_index]
     mean_mobil_hop_count_array = np.mean(mobil_dist_hop_count_array, axis=0)
     sem_mobil_hop_count_array = np.std(mobil_dist_hop_count_array, axis=0) / np.sqrt(n_traj)
 
@@ -208,7 +203,7 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
     if annotate:
-        for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
+        for i, v in enumerate(counts_mobil_hops):
             ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                     fontweight='bold')
     if xlabel_choice == 'hop_dist':
@@ -283,9 +278,9 @@ def plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
     plt.savefig(str(figure_path), dpi=600)
     return None
 
-def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
-                  max_hop_dist, disp_prec, xlabel_choice,
-                  dist_to_barrier_height_dict, annotate, bar_color, plot_style):
+def traj_analysis(dst_path, rattle_distance_pool, rattle_definition, disp_prec,
+                  xlabel_choice, dist_to_barrier_height_dict, annotate,
+                  bar_color, plot_style):
     #NOTE: currently works with unwrapped_traj.dat which has positions at every
     # step written to it using 'write_every_step' branch of PyCT
 
@@ -360,21 +355,20 @@ def traj_analysis(dst_path, rattle_distance_pool, rattle_definition,
         disp_array_prec_dict[traj_index+1] = disp_array_prec
 
     (hop_dist_count_array, hop_proc_indices) = plot_process_analysis(
-                            disp_array_prec_dict, max_hop_dist, xlabel_choice,
+                            disp_array_prec_dict, xlabel_choice,
                             dist_to_barrier_height_dict, bar_color, annotate,
                             dst_path, plot_style)
-    (escape_dist_list_array, escape_proc_indices_array,
+    (escape_dist_list_array,
      traj_wise_escape_count_array) = generate_report(hop_dist_count_array,
                                                      hop_proc_indices,
-                                                     rattle_event_array_dict,
-                                                     max_hop_dist)
+                                                     rattle_event_array_dict)
     len_escape_dist_list_array = [len(traj_escape_dist_list_array) for traj_escape_dist_list_array in escape_dist_list_array]
     if np.sum(len_escape_dist_list_array):
-        plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
+        plot_escape_dist_analysis(escape_dist_list_array,
                                   traj_wise_escape_count_array, xlabel_choice,
                                   dist_to_barrier_height_dict, bar_color,
                                   annotate, dst_path, plot_style)
-    plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist, xlabel_choice,
+    plot_mobility_analysis(mobility_dist_array_dict, xlabel_choice,
                            dist_to_barrier_height_dict, bar_color, annotate,
                            dst_path, plot_style)
     plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
