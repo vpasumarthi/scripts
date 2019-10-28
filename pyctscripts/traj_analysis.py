@@ -89,7 +89,7 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
             ax.text(i + 0.8, v + 100, str(v), color='green', rotation='vertical',
                     fontweight='bold')
 
-    ax.set_xlabel('Hopping Distance')
+    ax.set_xlabel(f'Hopping Distance ($\AA$)')
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of processes')
@@ -140,7 +140,7 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
         for i, v in enumerate(mean_escape_count_array):
             ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                     fontweight='bold')
-    ax.set_xlabel('Escape Distance')
+    ax.set_xlabel('Escape Distance ($\AA$)')
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Escape Distances')
@@ -192,7 +192,7 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
         for i, v in enumerate(counts_mobil_hops[mobil_proc_indices]):
             ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                     fontweight='bold')
-    ax.set_xlabel('Hop Distance')
+    ax.set_xlabel('Hop Distance ($\AA$)')
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Hop Distances contributing to mobility')
@@ -243,7 +243,7 @@ def plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
         for i, v in enumerate(counts_rattle_hops):
             ax.text(i - 0.2, v, str(v), color='green', rotation='vertical',
                     fontweight='bold')
-    ax.set_xlabel('Hop Distance')
+    ax.set_xlabel('Hop Distance ($\AA$)')
     ax.set_ylabel('Frequency')
     ax.set_yscale(plot_style)
     ax.set_title('Histogram of Hop Distances contributing to rattling')
