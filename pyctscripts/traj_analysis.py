@@ -74,13 +74,17 @@ def plot_process_analysis(disp_array_prec_dict, max_hop_dist, xlabel_choice,
     ax = fig.add_subplot(111)
     hop_proc_indices = np.where((0 < cumulative_unique_hop_dist) & (cumulative_unique_hop_dist <= max_hop_dist))[0]
     if xlabel_choice == 'hop_dist':
-        xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+        xtick_values = [item for item in cumulative_unique_hop_dist[hop_proc_indices]]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_hop_dist[hop_proc_indices][sort_indices]]
     elif xlabel_choice == 'activation_energy':
-        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices]]
-    plt.errorbar(hop_proc_indices, mean_hop_count[hop_proc_indices],
+        xtick_values = [dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices]]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_hop_dist[hop_proc_indices][sort_indices]]
+    plt.errorbar(hop_proc_indices, mean_hop_count[sort_indices],
                  yerr=sem_hop_count[hop_proc_indices], fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
-    plt.bar(hop_proc_indices, mean_hop_count[hop_proc_indices], align='center', alpha=1,
+    plt.bar(hop_proc_indices, mean_hop_count[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(hop_proc_indices, xtick_items, rotation='vertical')
 
@@ -129,13 +133,18 @@ def plot_escape_dist_analysis(escape_dist_list_array, escape_proc_indices_array,
     ax = fig.add_subplot(111)
     escape_dist_indices = np.arange(num_unique_escape_dist)
     if xlabel_choice == 'hop_dist':
-        xtick_items = ['%1.4f' % item for item in unique_escape_dist]
+        xtick_values = [item for item in unique_escape_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % item for item in unique_escape_dist[sort_indices]]
     elif xlabel_choice == 'activation_energy':
-        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in unique_escape_dist]
-    plt.errorbar(escape_dist_indices, mean_escape_count_array,
+        xtick_values = [dist_to_barrier_height_dict[item] for item in unique_escape_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in unique_escape_dist[sort_indices]]
+
+    plt.errorbar(escape_dist_indices, mean_escape_count_array[sort_indices],
                  yerr=sem_escape_count_array, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
-    plt.bar(escape_dist_indices, mean_escape_count_array, align='center', alpha=1,
+    plt.bar(escape_dist_indices, mean_escape_count_array[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(escape_dist_indices, xtick_items, rotation='vertical')
 
@@ -184,13 +193,17 @@ def plot_mobility_analysis(mobility_dist_array_dict, max_hop_dist,
     ax = fig.add_subplot(111)
     mobil_dist_indices = np.arange(num_unique_mobil_hop_dist)
     if xlabel_choice == 'hop_dist':
-        xtick_items = ['%1.4f' % item for item in cumulative_unique_mobil_hop_dist]
+        xtick_values = [item for item in cumulative_unique_mobil_hop_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_mobil_hop_dist[sort_indices]]
     elif xlabel_choice == 'activation_energy':
-        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_mobil_hop_dist]
-    plt.errorbar(mobil_dist_indices, mean_mobil_hop_count_array,
+        xtick_values = [dist_to_barrier_height_dict[item] for item in cumulative_unique_mobil_hop_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_mobil_hop_dist[sort_indices]]
+    plt.errorbar(mobil_dist_indices, mean_mobil_hop_count_array[sort_indices],
                  yerr=sem_mobil_hop_count_array, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
-    plt.bar(mobil_dist_indices, mean_mobil_hop_count_array, align='center', alpha=1,
+    plt.bar(mobil_dist_indices, mean_mobil_hop_count_array[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(mobil_dist_indices, xtick_items, rotation='vertical')
 
@@ -238,13 +251,17 @@ def plot_rattle_analysis(rattle_dist_array_dict, xlabel_choice,
     ax = fig.add_subplot(111)
     rattle_dist_indices = np.arange(num_unique_rattle_hop_dist)
     if xlabel_choice == 'hop_dist':
-        xtick_items = ['%1.4f' % item for item in cumulative_unique_rattle_hop_dist]
+        xtick_values = [item for item in cumulative_unique_rattle_hop_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % item for item in cumulative_unique_rattle_hop_dist[sort_indices]]
     elif xlabel_choice == 'activation_energy':
-        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_rattle_hop_dist]
-    plt.errorbar(rattle_dist_indices, mean_rattle_dist_hop_count,
+        xtick_values = [dist_to_barrier_height_dict[item] for item in cumulative_unique_rattle_hop_dist]
+        sort_indices = np.argsort(xtick_values)
+        xtick_items = ['%1.4f' % dist_to_barrier_height_dict[item] for item in cumulative_unique_rattle_hop_dist[sort_indices]]
+    plt.errorbar(rattle_dist_indices, mean_rattle_dist_hop_count[sort_indices],
                  yerr=sem_rattle_dist_hop_count, fmt='o', capsize=3,
                  color=bar_color, mfc='none', mec='none')
-    plt.bar(rattle_dist_indices, mean_rattle_dist_hop_count, align='center', alpha=1,
+    plt.bar(rattle_dist_indices, mean_rattle_dist_hop_count[sort_indices], align='center', alpha=1,
             edgecolor='black', color=bar_color)
     plt.xticks(rattle_dist_indices, xtick_items, rotation='vertical')
 
