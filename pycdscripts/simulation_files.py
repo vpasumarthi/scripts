@@ -121,7 +121,7 @@ class SimulationFiles(object):
                 run_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
-                    "from PyCT.material_run import material_run\n\n"
+                    "from PyCD.material_run import material_run\n\n"
                     "dst_path = Path.cwd()\n"
                     "material_run(dst_path)\n")
             run_file_path.chmod(0o755)
@@ -134,7 +134,7 @@ class SimulationFiles(object):
                         "#!/usr/bin/env python\n\n"
                         "from pathlib import Path\n"
                         "import os\n\n"
-                        "from PyCT.material_preprod import material_preprod\n"
+                        "from PyCD.material_preprod import material_preprod\n"
                         "from pyctscripts.parallel_input_files import generate_parallel_input_files\n\n"
                         "cwd = Path.cwd()\n"
                         "material_preprod(cwd)\n"
@@ -169,7 +169,7 @@ class SimulationFiles(object):
                 dst_file.write(
                     "#!/usr/bin/env python\n\n"
                     "from pathlib import Path\n\n"
-                    "from PyCT.material_msd import material_msd\n\n"
+                    "from PyCD.material_msd import material_msd\n\n"
                     "dst_path = Path.cwd()\n"
                     "material_msd(dst_path)\n")
             dst_file_path.chmod(0o755)
