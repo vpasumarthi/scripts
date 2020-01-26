@@ -135,7 +135,7 @@ class SimulationFiles(object):
                         "from pathlib import Path\n"
                         "import os\n\n"
                         "from PyCD.material_preprod import material_preprod\n"
-                        "from pyctscripts.parallel_input_files import generate_parallel_input_files\n\n"
+                        "from pycdscripts.parallel_input_files import generate_parallel_input_files\n\n"
                         "cwd = Path.cwd()\n"
                         "material_preprod(cwd)\n"
                         "generate_parallel_input_files(cwd)\n")
@@ -147,7 +147,7 @@ class SimulationFiles(object):
                     generate_msd_slurm_file.write(
                         "#!/usr/bin/env python\n\n"
                         "from pathlib import Path\n\n"
-                        "from pyctscripts.parallel_input_files import generate_slurm_msd_script\n\n"
+                        "from pycdscripts.parallel_input_files import generate_slurm_msd_script\n\n"
                         "cwd = Path.cwd()\n"
                         "generate_slurm_msd_script(cwd)\n")
                 generate_msd_slurm_file_path.chmod(0o755)
